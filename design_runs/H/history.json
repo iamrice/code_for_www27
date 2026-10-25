@@ -1,0 +1,818 @@
+[
+ {
+  "name": "H1.1_MedoidFilteredMean",
+  "round": 1,
+  "desc": "Compute the coordinate-free robust centre of {self, neighbours} as the coordinate-wise median, rank all messages by their Frobenius distance to that centre, and average only the closest 60% (always at least one). This is a trimmed-mean-style filter that adapts its cut to the local message count and does not depend on the attack's magnitude.",
+  "src": "def aggregate(x_self, X_nb, t, T, state):\n    k = len(X_nb)\n    S = np.concatenate([x_self[None], X_nb])\n    med = np.median(S, 0)\n    d = np.linalg.norm((S - med).reshape(k + 1, -1), axis=1)\n    keep = max(1, int(np.ceil(0.6 * (k + 1))))\n    idx = np.argsort(d, kind='stable')[:keep]\n    return S[idx].mean(0)\n",
+  "file": "<repo>/design_runs/H/H1.1_MedoidFilteredMean.py",
+  "design": {
+   "mean_acc": 0.8429416666666667,
+   "worst_acc": 0.7650625,
+   "score": 0.8040020833333333,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.8372083333333333,
+    "gaussian": 0.8483541666666666,
+    "signflip": 0.8508541666666667,
+    "labelflip": 0.8500833333333334,
+    "alie": 0.8282083333333333
+   }
+  },
+  "val": {
+   "mean_acc": 0.8145583333333332,
+   "worst_acc": 0.6795625000000001,
+   "score": 0.7470604166666666,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.7838750000000001,
+    "gaussian": 0.8183125000000001,
+    "signflip": 0.8240729166666667,
+    "labelflip": 0.8222812500000001,
+    "alie": 0.82425
+   }
+  },
+  "error": null
+ },
+ {
+  "name": "H1.2_TrustEMAGossip",
+  "round": 1,
+  "desc": "Each neighbour slot keeps a persistent trust weight in `state`, updated every iteration from a soft gate on its distance relative to the median distance, smoothed by an exponential moving average over iterations. Persistent low trust lets Byzantine neighbours that behave well early, or noisy honest neighbours, be discounted over time without a hard cut.",
+  "src": "def aggregate(x_self, X_nb, t, T, state):\n    k = len(X_nb)\n    D = np.linalg.norm((X_nb - x_self).reshape(k, -1), axis=1)\n    z = D / (np.median(D) + 1e-12)\n    w_inst = 1.0 / (1.0 + (z / 1.5) ** 4)\n    trust = state.get('trust')\n    if trust is None or len(trust) != k:\n        trust = np.ones(k)\n    trust = 0.5 * np.asarray(trust, dtype=float) + 0.5 * w_inst\n    state['trust'] = trust\n    return (x_self + np.tensordot(trust, X_nb, axes=1)) / (1.0 + trust.sum())\n",
+  "file": "<repo>/design_runs/H/H1.2_TrustEMAGossip.py",
+  "design": {
+   "mean_acc": 0.7983291666666668,
+   "worst_acc": 0.6865,
+   "score": 0.7424145833333333,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.8444791666666666,
+    "gaussian": 0.8054375,
+    "signflip": 0.7314999999999999,
+    "labelflip": 0.7485416666666667,
+    "alie": 0.8616874999999999
+   }
+  },
+  "val": {
+   "mean_acc": 0.7916520833333334,
+   "worst_acc": 0.587375,
+   "score": 0.6895135416666667,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.8001874999999999,
+    "gaussian": 0.7991041666666666,
+    "signflip": 0.7513437500000001,
+    "labelflip": 0.7447083333333332,
+    "alie": 0.8629166666666666
+   }
+  },
+  "error": null
+ },
+ {
+  "name": "H1.3_GeometricMedianCentre",
+  "round": 1,
+  "desc": "Replace the mean by the geometric median of the flattened {self, neighbours} set, computed with Weiszfeld iterations started from the coordinate-wise median. The geometric median has a breakdown point of one half and is rotation-invariant, so it bounds the influence of any single far-away message regardless of its coordinate pattern.",
+  "src": "def aggregate(x_self, X_nb, t, T, state):\n    P = np.concatenate([x_self[None], X_nb]).reshape(len(X_nb) + 1, -1)\n    z = np.median(P, 0)\n    for _ in range(30):\n        d = np.linalg.norm(P - z, axis=1)\n        w = 1.0 / np.maximum(d, 1e-8)\n        z_new = (w[:, None] * P).sum(0) / w.sum()\n        done = np.linalg.norm(z_new - z) <= 1e-9 * (1.0 + np.linalg.norm(z))\n        z = z_new\n        if done:\n            break\n    return z.reshape(x_self.shape)\n",
+  "file": "<repo>/design_runs/H/H1.3_GeometricMedianCentre.py",
+  "design": {
+   "mean_acc": 0.8440041666666667,
+   "worst_acc": 0.7691250000000001,
+   "score": 0.8065645833333334,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.84475,
+    "gaussian": 0.8558749999999998,
+    "signflip": 0.8232083333333334,
+    "labelflip": 0.8336666666666667,
+    "alie": 0.8625208333333333
+   }
+  },
+  "val": {
+   "mean_acc": 0.8215333333333333,
+   "worst_acc": 0.7065625,
+   "score": 0.7640479166666667,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.80053125,
+    "gaussian": 0.8371979166666667,
+    "signflip": 0.8069687499999999,
+    "labelflip": 0.8056666666666666,
+    "alie": 0.8573020833333332
+   }
+  },
+  "error": null
+ },
+ {
+  "name": "H1.4_RowwiseConsensusWeighted",
+  "round": 1,
+  "desc": "Work per sample rather than per message: project every message row onto the simplex (clip negatives, renormalise), then weight each row by its confidence (one minus normalised entropy) times a Gaussian-like gate on its total-variation deviation from the per-row median. Noisy honest nodes, which give high-entropy rows, and outlier rows from attackers are both down-weighted sample by sample.",
+  "src": "def aggregate(x_self, X_nb, t, T, state):\n    C = x_self.shape[-1]\n    P = np.concatenate([x_self[None], X_nb])\n    P = np.nan_to_num(P, nan=0.0, posinf=0.0, neginf=0.0)\n    P = np.clip(P, 0.0, None)\n    s = P.sum(-1, keepdims=True)\n    P = np.where(s > 0, P / np.maximum(s, 1e-12), 1.0 / C)\n    H = -(P * np.log(P + 1e-12)).sum(-1)\n    conf = np.clip(1.0 - H / math.log(C), 0.0, 1.0)\n    med = np.median(P, 0)\n    dev = 0.5 * np.abs(P - med).sum(-1)\n    tau = np.median(dev) + 1e-3\n    wgt = conf * np.exp(-dev / tau) + 1e-6\n    num = (wgt[..., None] * P).sum(0)\n    den = wgt.sum(0)[..., None]\n    return num / den\n",
+  "file": "<repo>/design_runs/H/H1.4_RowwiseConsensusWeighted.py",
+  "design": {
+   "mean_acc": 0.8391291666666667,
+   "worst_acc": 0.7525625,
+   "score": 0.7958458333333334,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.8404791666666668,
+    "gaussian": 0.8532500000000001,
+    "signflip": 0.8542708333333332,
+    "labelflip": 0.7921666666666667,
+    "alie": 0.8554791666666667
+   }
+  },
+  "val": {
+   "mean_acc": 0.8317791666666666,
+   "worst_acc": 0.67225,
+   "score": 0.7520145833333334,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.8150000000000001,
+    "gaussian": 0.8453750000000001,
+    "signflip": 0.85959375,
+    "labelflip": 0.77978125,
+    "alie": 0.8591458333333333
+   }
+  },
+  "error": null
+ },
+ {
+  "name": "H2.1_HuberIRLSAnchored",
+  "round": 2,
+  "desc": "Anchor an M-estimator of location at the node's own state instead of a median, so the centre is never pulled toward Byzantine values. Scale is set robustly from the MAD of the distances to the current centre, and Huber weights are recomputed each iteration. This keeps the statistical efficiency of a mean for honest, similar messages while bounding the influence of any single message.",
+  "src": "def aggregate(x_self, X_nb, t, T, state):\n    k = len(X_nb)\n    P = np.concatenate([x_self[None], X_nb]).reshape(k + 1, -1)\n    P = np.nan_to_num(P, nan=0.0, posinf=0.0, neginf=0.0)\n    z = P[0].copy()\n    for _ in range(8):\n        d = np.linalg.norm(P - z, axis=1)\n        s = 1.4826 * np.median(np.abs(d - np.median(d))) + 1e-9\n        c = 1.345 * max(s, 1e-6 * (1.0 + np.median(d)))\n        w = np.minimum(1.0, c / np.maximum(d, 1e-12))\n        z_new = (w[:, None] * P).sum(0) / w.sum()\n        done = np.linalg.norm(z_new - z) <= 1e-8 * (1.0 + np.linalg.norm(z))\n        z = z_new\n        if done:\n            break\n    return z.reshape(x_self.shape)\n",
+  "file": "<repo>/design_runs/H/H2.1_HuberIRLSAnchored.py",
+  "design": {
+   "mean_acc": 0.8133666666666667,
+   "worst_acc": 0.7183124999999999,
+   "score": 0.7658395833333334,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.8435833333333332,
+    "gaussian": 0.8559166666666668,
+    "signflip": 0.7508125,
+    "labelflip": 0.7532708333333334,
+    "alie": 0.86325
+   }
+  },
+  "val": {
+   "mean_acc": 0.7938604166666666,
+   "worst_acc": 0.5678749999999999,
+   "score": 0.6808677083333332,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.7898229166666667,
+    "gaussian": 0.8420833333333334,
+    "signflip": 0.74003125,
+    "labelflip": 0.7347916666666666,
+    "alie": 0.8625729166666666
+   }
+  },
+  "error": null
+ },
+ {
+  "name": "H2.2_AnnealedMedianBand",
+  "round": 2,
+  "desc": "Build a robust reference as the coordinate-wise median of self and neighbours, then accept only messages within a distance band around it. The band is wide early (exploration while the consensus is far from converged) and tightens over iterations, following the annealing idea of BALANCE but using a median reference that does not depend on x_self. The accepted messages, including self, are averaged.",
+  "src": "def aggregate(x_self, X_nb, t, T, state):\n    k = len(X_nb)\n    P = np.concatenate([x_self[None], X_nb]).reshape(k + 1, -1)\n    P = np.nan_to_num(P, nan=0.0, posinf=0.0, neginf=0.0)\n    ref = np.median(P, 0)\n    d = np.linalg.norm(P - ref, axis=1)\n    scale = np.median(d) + 1e-12\n    thr = scale * (1.0 + math.exp(-2.0 * t / T))\n    keep = d <= thr\n    keep[0] = True\n    out = P[keep].mean(0)\n    return out.reshape(x_self.shape)\n",
+  "file": "<repo>/design_runs/H/H2.2_AnnealedMedianBand.py",
+  "design": {
+   "mean_acc": 0.8431583333333333,
+   "worst_acc": 0.7959375,
+   "score": 0.8195479166666666,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.8528958333333333,
+    "gaussian": 0.8610416666666666,
+    "signflip": 0.8312083333333332,
+    "labelflip": 0.8102916666666666,
+    "alie": 0.8603541666666666
+   }
+  },
+  "val": {
+   "mean_acc": 0.82953125,
+   "worst_acc": 0.7446875,
+   "score": 0.787109375,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.8310312499999998,
+    "gaussian": 0.8424166666666667,
+    "signflip": 0.8095729166666668,
+    "labelflip": 0.80384375,
+    "alie": 0.8607916666666666
+   }
+  },
+  "error": null
+ },
+ {
+  "name": "H2.3_SimplexTVReputation",
+  "round": 2,
+  "desc": "Messages are probability matrices, so compare them with a simplex-native distance instead of the Euclidean norm. Each message is clipped and row-normalised, then its mean row-wise total-variation distance to the coordinate-wise median is computed. A per-slot reputation is stored in `state`: it is decayed when a neighbour is repeatedly an outlier and recovers when it behaves, so persistent attackers lose weight across iterations while noisy but honest nodes are only downweighted, not removed. The output is the reputation-weighted mean with self weight 1.",
+  "src": "def aggregate(x_self, X_nb, t, T, state):\n    k = len(X_nb)\n    C = x_self.shape[-1]\n    P = np.concatenate([x_self[None], X_nb]).astype(float)\n    P = np.nan_to_num(P, nan=0.0, posinf=0.0, neginf=0.0)\n    P = np.clip(P, 0.0, None).reshape(k + 1, -1, C)\n    s = P.sum(-1, keepdims=True)\n    P = np.where(s > 0, P / np.maximum(s, 1e-12), 1.0 / C)\n    ref = np.median(P, 0)\n    tv = 0.5 * np.abs(P - ref).sum(-1).mean(-1)\n    rep = state.get('rep')\n    if rep is None or len(rep) != k:\n        rep = np.ones(k)\n    rep = np.asarray(rep, dtype=float)\n    u = tv[1:] / (np.median(tv[1:]) + 1e-12)\n    good = np.exp(-np.maximum(u - 1.5, 0.0) ** 2)\n    rep = 0.7 * rep + 0.3 * good\n    state['rep'] = rep\n    tau = np.median(tv) + 1e-12\n    w = rep * np.minimum(1.0, tau / np.maximum(tv[1:], 1e-12))\n    Xn = P[1:]\n    num = P[0] + (w[:, None, None] * Xn).sum(0)\n    den = 1.0 + w.sum()\n    out = num / den\n    out = np.nan_to_num(out, nan=0.0, posinf=0.0, neginf=0.0)\n    return out.reshape(x_self.shape)\n",
+  "file": "<repo>/design_runs/H/H2.3_SimplexTVReputation.py",
+  "design": {
+   "mean_acc": 0.846875,
+   "worst_acc": 0.7565625,
+   "score": 0.80171875,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.8465625,
+    "gaussian": 0.855625,
+    "signflip": 0.855125,
+    "labelflip": 0.8202708333333334,
+    "alie": 0.8567916666666666
+   }
+  },
+  "val": {
+   "mean_acc": 0.8303333333333335,
+   "worst_acc": 0.7121875,
+   "score": 0.7712604166666668,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.80428125,
+    "gaussian": 0.8416458333333335,
+    "signflip": 0.8643854166666666,
+    "labelflip": 0.7795,
+    "alie": 0.8618541666666665
+   }
+  },
+  "error": null
+ },
+ {
+  "name": "H2.4_GeometricMedianFromClip",
+  "round": 2,
+  "desc": "Combine the two strongest existing mechanisms in sequence. First, self-centred norm clipping (ClippedGossip) bounds each neighbour's deviation from x_self by a robust quantile radius. Then a Weiszfeld geometric-median refinement is run on the clipped set, which removes the residual bias of the clipped mean under ALIE-type shifts. Iteration is capped so the call stays well under the time limit.",
+  "src": "def aggregate(x_self, X_nb, t, T, state):\n    k = len(X_nb)\n    xs = x_self.reshape(-1)\n    D = X_nb.reshape(k, -1) - xs\n    nrm = np.linalg.norm(D, axis=1)\n    tau = 0.5 * np.quantile(nrm, 0.25) + 1e-12\n    scale = np.minimum(1.0, tau / np.maximum(nrm, 1e-12))\n    Q = np.concatenate([xs[None], xs + scale[:, None] * D])\n    Q = np.nan_to_num(Q, nan=0.0, posinf=0.0, neginf=0.0)\n    z = Q.mean(0)\n    for _ in range(20):\n        d = np.linalg.norm(Q - z, axis=1)\n        w = 1.0 / np.maximum(d, 1e-8)\n        z_new = (w[:, None] * Q).sum(0) / w.sum()\n        done = np.linalg.norm(z_new - z) <= 1e-9 * (1.0 + np.linalg.norm(z))\n        z = z_new\n        if done:\n            break\n    return z.reshape(x_self.shape)\n",
+  "file": "<repo>/design_runs/H/H2.4_GeometricMedianFromClip.py",
+  "design": {
+   "mean_acc": 0.8403541666666666,
+   "worst_acc": 0.7754375,
+   "score": 0.8078958333333333,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.8457499999999999,
+    "gaussian": 0.8488333333333333,
+    "signflip": 0.8229791666666667,
+    "labelflip": 0.8353541666666667,
+    "alie": 0.8488541666666668
+   }
+  },
+  "val": {
+   "mean_acc": 0.8214479166666669,
+   "worst_acc": 0.6985625,
+   "score": 0.7600052083333335,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.8128854166666666,
+    "gaussian": 0.8431562499999999,
+    "signflip": 0.8017395833333333,
+    "labelflip": 0.7957395833333333,
+    "alie": 0.85371875
+   }
+  },
+  "error": null
+ },
+ {
+  "name": "H3.1_AnnealedSoftBandGeoMedian",
+  "round": 3,
+  "desc": "Keeps the annealed distance band from H2.2 but replaces the hard keep/drop cut with a soft weight that falls off linearly across the band edge, then takes a weighted geometric median (Weiszfeld) of the retained messages instead of their plain mean. This limits the influence of messages near the band boundary, which the hard cut treats inconsistently.",
+  "src": "def aggregate(x_self, X_nb, t, T, state):\n    k = len(X_nb)\n    if k == 0:\n        return x_self\n    P = np.concatenate([x_self[None], X_nb]).reshape(k + 1, -1).astype(float)\n    P = np.nan_to_num(P, nan=0.0, posinf=0.0, neginf=0.0)\n    ref = np.median(P, 0)\n    d = np.linalg.norm(P - ref, axis=1)\n    scale = np.median(d) + 1e-12\n    thr = scale * (1.0 + math.exp(-2.0 * t / T))\n    w = np.clip((thr - d) / (0.5 * thr + 1e-12), 0.0, 1.0)\n    w[0] = 1.0\n    z = (w[:, None] * P).sum(0) / w.sum()\n    for _ in range(20):\n        dz = np.linalg.norm(P - z, axis=1)\n        ww = w / np.maximum(dz, 1e-8)\n        z_new = (ww[:, None] * P).sum(0) / ww.sum()\n        done = np.linalg.norm(z_new - z) <= 1e-9 * (1.0 + np.linalg.norm(z))\n        z = z_new\n        if done:\n            break\n    z = np.nan_to_num(z, nan=0.0, posinf=0.0, neginf=0.0)\n    return z.reshape(x_self.shape)\n",
+  "file": "<repo>/design_runs/H/H3.1_AnnealedSoftBandGeoMedian.py",
+  "design": {
+   "mean_acc": 0.8459249999999999,
+   "worst_acc": 0.8124375,
+   "score": 0.82918125,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.8400625,
+    "gaussian": 0.8509583333333334,
+    "signflip": 0.8491666666666666,
+    "labelflip": 0.8469375,
+    "alie": 0.8424999999999999
+   }
+  },
+  "val": {
+   "mean_acc": 0.8190979166666666,
+   "worst_acc": 0.6938124999999999,
+   "score": 0.7564552083333334,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.80453125,
+    "gaussian": 0.8253645833333333,
+    "signflip": 0.8250208333333333,
+    "labelflip": 0.8098645833333332,
+    "alie": 0.8307083333333334
+   }
+  },
+  "error": null
+ },
+ {
+  "name": "H3.2_LogPoolTrimmedMean",
+  "round": 3,
+  "desc": "A new mechanism: pool in the log domain. Each message is renormalised per row and log-transformed, then the 20% extremes are trimmed per coordinate and the rest averaged (geometric pooling). Log pooling makes a single message that assigns near-zero probability to the consensus class very costly, so it resists corrupted or noisy rows while keeping the output a probability vector.",
+  "src": "def aggregate(x_self, X_nb, t, T, state):\n    k = len(X_nb)\n    if k == 0:\n        return x_self\n    m, C = x_self.shape\n    n = k + 1\n    Q = np.concatenate([x_self[None], X_nb]).reshape(n, m, C).astype(float)\n    Q = np.nan_to_num(Q, nan=0.0, posinf=0.0, neginf=0.0)\n    Q = np.clip(Q, 1e-6, None)\n    Q = Q / Q.sum(-1, keepdims=True)\n    L = np.log(Q)\n    b = int(math.floor(0.2 * n)) if n >= 5 else 0\n    S = np.sort(L, axis=0)\n    M = S[b:n - b].mean(0)\n    out = np.exp(M - M.max(-1, keepdims=True))\n    out = out / out.sum(-1, keepdims=True)\n    out = np.nan_to_num(out, nan=1.0 / C, posinf=1.0 / C, neginf=1.0 / C)\n    return out.reshape(x_self.shape)\n",
+  "file": "<repo>/design_runs/H/H3.2_LogPoolTrimmedMean.py",
+  "design": {
+   "mean_acc": 0.6483125,
+   "worst_acc": 0.0460625,
+   "score": 0.3471875,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.8358541666666667,
+    "gaussian": 0.641625,
+    "signflip": 0.8542291666666667,
+    "labelflip": 0.058791666666666666,
+    "alie": 0.8510624999999999
+   }
+  },
+  "val": {
+   "mean_acc": 0.6189854166666666,
+   "worst_acc": 0.01525,
+   "score": 0.3171177083333333,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.7423749999999999,
+    "gaussian": 0.5833333333333334,
+    "signflip": 0.8619375000000001,
+    "labelflip": 0.052656249999999995,
+    "alie": 0.854625
+   }
+  },
+  "error": null
+ },
+ {
+  "name": "H3.3_DirectionGatedClip",
+  "round": 3,
+  "desc": "Combines self-centred norm clipping (ClippedGossip) with a directional gate: each message's displacement from the node's own state is weighted by how well its direction agrees with the coordinate-wise median displacement. Messages pushing the state in a direction most others do not support are down-weighted, which targets sign-flipped and label-permuted messages without relying on their specific form.",
+  "src": "def aggregate(x_self, X_nb, t, T, state):\n    k = len(X_nb)\n    if k == 0:\n        return x_self\n    xs = np.nan_to_num(x_self.reshape(-1).astype(float), nan=0.0, posinf=0.0, neginf=0.0)\n    Xf = np.nan_to_num(X_nb.reshape(k, -1).astype(float), nan=0.0, posinf=0.0, neginf=0.0)\n    D = Xf - xs\n    nrm = np.linalg.norm(D, axis=1)\n    med = np.median(np.concatenate([xs[None], Xf]), 0)\n    dm = med - xs\n    cos = (D @ dm) / (nrm * np.linalg.norm(dm) + 1e-12)\n    gate = np.clip(cos, 0.0, 1.0) ** 2\n    tau = 0.5 * np.quantile(nrm, 0.25) + 1e-12\n    scale = np.minimum(1.0, tau / np.maximum(nrm, 1e-12))\n    w = gate * scale\n    out = xs + (w[:, None] * D).sum(0) / (k + 1)\n    out = np.nan_to_num(out, nan=0.0, posinf=0.0, neginf=0.0)\n    return out.reshape(x_self.shape)\n",
+  "file": "<repo>/design_runs/H/H3.3_DirectionGatedClip.py",
+  "design": {
+   "mean_acc": 0.8050249999999999,
+   "worst_acc": 0.71425,
+   "score": 0.7596375,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.8269583333333332,
+    "gaussian": 0.803875,
+    "signflip": 0.7865416666666666,
+    "labelflip": 0.7959166666666667,
+    "alie": 0.8118333333333334
+   }
+  },
+  "val": {
+   "mean_acc": 0.8016312500000001,
+   "worst_acc": 0.6765000000000001,
+   "score": 0.7390656250000001,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.8070520833333333,
+    "gaussian": 0.8121979166666665,
+    "signflip": 0.77740625,
+    "labelflip": 0.7824166666666666,
+    "alie": 0.8290833333333335
+   }
+  },
+  "error": null
+ },
+ {
+  "name": "H3.4_DecayedTrustBand",
+  "round": 3,
+  "desc": "Uses the state across iterations: each neighbour carries a reputation that is an exponential moving average of how typical its distance to the coordinate-wise median is, relative to the median distance. The reputation then scales a norm-clipped, self-anchored weighted average. Persistent outliers lose influence over the T rounds, while a single noisy-but-honest round is not decisive.",
+  "src": "def aggregate(x_self, X_nb, t, T, state):\n    k = len(X_nb)\n    if k == 0:\n        return x_self\n    P = np.concatenate([x_self[None], X_nb]).reshape(k + 1, -1).astype(float)\n    P = np.nan_to_num(P, nan=0.0, posinf=0.0, neginf=0.0)\n    ref = np.median(P, 0)\n    d = np.linalg.norm(P - ref, axis=1)\n    s = np.median(d) + 1e-12\n    u = d[1:] / s\n    evidence = np.exp(-np.maximum(u - 1.0, 0.0) ** 2)\n    rep = state.get('rep')\n    if rep is None or len(rep) != k:\n        rep = np.ones(k)\n    rep = 0.8 * np.asarray(rep, dtype=float) + 0.2 * evidence\n    state['rep'] = rep\n    w = rep * np.minimum(1.0, (1.5 * s) / np.maximum(d[1:], 1e-12))\n    num = P[0] + (w[:, None] * P[1:]).sum(0)\n    out = num / (1.0 + w.sum())\n    out = np.nan_to_num(out, nan=0.0, posinf=0.0, neginf=0.0)\n    return out.reshape(x_self.shape)\n",
+  "file": "<repo>/design_runs/H/H3.4_DecayedTrustBand.py",
+  "design": {
+   "mean_acc": 0.8404708333333334,
+   "worst_acc": 0.735625,
+   "score": 0.7880479166666667,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.8466041666666667,
+    "gaussian": 0.8611874999999999,
+    "signflip": 0.8279583333333332,
+    "labelflip": 0.8056875,
+    "alie": 0.8609166666666667
+   }
+  },
+  "val": {
+   "mean_acc": 0.81671875,
+   "worst_acc": 0.680875,
+   "score": 0.748796875,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.8063125000000001,
+    "gaussian": 0.8415624999999999,
+    "signflip": 0.7999791666666666,
+    "labelflip": 0.7719270833333333,
+    "alie": 0.8638124999999999
+   }
+  },
+  "error": null
+ },
+ {
+  "name": "H4.1_HellingerBandMixture",
+  "round": 4,
+  "desc": "Measures disagreement in square-root (Hellinger) space, where the distance between two probability rows is a bounded, principled divergence, and then forms the output as a weighted mixture of the probability rows rather than an average in raw space. Each message is accepted with a soft band that anneals over iterations, and the mixture stays on the simplex by construction.",
+  "src": "def aggregate(x_self, X_nb, t, T, state):\n    P = np.concatenate([x_self[None], X_nb]).astype(float)\n    P = np.nan_to_num(P, nan=0.0, posinf=0.0, neginf=0.0)\n    P = np.clip(P, 0.0, None)\n    rs = P.sum(-1, keepdims=True)\n    P = np.where(rs > 1e-12, P / np.maximum(rs, 1e-12), 1.0 / P.shape[-1])\n    S = np.sqrt(P)\n    ref = np.median(S, 0)\n    d = np.sqrt(((S - ref) ** 2).sum(-1)).mean(-1)\n    scale = np.median(d) + 1e-12\n    thr = scale * (1.0 + math.exp(-2.0 * t / T))\n    w = np.clip((thr - d) / (0.5 * thr + 1e-12), 0.0, 1.0)\n    w[0] = 1.0\n    out = (w[:, None, None] * P).sum(0) / w.sum()\n    return out.reshape(x_self.shape)\n",
+  "file": "<repo>/design_runs/H/H4.1_HellingerBandMixture.py",
+  "design": {
+   "mean_acc": 0.8492291666666667,
+   "worst_acc": 0.8176874999999999,
+   "score": 0.8334583333333333,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.8506666666666667,
+    "gaussian": 0.8516666666666666,
+    "signflip": 0.8448125000000001,
+    "labelflip": 0.8504999999999999,
+    "alie": 0.8484999999999999
+   }
+  },
+  "val": {
+   "mean_acc": 0.8402458333333332,
+   "worst_acc": 0.765875,
+   "score": 0.8030604166666666,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.8174999999999999,
+    "gaussian": 0.8362604166666667,
+    "signflip": 0.8575416666666668,
+    "labelflip": 0.8343020833333333,
+    "alie": 0.855625
+   }
+  },
+  "error": null
+ },
+ {
+  "name": "H4.2_NeighbourhoodAgreementGeoMed",
+  "round": 4,
+  "desc": "Weights each message by its local agreement with all other messages, using a Gaussian kernel on pairwise distances (a Krum-like density score that does not rely on a single reference point). The weighted geometric median of the messages is then computed, which keeps the estimate robust when a Byzantine cluster is large.",
+  "src": "def aggregate(x_self, X_nb, t, T, state):\n    k = len(X_nb)\n    P = np.concatenate([x_self[None], X_nb]).reshape(k + 1, -1).astype(float)\n    P = np.nan_to_num(P, nan=0.0, posinf=0.0, neginf=0.0)\n    n = k + 1\n    if n == 1:\n        return x_self\n    G = P @ P.T\n    sq = np.diag(G)\n    D = np.sqrt(np.maximum(sq[:, None] + sq[None, :] - 2.0 * G, 0.0))\n    off = D[~np.eye(n, dtype=bool)]\n    h = np.median(off) + 1e-12\n    ht = h * (1.0 + math.exp(-2.0 * t / T))\n    K = np.exp(-(D / ht) ** 2)\n    agree = (K.sum(1) - 1.0) / max(n - 1, 1)\n    w = agree ** 2\n    w[0] = 1.0\n    z = (w[:, None] * P).sum(0) / w.sum()\n    for _ in range(20):\n        d = np.linalg.norm(P - z, axis=1)\n        a = w / np.maximum(d, 1e-8)\n        z_new = (a[:, None] * P).sum(0) / a.sum()\n        done = np.linalg.norm(z_new - z) <= 1e-9 * (1.0 + np.linalg.norm(z))\n        z = z_new\n        if done:\n            break\n    z = np.nan_to_num(z, nan=0.0, posinf=0.0, neginf=0.0)\n    return z.reshape(x_self.shape)\n",
+  "file": "<repo>/design_runs/H/H4.2_NeighbourhoodAgreementGeoMed.py",
+  "design": {
+   "mean_acc": 0.816125,
+   "worst_acc": 0.7396875,
+   "score": 0.77790625,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.8320625,
+    "gaussian": 0.812875,
+    "signflip": 0.7968125,
+    "labelflip": 0.8038541666666666,
+    "alie": 0.8350208333333334
+   }
+  },
+  "val": {
+   "mean_acc": 0.8205145833333334,
+   "worst_acc": 0.7043124999999999,
+   "score": 0.7624135416666666,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.8066875000000001,
+    "gaussian": 0.8309791666666667,
+    "signflip": 0.8145312499999999,
+    "labelflip": 0.8051458333333334,
+    "alie": 0.8452291666666668
+   }
+  },
+  "error": null
+ },
+ {
+  "name": "H4.3_PersistentSuspicionBand",
+  "round": 4,
+  "desc": "Keeps a per-neighbour suspicion score in the persistent state, an exponential moving average of how far each slot's message lies from the robust centre. Slots that are persistently far are down-weighted even if they occasionally look plausible, which handles attackers that change behaviour over iterations. Combined with an annealed soft band on the current deviation, the output is a trust-weighted mean.",
+  "src": "def aggregate(x_self, X_nb, t, T, state):\n    k = len(X_nb)\n    if k == 0:\n        return x_self\n    P = np.concatenate([x_self[None], X_nb]).reshape(k + 1, -1).astype(float)\n    P = np.nan_to_num(P, nan=0.0, posinf=0.0, neginf=0.0)\n    ref = np.median(P, 0)\n    d = np.linalg.norm(P - ref, axis=1)\n    r = d / (np.median(d) + 1e-12)\n    s_prev = state.get('s')\n    if s_prev is None or len(s_prev) != k:\n        s_prev = np.zeros(k)\n    s = 0.6 * np.asarray(s_prev, dtype=float) + 0.4 * r[1:]\n    state['s'] = s\n    thr = 1.0 + math.exp(-2.0 * t / T)\n    band = np.clip((thr - r[1:]) / (0.5 * thr + 1e-12), 0.0, 1.0)\n    trust = band * np.exp(-np.maximum(s - 1.0, 0.0))\n    w = np.concatenate([[1.0], trust])\n    z = (w[:, None] * P).sum(0) / w.sum()\n    z = np.nan_to_num(z, nan=0.0, posinf=0.0, neginf=0.0)\n    return z.reshape(x_self.shape)\n",
+  "file": "<repo>/design_runs/H/H4.3_PersistentSuspicionBand.py",
+  "design": {
+   "mean_acc": 0.8571208333333332,
+   "worst_acc": 0.8312499999999999,
+   "score": 0.8441854166666666,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.8568333333333333,
+    "gaussian": 0.8561458333333333,
+    "signflip": 0.8593125,
+    "labelflip": 0.8586874999999999,
+    "alie": 0.8546249999999999
+   }
+  },
+  "val": {
+   "mean_acc": 0.8341583333333334,
+   "worst_acc": 0.7373125,
+   "score": 0.7857354166666668,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.8267395833333334,
+    "gaussian": 0.8353958333333332,
+    "signflip": 0.8368645833333334,
+    "labelflip": 0.8181666666666666,
+    "alie": 0.8536250000000001
+   }
+  },
+  "error": null
+ },
+ {
+  "name": "H4.4_CoordinateMADFilteredMean",
+  "round": 4,
+  "desc": "Works coordinate by coordinate: each probability entry is compared with the coordinate-wise median in units of the scaled median absolute deviation, entries outside an annealed band are discarded, and the rest are averaged. This is a trimmed-mean style estimator that keeps the efficiency of averaging on coordinates where honest nodes agree, and falls back to the median where it has no inliers. The self value is always kept.",
+  "src": "def aggregate(x_self, X_nb, t, T, state):\n    k = len(X_nb)\n    P = np.concatenate([x_self[None], X_nb]).reshape(k + 1, -1).astype(float)\n    P = np.nan_to_num(P, nan=0.0, posinf=0.0, neginf=0.0)\n    med = np.median(P, 0)\n    mad = 1.4826 * np.median(np.abs(P - med), 0) + 1e-6\n    c = 1.5 + 2.0 * math.exp(-2.0 * t / T)\n    inl = np.abs(P - med) <= c * mad\n    inl[0] = True\n    cnt = inl.sum(0)\n    s = np.where(inl, P, 0.0).sum(0)\n    out = s / np.maximum(cnt, 1)\n    out = np.nan_to_num(out, nan=0.0, posinf=0.0, neginf=0.0)\n    return out.reshape(x_self.shape)\n",
+  "file": "<repo>/design_runs/H/H4.4_CoordinateMADFilteredMean.py",
+  "design": {
+   "mean_acc": 0.8226541666666665,
+   "worst_acc": 0.7293749999999999,
+   "score": 0.7760145833333332,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.8470208333333332,
+    "gaussian": 0.8556874999999998,
+    "signflip": 0.7634374999999999,
+    "labelflip": 0.8123541666666666,
+    "alie": 0.8347708333333332
+   }
+  },
+  "val": {
+   "mean_acc": 0.7861270833333334,
+   "worst_acc": 0.5245,
+   "score": 0.6553135416666667,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.8041145833333334,
+    "gaussian": 0.8209479166666664,
+    "signflip": 0.6827499999999999,
+    "labelflip": 0.7767708333333333,
+    "alie": 0.8460520833333334
+   }
+  },
+  "error": null
+ },
+ {
+  "name": "H5.1_H5_1_PersistentBandClippedMix",
+  "round": 5,
+  "desc": "Combines the persistent suspicion memory and band trust of H4.3 with ClippedGossip-style norm clipping of the accepted deviations from the node's own state, so that even trusted but large deviations cannot move the output far in one iteration.",
+  "src": "def aggregate(x_self, X_nb, t, T, state):\n    k = len(X_nb)\n    if k == 0:\n        return x_self\n    P = np.concatenate([x_self[None], X_nb]).reshape(k + 1, -1).astype(float)\n    P = np.nan_to_num(P, nan=0.0, posinf=0.0, neginf=0.0)\n    ref = np.median(P, 0)\n    d = np.linalg.norm(P - ref, axis=1)\n    r = d / (np.median(d) + 1e-12)\n    s_prev = state.get('s')\n    if s_prev is None or len(s_prev) != k:\n        s_prev = np.zeros(k)\n    s = 0.6 * np.asarray(s_prev, dtype=float) + 0.4 * r[1:]\n    state['s'] = s\n    thr = 1.0 + math.exp(-2.0 * t / T)\n    band = np.clip((thr - r[1:]) / (0.5 * thr + 1e-12), 0.0, 1.0)\n    trust = band * np.exp(-np.maximum(s - 1.0, 0.0))\n    x0 = P[0]\n    D = P[1:] - x0\n    nrm = np.linalg.norm(D, axis=1)\n    tau = np.median(nrm) + 1e-12\n    scale = np.minimum(1.0, tau / np.maximum(nrm, 1e-12))\n    z = x0 + (trust * scale)[:, None].__mul__(D).sum(0) / (1.0 + trust.sum())\n    z = np.nan_to_num(z, nan=0.0, posinf=0.0, neginf=0.0)\n    return z.reshape(x_self.shape)\n",
+  "file": "<repo>/design_runs/H/H5.1_H5_1_PersistentBandClippedMix.py",
+  "design": {
+   "mean_acc": 0.8538875000000002,
+   "worst_acc": 0.8278749999999999,
+   "score": 0.84088125,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.8545208333333333,
+    "gaussian": 0.8534166666666666,
+    "signflip": 0.8563749999999999,
+    "labelflip": 0.8568541666666666,
+    "alie": 0.8482708333333333
+   }
+  },
+  "val": {
+   "mean_acc": 0.83568125,
+   "worst_acc": 0.772875,
+   "score": 0.804278125,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.8258541666666668,
+    "gaussian": 0.8345416666666666,
+    "signflip": 0.83425,
+    "labelflip": 0.8320416666666666,
+    "alie": 0.85171875
+   }
+  },
+  "error": null
+ },
+ {
+  "name": "H5.2_H5_2_WelschIRLSAnnealed",
+  "round": 5,
+  "desc": "A robust location estimate: a Welsch (Gaussian-kernel) M-estimator solved by a few iterative reweighted averages, started from the coordinate-wise median. The kernel scale is a MAD-based estimate of the spread of distances, inflated early in consensus and annealed towards the honest spread later; the node's own state always keeps unit weight.",
+  "src": "def aggregate(x_self, X_nb, t, T, state):\n    k = len(X_nb)\n    if k == 0:\n        return x_self\n    P = np.concatenate([x_self[None], X_nb]).reshape(k + 1, -1).astype(float)\n    P = np.nan_to_num(P, nan=0.0, posinf=0.0, neginf=0.0)\n    z = np.median(P, 0)\n    d0 = np.linalg.norm(P - z, axis=1)\n    med0 = np.median(d0)\n    mad = np.median(np.abs(d0 - med0))\n    sig = (1.4826 * mad + 0.5 * med0 + 1e-12) * (1.0 + math.exp(-2.0 * t / T))\n    for _ in range(10):\n        d = np.linalg.norm(P - z, axis=1)\n        u = np.minimum(d / sig, 1e6)\n        w = np.exp(-0.5 * u * u)\n        w[0] = 1.0\n        z_new = (w[:, None] * P).sum(0) / w.sum()\n        done = np.linalg.norm(z_new - z) <= 1e-9 * (1.0 + np.linalg.norm(z))\n        z = z_new\n        if done:\n            break\n    z = np.nan_to_num(z, nan=0.0, posinf=0.0, neginf=0.0)\n    return z.reshape(x_self.shape)\n",
+  "file": "<repo>/design_runs/H/H5.2_H5_2_WelschIRLSAnnealed.py",
+  "design": {
+   "mean_acc": 0.8357958333333333,
+   "worst_acc": 0.7498125,
+   "score": 0.7928041666666666,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.852125,
+    "gaussian": 0.8599375,
+    "signflip": 0.8152916666666666,
+    "labelflip": 0.7888125,
+    "alie": 0.8628125
+   }
+  },
+  "val": {
+   "mean_acc": 0.8202229166666667,
+   "worst_acc": 0.6614374999999999,
+   "score": 0.7408302083333334,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.8144166666666667,
+    "gaussian": 0.86375,
+    "signflip": 0.7837916666666666,
+    "labelflip": 0.7775625,
+    "alie": 0.86159375
+   }
+  },
+  "error": null
+ },
+ {
+  "name": "H5.3_H5_3_PerSampleRowTrust",
+  "round": 5,
+  "desc": "Changes the granularity of the trust decision: instead of judging a whole neighbour message, each row (sample) of each message is judged against the per-sample median across messages, after renormalising rows to probability vectors. A neighbour that is noisy or manipulated on some public samples is discounted only there, while its agreeing rows still contribute. Row-wise L1 deviations are compared with the per-row median deviation, with the annealed band as in H4.1.",
+  "src": "def aggregate(x_self, X_nb, t, T, state):\n    k = len(X_nb)\n    if k == 0:\n        return x_self\n    P = np.concatenate([x_self[None], X_nb]).astype(float)\n    P = np.nan_to_num(P, nan=0.0, posinf=0.0, neginf=0.0)\n    P = np.clip(P, 0.0, None)\n    rs = P.sum(-1, keepdims=True)\n    P = np.where(rs > 1e-12, P / np.maximum(rs, 1e-12), 1.0 / P.shape[-1])\n    ref = np.median(P, 0)\n    d = np.abs(P - ref).sum(-1)\n    scale = np.median(d, 0) + 1e-9\n    thr = scale * (1.0 + math.exp(-2.0 * t / T))\n    w = np.clip((thr[None, :] - d) / (0.5 * thr[None, :] + 1e-12), 0.0, 1.0)\n    w[0] = 1.0\n    out = (w[..., None] * P).sum(0) / w.sum(0)[:, None]\n    out = np.nan_to_num(out, nan=0.0, posinf=0.0, neginf=0.0)\n    out = np.clip(out, 0.0, None)\n    rs = out.sum(-1, keepdims=True)\n    out = np.where(rs > 1e-12, out / np.maximum(rs, 1e-12), 1.0 / out.shape[-1])\n    return out.reshape(x_self.shape)\n",
+  "file": "<repo>/design_runs/H/H5.3_H5_3_PerSampleRowTrust.py",
+  "design": {
+   "mean_acc": 0.8456208333333333,
+   "worst_acc": 0.7959999999999999,
+   "score": 0.8208104166666665,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.8410625,
+    "gaussian": 0.8566458333333333,
+    "signflip": 0.8354166666666666,
+    "labelflip": 0.8456875,
+    "alie": 0.8492916666666667
+   }
+  },
+  "val": {
+   "mean_acc": 0.8292229166666664,
+   "worst_acc": 0.7282500000000001,
+   "score": 0.7787364583333332,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.8212812499999999,
+    "gaussian": 0.8288541666666666,
+    "signflip": 0.8393541666666665,
+    "labelflip": 0.8028437500000001,
+    "alie": 0.8537812499999999
+   }
+  },
+  "error": null
+ },
+ {
+  "name": "H5.4_H5_4_LargestGapCutWithBanMemory",
+  "round": 5,
+  "desc": "A new mechanism that avoids a fixed or annealed threshold: among the sorted distances to the coordinate-wise median, the rule looks for the largest multiplicative gap in the lower half-plus of the distribution and cuts there only if the gap is clear (ratio above 1.3), otherwise it keeps everyone. Neighbours cut in previous iterations are persistently down-weighted through a per-neighbour memory, so repeated cuts accumulate evidence while a single noisy iteration does not exclude an honest node.",
+  "src": "def aggregate(x_self, X_nb, t, T, state):\n    k = len(X_nb)\n    if k == 0:\n        return x_self\n    P = np.concatenate([x_self[None], X_nb]).reshape(k + 1, -1).astype(float)\n    P = np.nan_to_num(P, nan=0.0, posinf=0.0, neginf=0.0)\n    ref = np.median(P, 0)\n    d = np.linalg.norm(P - ref, axis=1)\n    keep = np.ones(k + 1, dtype=bool)\n    if k + 1 >= 3:\n        order = np.argsort(d)\n        ds = d[order]\n        lo = (k + 1) // 2\n        ratios = (ds[lo:] + 1e-12) / (ds[lo - 1:k] + 1e-12)\n        j = lo + int(np.argmax(ratios))\n        if ratios.max() > 1.3:\n            keep = np.zeros(k + 1, dtype=bool)\n            keep[order[:j]] = True\n    keep[0] = True\n    ban_prev = state.get('ban')\n    if ban_prev is None or len(ban_prev) != k:\n        ban_prev = np.zeros(k)\n    cut_nb = (~keep[1:]).astype(float)\n    ban = 0.6 * np.asarray(ban_prev, dtype=float) + 0.4 * cut_nb\n    state['ban'] = ban\n    wnb = keep[1:].astype(float) * np.clip(1.0 - ban, 0.1, 1.0)\n    w = np.concatenate([[1.0], wnb])\n    z = (w[:, None] * P).sum(0) / w.sum()\n    z = np.nan_to_num(z, nan=0.0, posinf=0.0, neginf=0.0)\n    return z.reshape(x_self.shape)\n",
+  "file": "<repo>/design_runs/H/H5.4_H5_4_LargestGapCutWithBanMemory.py",
+  "design": {
+   "mean_acc": 0.850725,
+   "worst_acc": 0.762625,
+   "score": 0.806675,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.8554583333333333,
+    "gaussian": 0.8606875,
+    "signflip": 0.8606875,
+    "labelflip": 0.8600833333333332,
+    "alie": 0.8167083333333333
+   }
+  },
+  "val": {
+   "mean_acc": 0.8333416666666668,
+   "worst_acc": 0.7466875,
+   "score": 0.7900145833333334,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.8298333333333333,
+    "gaussian": 0.8393645833333333,
+    "signflip": 0.8268333333333332,
+    "labelflip": 0.8219687499999999,
+    "alie": 0.8487083333333333
+   }
+  },
+  "error": null
+ },
+ {
+  "name": "H6.1_HellingerPersistentTrust",
+  "round": 6,
+  "desc": "Hybrid of the two strongest prior rules: row-normalised Hellinger distances to the coordinate-wise median give a per-round deviation score, a persistent suspicion memory penalises neighbours that stay far across iterations, and the annealed band gates the trust weights before a self-anchored mean.",
+  "src": "def aggregate(x_self, X_nb, t, T, state):\n    k = len(X_nb)\n    if k == 0:\n        return x_self\n    m, C = x_self.shape\n    P = np.concatenate([x_self[None], X_nb]).reshape(k + 1, m, C).astype(float)\n    P = np.nan_to_num(P, nan=0.0, posinf=0.0, neginf=0.0)\n    P = np.clip(P, 0.0, None)\n    rs = P.sum(-1, keepdims=True)\n    P = np.where(rs > 1e-12, P / np.maximum(rs, 1e-12), 1.0 / C)\n    S = np.sqrt(P)\n    ref = np.median(S, 0)\n    raw = np.sqrt(((S - ref) ** 2).sum(-1)).mean(-1) / math.sqrt(2.0)\n    r = raw / (np.median(raw) + 1e-12)\n    s_prev = state.get('s')\n    if s_prev is None or len(s_prev) != k:\n        s_prev = np.zeros(k)\n    s = 0.6 * np.asarray(s_prev, dtype=float) + 0.4 * r[1:]\n    state['s'] = s\n    thr = 1.0 + math.exp(-2.0 * t / T)\n    band = np.clip((thr - r[1:]) / (0.5 * thr + 1e-12), 0.0, 1.0)\n    trust = band * np.exp(-1.5 * np.maximum(s - 1.0, 0.0))\n    z = (P[0] + np.tensordot(trust, P[1:], axes=1)) / (1.0 + trust.sum())\n    z = np.nan_to_num(z, nan=0.0, posinf=0.0, neginf=0.0)\n    z = np.clip(z, 0.0, None)\n    zs = z.sum(-1, keepdims=True)\n    z = np.where(zs > 1e-12, z / np.maximum(zs, 1e-12), 1.0 / C)\n    return z.reshape(x_self.shape)\n",
+  "file": "<repo>/design_runs/H/H6.1_HellingerPersistentTrust.py",
+  "design": {
+   "mean_acc": 0.8489666666666668,
+   "worst_acc": 0.8178125,
+   "score": 0.8333895833333334,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.8494583333333333,
+    "gaussian": 0.85175,
+    "signflip": 0.8448125000000001,
+    "labelflip": 0.8507083333333334,
+    "alie": 0.8481041666666668
+   }
+  },
+  "val": {
+   "mean_acc": 0.8400125,
+   "worst_acc": 0.7654374999999999,
+   "score": 0.8027249999999999,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.8171979166666667,
+    "gaussian": 0.8361875,
+    "signflip": 0.8570729166666666,
+    "labelflip": 0.8342604166666666,
+    "alie": 0.85534375
+   }
+  },
+  "error": null
+ },
+ {
+  "name": "H6.2_HuberIRLSWithBanMemory",
+  "round": 6,
+  "desc": "Runs a few Huber-IRLS steps anchored at the node's own state with an annealed scale, then turns persistently down-weighted neighbours (weight below 0.5 in most recent rounds) into hard exclusions via a decaying flag memory, which adds a new ban mechanism on top of soft robust weights.",
+  "src": "def aggregate(x_self, X_nb, t, T, state):\n    k = len(X_nb)\n    if k == 0:\n        return x_self\n    m, C = x_self.shape\n    P = np.concatenate([x_self[None], X_nb]).reshape(k + 1, m, C).astype(float)\n    P = np.nan_to_num(P, nan=0.0, posinf=0.0, neginf=0.0)\n    P = np.clip(P, 0.0, None)\n    rs = P.sum(-1, keepdims=True)\n    P = np.where(rs > 1e-12, P / np.maximum(rs, 1e-12), 1.0 / C)\n    P0, Nb = P[0], P[1:]\n    b_prev = state.get('b')\n    if b_prev is None or len(b_prev) != k:\n        b_prev = np.zeros(k)\n    dself = np.sqrt(((Nb - P0) ** 2).sum(axis=(-1, -2)) / m)\n    c = (np.median(dself) + 1e-12) * (1.0 + math.exp(-2.0 * t / T))\n    z = P0.copy()\n    w = np.ones(k)\n    for _ in range(4):\n        dz = np.sqrt(((Nb - z) ** 2).sum(axis=(-1, -2)) / m)\n        w = np.minimum(1.0, c / np.maximum(dz, 1e-12))\n        z = (P0 + np.tensordot(w, Nb, axes=1)) / (1.0 + w.sum())\n    flag = (w < 0.5).astype(float)\n    b = 0.7 * np.asarray(b_prev, dtype=float) + 0.3 * flag\n    state['b'] = b\n    w_eff = w * (b < 0.5)\n    z = (P0 + np.tensordot(w_eff, Nb, axes=1)) / (1.0 + w_eff.sum())\n    z = np.nan_to_num(z, nan=0.0, posinf=0.0, neginf=0.0)\n    z = np.clip(z, 0.0, None)\n    zs = z.sum(-1, keepdims=True)\n    z = np.where(zs > 1e-12, z / np.maximum(zs, 1e-12), 1.0 / C)\n    return z.reshape(x_self.shape)\n",
+  "file": "<repo>/design_runs/H/H6.2_HuberIRLSWithBanMemory.py",
+  "design": {
+   "mean_acc": 0.8096625000000001,
+   "worst_acc": 0.5924999999999999,
+   "score": 0.70108125,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.8382916666666667,
+    "gaussian": 0.8273333333333334,
+    "signflip": 0.8603125,
+    "labelflip": 0.6638541666666667,
+    "alie": 0.8585208333333334
+   }
+  },
+  "val": {
+   "mean_acc": 0.7622291666666666,
+   "worst_acc": 0.143625,
+   "score": 0.4529270833333333,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.7623020833333333,
+    "gaussian": 0.8147291666666666,
+    "signflip": 0.8636770833333335,
+    "labelflip": 0.50840625,
+    "alie": 0.8620312499999999
+   }
+  },
+  "error": null
+ },
+ {
+  "name": "H6.3_MedoidAnchoredAnnealedTrim",
+  "round": 6,
+  "desc": "Finds the medoid of the received messages plus self using pairwise Hellinger distances, then averages self with the neighbours nearest to that medoid; the kept fraction grows over iterations as honest estimates converge, so early rounds are strict and late rounds recover accuracy.",
+  "src": "def aggregate(x_self, X_nb, t, T, state):\n    k = len(X_nb)\n    if k == 0:\n        return x_self\n    m, C = x_self.shape\n    P = np.concatenate([x_self[None], X_nb]).reshape(k + 1, m, C).astype(float)\n    P = np.nan_to_num(P, nan=0.0, posinf=0.0, neginf=0.0)\n    P = np.clip(P, 0.0, None)\n    rs = P.sum(-1, keepdims=True)\n    P = np.where(rs > 1e-12, P / np.maximum(rs, 1e-12), 1.0 / C)\n    F = np.sqrt(P).reshape(k + 1, -1)\n    G = F @ F.T\n    Dm = np.sqrt(np.maximum(2.0 * m - 2.0 * G, 0.0))\n    med = int(np.argmin(Dm.sum(1)))\n    dm = Dm[med, 1:]\n    frac = 0.5 + 0.4 * t / max(T, 1)\n    n_keep = max(1, int(round(frac * k)))\n    keep = np.argsort(dm, kind='stable')[:n_keep]\n    z = (P[0] + P[1:][keep].sum(0)) / (1.0 + n_keep)\n    z = np.nan_to_num(z, nan=0.0, posinf=0.0, neginf=0.0)\n    z = np.clip(z, 0.0, None)\n    zs = z.sum(-1, keepdims=True)\n    z = np.where(zs > 1e-12, z / np.maximum(zs, 1e-12), 1.0 / C)\n    return z.reshape(x_self.shape)\n",
+  "file": "<repo>/design_runs/H/H6.3_MedoidAnchoredAnnealedTrim.py",
+  "design": {
+   "mean_acc": 0.8347249999999999,
+   "worst_acc": 0.7409375,
+   "score": 0.78783125,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.8356666666666667,
+    "gaussian": 0.8412499999999999,
+    "signflip": 0.854375,
+    "labelflip": 0.7923749999999999,
+    "alie": 0.8499583333333334
+   }
+  },
+  "val": {
+   "mean_acc": 0.7814041666666668,
+   "worst_acc": 0.5008125,
+   "score": 0.6411083333333334,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.7463854166666667,
+    "gaussian": 0.7981250000000001,
+    "signflip": 0.8235624999999999,
+    "labelflip": 0.6816666666666666,
+    "alie": 0.8572812500000001
+   }
+  },
+  "error": null
+ },
+ {
+  "name": "H6.4_ConfidenceWeightedBand",
+  "round": 6,
+  "desc": "New precision-weighting idea: each message is weighted by the mean confidence (one minus normalised row entropy) of its predictions, so diffuse or noisy messages count less in the average, multiplied by the annealed distance band to reject outliers; a floor keeps noisy but honest nodes from being fully discarded.",
+  "src": "def aggregate(x_self, X_nb, t, T, state):\n    k = len(X_nb)\n    if k == 0:\n        return x_self\n    m, C = x_self.shape\n    P = np.concatenate([x_self[None], X_nb]).reshape(k + 1, m, C).astype(float)\n    P = np.nan_to_num(P, nan=0.0, posinf=0.0, neginf=0.0)\n    P = np.clip(P, 0.0, None)\n    rs = P.sum(-1, keepdims=True)\n    P = np.where(rs > 1e-12, P / np.maximum(rs, 1e-12), 1.0 / C)\n    denom = max(math.log(C), 1e-12)\n    H = -(P * np.log(P + 1e-12)).sum(-1) / denom\n    conf = np.clip(1.0 - H.mean(-1), 0.0, 1.0)\n    S = np.sqrt(P)\n    ref = np.median(S, 0)\n    raw = np.sqrt(((S - ref) ** 2).sum(-1)).mean(-1) / math.sqrt(2.0)\n    r = raw / (np.median(raw) + 1e-12)\n    thr = 1.0 + math.exp(-2.0 * t / T)\n    band = np.clip((thr - r[1:]) / (0.5 * thr + 1e-12), 0.0, 1.0)\n    w = np.concatenate([[0.1 + conf[0]], band * (0.1 + conf[1:])])\n    z = np.tensordot(w, P, axes=1) / (w.sum() + 1e-12)\n    z = np.nan_to_num(z, nan=0.0, posinf=0.0, neginf=0.0)\n    z = np.clip(z, 0.0, None)\n    zs = z.sum(-1, keepdims=True)\n    z = np.where(zs > 1e-12, z / np.maximum(zs, 1e-12), 1.0 / C)\n    return z.reshape(x_self.shape)\n",
+  "file": "<repo>/design_runs/H/H6.4_ConfidenceWeightedBand.py",
+  "design": {
+   "mean_acc": 0.8452749999999999,
+   "worst_acc": 0.7798749999999999,
+   "score": 0.8125749999999998,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.8508541666666667,
+    "gaussian": 0.8473124999999998,
+    "signflip": 0.8464791666666667,
+    "labelflip": 0.8326458333333333,
+    "alie": 0.8490833333333333
+   }
+  },
+  "val": {
+   "mean_acc": 0.8288729166666667,
+   "worst_acc": 0.72775,
+   "score": 0.7783114583333334,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.8120104166666667,
+    "gaussian": 0.8299479166666667,
+    "signflip": 0.8527812499999999,
+    "labelflip": 0.7952812499999999,
+    "alie": 0.85434375
+   }
+  },
+  "error": null
+ }
+]

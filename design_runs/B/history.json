@@ -1,0 +1,818 @@
+[
+ {
+  "name": "B1.1_SimplexGeoMedian",
+  "round": 1,
+  "desc": "Every message is first checked against the protocol: it should be a row-stochastic matrix. Each message is projected onto the simplex, and a neighbour is down-weighted by how far its raw message was from that projection (the \"violation\"). The new state is then the per-sample weighted geometric median (Weiszfeld) of the self state and the projected messages. A geometric median has a 50% breakdown point per sample and does not average every coordinate the way a mean does.",
+  "src": "def aggregate(x_self, X_nb, t, T, state):\n    C = x_self.shape[-1]\n\n    def clean(X):\n        return np.nan_to_num(np.asarray(X, dtype=np.float64), nan=0.0, posinf=0.0, neginf=0.0)\n\n    def proj(X):\n        X = np.clip(X, 0.0, None)\n        s = X.sum(-1, keepdims=True)\n        return np.where(s > 1e-12, X / np.maximum(s, 1e-12), 1.0 / C)\n\n    R = clean(X_nb)\n    P = proj(R)\n    xs = proj(clean(x_self))\n    viol = np.abs(R - P).sum(-1).mean(1)              # (k,) distance from the simplex\n    w0 = np.concatenate([[1.0], np.exp(-viol / 0.05)])  # protocol-violation down-weighting\n    Z = np.concatenate([xs[None], P], 0)              # (n, m, C)\n    y = np.median(Z, 0)\n    for _ in range(10):\n        d = np.sqrt(((Z - y[None]) ** 2).sum(-1)) + 1e-6   # (n, m)\n        w = w0[:, None] / d\n        y = (w[:, :, None] * Z).sum(0) / w.sum(0)[:, None]\n    return y\n",
+  "file": "<repo>/design_runs/B/B1.1_SimplexGeoMedian.py",
+  "design": {
+   "mean_acc": 0.8465041666666667,
+   "worst_acc": 0.77525,
+   "score": 0.8108770833333334,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.8416458333333333,
+    "gaussian": 0.8559166666666668,
+    "signflip": 0.8557083333333333,
+    "labelflip": 0.8232291666666667,
+    "alie": 0.8560208333333333
+   }
+  },
+  "val": {
+   "mean_acc": 0.8329833333333332,
+   "worst_acc": 0.69725,
+   "score": 0.7651166666666667,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.8136979166666668,
+    "gaussian": 0.854,
+    "signflip": 0.8536979166666666,
+    "labelflip": 0.7876979166666667,
+    "alie": 0.8558229166666665
+   }
+  },
+  "error": null
+ },
+ {
+  "name": "B1.2_ReputationGossip",
+  "round": 1,
+  "desc": "Each neighbour gets a trust score from evidence about its prediction behaviour. The evidence is how often its argmax agrees with a robust per-sample centre (the coordinate-wise median including self) and with the node's own state, how far it sits from that centre compared with typical peers, and whether it violates the simplex. Trust is kept in memory with an asymmetric update: it drops at once on bad evidence and rises slowly on good evidence, so a neighbour that switches to attacking mid-run is cut off quickly. The new state is a trust-weighted mean of the projected messages, anchored on self.",
+  "src": "def aggregate(x_self, X_nb, t, T, state):\n    C = x_self.shape[-1]\n\n    def clean(X):\n        return np.nan_to_num(np.asarray(X, dtype=np.float64), nan=0.0, posinf=0.0, neginf=0.0)\n\n    def proj(X):\n        X = np.clip(X, 0.0, None)\n        s = X.sum(-1, keepdims=True)\n        return np.where(s > 1e-12, X / np.maximum(s, 1e-12), 1.0 / C)\n\n    R = clean(X_nb)\n    k = R.shape[0]\n    P = proj(R)\n    xs = proj(clean(x_self))\n    viol = np.abs(R - P).sum(-1).mean(1)\n    Z = np.concatenate([xs[None], P], 0)\n    center = np.median(Z, 0)\n    lab_c = center.argmax(-1)\n    lab_s = xs.argmax(-1)\n    lab_n = P.argmax(-1)\n    agree = 0.5 * ((lab_n == lab_c[None]).mean(1) + (lab_n == lab_s[None]).mean(1))\n    lo, hi = 2.5 / C, 5.0 / C                       # chance-relative agreement thresholds\n    w_agree = np.clip((agree - lo) / (hi - lo), 0.0, 1.0)\n    dist = np.abs(Z - center[None]).sum(-1).mean(1)   # mean row L1 to centre, (n,)\n    d_ref = float(np.median(dist)) + 1e-3\n    w_dist = 1.0 / (1.0 + (dist[1:] / (2.0 * d_ref)) ** 4)\n    w_valid = np.exp(-viol / 0.05)\n    w_new = w_agree * w_dist * w_valid\n    prev = state.get('trust')\n    if prev is None or len(prev) != k:\n        trust = w_new\n    else:\n        trust = np.where(w_new < prev, w_new, 0.7 * prev + 0.3 * w_new)\n    state['trust'] = trust\n    num = xs + (trust[:, None, None] * P).sum(0)\n    return num / (1.0 + trust.sum())\n",
+  "file": "<repo>/design_runs/B/B1.2_ReputationGossip.py",
+  "design": {
+   "mean_acc": 0.8522166666666665,
+   "worst_acc": 0.7893124999999999,
+   "score": 0.8207645833333332,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.8474583333333333,
+    "gaussian": 0.8577916666666666,
+    "signflip": 0.858,
+    "labelflip": 0.8412291666666666,
+    "alie": 0.8566041666666666
+   }
+  },
+  "val": {
+   "mean_acc": 0.8458708333333333,
+   "worst_acc": 0.7498750000000001,
+   "score": 0.7978729166666667,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.8056666666666666,
+    "gaussian": 0.8643020833333335,
+    "signflip": 0.8643437500000001,
+    "labelflip": 0.8368125000000001,
+    "alie": 0.8582291666666667
+   }
+  },
+  "error": null
+ },
+ {
+  "name": "B1.3_AnchoredCenteredClipping",
+  "round": 1,
+  "desc": "This is centred clipping (Karimireddy et al.), but the clipping is centred on a robust anchor, the coordinate-wise median of self plus the projected messages, rather than on the node's own state. A noisy honest node therefore does not reject good neighbours. The radius adapts to the median deviation, and it is not allowed to grow faster than 1.5x per iteration, because honest disagreement should shrink as gossip proceeds. Raw, unprojected messages are clipped, so the size of an outlier is used as evidence while its influence stays capped at tau per message.",
+  "src": "def aggregate(x_self, X_nb, t, T, state):\n    C = x_self.shape[-1]\n\n    def clean(X):\n        return np.nan_to_num(np.asarray(X, dtype=np.float64), nan=0.0, posinf=0.0, neginf=0.0)\n\n    def proj(X):\n        X = np.clip(X, 0.0, None)\n        s = X.sum(-1, keepdims=True)\n        return np.where(s > 1e-12, X / np.maximum(s, 1e-12), 1.0 / C)\n\n    R = clean(X_nb)\n    xs = proj(clean(x_self))\n    Z = np.concatenate([xs[None], R], 0)\n    n = Z.shape[0]\n    v = np.median(np.concatenate([xs[None], proj(R)], 0), 0)\n    prev_tau = state.get('tau')\n    tau_used = None\n    for _ in range(3):\n        D = Z - v[None]\n        nrm = np.linalg.norm(D.reshape(n, -1), axis=1)\n        tau = float(np.median(nrm)) + 1e-12\n        if prev_tau is not None:\n            tau = min(tau, 1.5 * prev_tau)\n        if tau_used is None:\n            tau_used = tau\n        sc = np.minimum(1.0, tau / np.maximum(nrm, 1e-12))\n        v = v + (sc[:, None, None] * D).mean(0)\n    state['tau'] = tau_used\n    return proj(v)\n",
+  "file": "<repo>/design_runs/B/B1.3_AnchoredCenteredClipping.py",
+  "design": {
+   "mean_acc": 0.8438208333333334,
+   "worst_acc": 0.7434999999999999,
+   "score": 0.7936604166666666,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.8457083333333334,
+    "gaussian": 0.8598541666666666,
+    "signflip": 0.8454583333333333,
+    "labelflip": 0.8083333333333332,
+    "alie": 0.85975
+   }
+  },
+  "val": {
+   "mean_acc": 0.8114062499999999,
+   "worst_acc": 0.5686249999999999,
+   "score": 0.6900156249999999,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.7984583333333334,
+    "gaussian": 0.8418958333333334,
+    "signflip": 0.8232291666666667,
+    "labelflip": 0.7284583333333333,
+    "alie": 0.8649895833333333
+   }
+  },
+  "error": null
+ },
+ {
+  "name": "B1.4_ConsistentCore",
+  "round": 1,
+  "desc": "This is a Krum- or medoid-style selection by mutual consistency. The node computes pairwise mean-row-L1 distances between the self state and the projected messages, adding a penalty for simplex violations. It then finds the medoid, the message with the smallest summed distance to its ceil(n/2)-1 nearest others, with a slight tie-break in favour of self. The new state averages the messages close to that medoid: within twice the medoid's q-th nearest-neighbour distance, capped by an absolute bound on the simplex, which also protects nodes of degree 1.",
+  "src": "def aggregate(x_self, X_nb, t, T, state):\n    C = x_self.shape[-1]\n\n    def clean(X):\n        return np.nan_to_num(np.asarray(X, dtype=np.float64), nan=0.0, posinf=0.0, neginf=0.0)\n\n    def proj(X):\n        X = np.clip(X, 0.0, None)\n        s = X.sum(-1, keepdims=True)\n        return np.where(s > 1e-12, X / np.maximum(s, 1e-12), 1.0 / C)\n\n    R = clean(X_nb)\n    k = R.shape[0]\n    P = proj(R)\n    xs = proj(clean(x_self))\n    viol = np.concatenate([[0.0], np.abs(R - P).sum(-1).mean(1)])\n    Z = np.concatenate([xs[None], P], 0)\n    n = k + 1\n    Dm = np.abs(Z[:, None] - Z[None]).sum(-1).mean(-1)   # (n, n) mean row L1 in [0, 2]\n    Dm = Dm + 10.0 * (viol[:, None] + viol[None, :])\n    np.fill_diagonal(Dm, 0.0)\n    q = max(1, (n + 1) // 2 - 1)\n    score = np.sort(Dm, 1)[:, 1:q + 1].sum(1)\n    score[0] *= 0.9\n    med = int(np.argmin(score))\n    d = Dm[med]\n    radius = min(1.4, max(2.0 * float(np.sort(d)[q]), 0.05))\n    members = d <= radius\n    members[med] = True\n    return Z[members].mean(0)\n",
+  "file": "<repo>/design_runs/B/B1.4_ConsistentCore.py",
+  "design": {
+   "mean_acc": 0.8517749999999998,
+   "worst_acc": 0.7856249999999999,
+   "score": 0.8186999999999999,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.8465833333333332,
+    "gaussian": 0.8573749999999999,
+    "signflip": 0.8573749999999999,
+    "labelflip": 0.8401458333333333,
+    "alie": 0.8573958333333334
+   }
+  },
+  "val": {
+   "mean_acc": 0.8365979166666666,
+   "worst_acc": 0.6359375,
+   "score": 0.7362677083333333,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.81353125,
+    "gaussian": 0.8612604166666666,
+    "signflip": 0.8612604166666666,
+    "labelflip": 0.7856354166666666,
+    "alie": 0.8613020833333332
+   }
+  },
+  "error": null
+ },
+ {
+  "name": "B2.1_B2_1_TrustCore",
+  "round": 2,
+  "desc": "This combines the two strongest round-1 ideas. A Hellinger-distance medoid core (from ConsistentCore) gives each node a soft membership weight, and the core's weighted centre plus the node's own labels give an argmax-agreement test (from ReputationGossip). The product of these is kept as a reputation that drops at once and recovers slowly, and the output is a trust-weighted mean with a floor on the node's own weight.",
+  "src": "def aggregate(x_self, X_nb, t, T, state):\n    C = x_self.shape[-1]\n\n    def clean(X):\n        X = np.nan_to_num(np.asarray(X, dtype=np.float64), nan=0.0, posinf=0.0, neginf=0.0)\n        return np.clip(X, -1e6, 1e6)\n\n    def proj(X):\n        X = np.clip(X, 0.0, None)\n        s = X.sum(-1, keepdims=True)\n        return np.where(s > 1e-12, X / np.maximum(s, 1e-12), 1.0 / C)\n\n    R = clean(X_nb)\n    k = R.shape[0]\n    P = proj(R)\n    xs = proj(clean(x_self))\n    viol = np.abs(R - P).sum(-1).mean(1)\n    Z = np.concatenate([xs[None], P], 0)\n    n = k + 1\n    S = np.sqrt(Z)\n    H = np.sqrt(np.maximum(0.5 * ((S[:, None] - S[None]) ** 2).sum(-1), 0.0)).mean(-1)  # (n,n) in [0,1]\n    vv = np.concatenate([[0.0], viol])\n    Dm = H + 5.0 * (vv[:, None] + vv[None, :])\n    np.fill_diagonal(Dm, 0.0)\n    q = max(1, (n + 1) // 2 - 1)\n    sc = np.sort(Dm, 1)[:, 1:q + 1].mean(1)\n    sc[0] *= 0.9\n    med = int(np.argmin(sc))\n    d = Dm[med]\n    r = max(float(np.sort(d)[min(q, n - 1)]), 0.02)\n    w_core = 1.0 / (1.0 + (d / (2.0 * r)) ** 4)\n    w_core[med] = 1.0\n    center = (w_core[:, None, None] * Z).sum(0) / w_core.sum()\n    lab = Z.argmax(-1)\n    lab_c = center.argmax(-1)\n    lab_s = lab[0]\n    agree = 0.5 * ((lab == lab_c[None]).mean(1) + (lab == lab_s[None]).mean(1))\n    lo, hi = 2.5 / C, 5.0 / C\n    w_agree = np.clip((agree - lo) / (hi - lo), 0.0, 1.0)\n    w_new = (w_core * w_agree)[1:] * np.exp(-viol / 0.05)\n    prev = state.get('trust')\n    if prev is None or len(prev) != k:\n        trust = w_new\n    else:\n        trust = np.where(w_new < prev, w_new, 0.6 * prev + 0.4 * w_new)\n    state['trust'] = trust\n    w_self = max(0.5, float(w_core[0]))\n    out = (w_self * xs + (trust[:, None, None] * P).sum(0)) / (w_self + trust.sum())\n    return out\n",
+  "file": "<repo>/design_runs/B/B2.1_B2_1_TrustCore.py",
+  "design": {
+   "mean_acc": 0.8549833333333332,
+   "worst_acc": 0.8115625,
+   "score": 0.8332729166666666,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.8455833333333332,
+    "gaussian": 0.8572708333333333,
+    "signflip": 0.8572708333333333,
+    "labelflip": 0.8574583333333333,
+    "alie": 0.8573333333333334
+   }
+  },
+  "val": {
+   "mean_acc": 0.8378624999999998,
+   "worst_acc": 0.73475,
+   "score": 0.78630625,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.8117604166666667,
+    "gaussian": 0.8586770833333333,
+    "signflip": 0.8586770833333333,
+    "labelflip": 0.8016145833333334,
+    "alie": 0.8585833333333334
+   }
+  },
+  "error": null
+ },
+ {
+  "name": "B2.2_B2_2_EvidenceLedger",
+  "round": 2,
+  "desc": "This is a sequential-testing view of reputation. At each iteration, every neighbour is scored against the leave-one-out median of all the other messages, using both distance and argmax agreement (also checked against the node's own labels). The score is added to a per-neighbour log-evidence ledger, and trust is a sigmoid of that ledger. Bad evidence counts three times as much as good evidence, and good evidence is capped, so a neighbour that turns Byzantine late loses trust within one or two steps.",
+  "src": "def aggregate(x_self, X_nb, t, T, state):\n    C = x_self.shape[-1]\n\n    def clean(X):\n        X = np.nan_to_num(np.asarray(X, dtype=np.float64), nan=0.0, posinf=0.0, neginf=0.0)\n        return np.clip(X, -1e6, 1e6)\n\n    def proj(X):\n        X = np.clip(X, 0.0, None)\n        s = X.sum(-1, keepdims=True)\n        return np.where(s > 1e-12, X / np.maximum(s, 1e-12), 1.0 / C)\n\n    R = clean(X_nb)\n    k = R.shape[0]\n    P = proj(R)\n    xs = proj(clean(x_self))\n    viol = np.abs(R - P).sum(-1).mean(1)\n    Z = np.concatenate([xs[None], P], 0)\n    n = k + 1\n    lab = Z.argmax(-1)\n    d = np.empty(n)\n    a = np.empty(n)\n    for j in range(n):\n        c = np.median(np.delete(Z, j, 0), 0)\n        d[j] = np.abs(Z[j] - c).sum(-1).mean()\n        a[j] = (lab[j] == c.argmax(-1)).mean()\n    a_self = (lab == lab[0][None]).mean(1)\n    a = 0.5 * (a + a_self)\n    ref = max(float(np.median(d)), 0.02)\n    g_dist = np.clip(2.0 - d / ref, -1.0, 1.0)\n    g_agree = np.clip((a - 3.0 / C) / (2.0 / C), -1.0, 1.0)\n    g = np.minimum(g_dist, g_agree)[1:] - viol / 0.05\n    g = np.clip(g, -3.0, 1.0)\n    L = state.get('L')\n    if L is None or len(L) != k:\n        L = np.zeros(k)\n    L = np.clip(L + np.where(g < 0, 3.0 * g, g), -10.0, 4.0)\n    state['L'] = L\n    trust = 1.0 / (1.0 + np.exp(-3.0 * (L - 0.5)))\n    return (xs + (trust[:, None, None] * P).sum(0)) / (1.0 + trust.sum())\n",
+  "file": "<repo>/design_runs/B/B2.2_B2_2_EvidenceLedger.py",
+  "design": {
+   "mean_acc": 0.8541791666666667,
+   "worst_acc": 0.8118125,
+   "score": 0.8329958333333334,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.8462083333333333,
+    "gaussian": 0.8598333333333333,
+    "signflip": 0.8598958333333333,
+    "labelflip": 0.8510208333333334,
+    "alie": 0.8539375000000001
+   }
+  },
+  "val": {
+   "mean_acc": 0.8466937499999999,
+   "worst_acc": 0.73125,
+   "score": 0.7889718749999999,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.7908333333333334,
+    "gaussian": 0.8633541666666665,
+    "signflip": 0.8626354166666665,
+    "labelflip": 0.8625937499999999,
+    "alie": 0.8540520833333333
+   }
+  },
+  "error": null
+ },
+ {
+  "name": "B2.3_B2_3_TwoLevelRobustMean",
+  "round": 2,
+  "desc": "Robustness is applied at two levels. At the node level, a reputation (distance, agreement and simplex violation, with memory) decides how much each neighbour counts overall. At the sample level, each row's weight is also reduced smoothly by its L1 distance to the row-wise median, measured relative to that row's own spread. This keeps out subtle attacks that only change some rows, while a wide margin keeps confident honest minorities from being removed.",
+  "src": "def aggregate(x_self, X_nb, t, T, state):\n    C = x_self.shape[-1]\n\n    def clean(X):\n        X = np.nan_to_num(np.asarray(X, dtype=np.float64), nan=0.0, posinf=0.0, neginf=0.0)\n        return np.clip(X, -1e6, 1e6)\n\n    def proj(X):\n        X = np.clip(X, 0.0, None)\n        s = X.sum(-1, keepdims=True)\n        return np.where(s > 1e-12, X / np.maximum(s, 1e-12), 1.0 / C)\n\n    R = clean(X_nb)\n    k = R.shape[0]\n    P = proj(R)\n    xs = proj(clean(x_self))\n    viol = np.abs(R - P).sum(-1).mean(1)\n    Z = np.concatenate([xs[None], P], 0)\n    med = np.median(Z, 0)\n    drow = np.abs(Z - med[None]).sum(-1)              # (n, m)\n    dist = drow.mean(1)\n    d_ref = float(np.median(dist)) + 1e-3\n    w_dist = 1.0 / (1.0 + (dist / (2.0 * d_ref)) ** 4)\n    lab = Z.argmax(-1)\n    lab_c = med.argmax(-1)\n    agree = 0.5 * ((lab == lab_c[None]).mean(1) + (lab == lab[0][None]).mean(1))\n    w_agree = np.clip((agree - 2.5 / C) / (2.5 / C), 0.0, 1.0)\n    w_new = (w_dist * w_agree)[1:] * np.exp(-viol / 0.05)\n    prev = state.get('trust')\n    if prev is None or len(prev) != k:\n        trust = w_new\n    else:\n        trust = np.where(w_new < prev, w_new, 0.7 * prev + 0.3 * w_new)\n    state['trust'] = trust\n    tr = np.concatenate([[1.0], trust])\n    s = np.median(drow, 0) + 0.05                      # (m,)\n    u = 1.0 / (1.0 + (drow / (3.0 * s[None])) ** 2)\n    W = tr[:, None] * u\n    W[0] = np.maximum(W[0], 0.5)\n    return (W[:, :, None] * Z).sum(0) / W.sum(0)[:, None]\n",
+  "file": "<repo>/design_runs/B/B2.3_B2_3_TwoLevelRobustMean.py",
+  "design": {
+   "mean_acc": 0.8508708333333334,
+   "worst_acc": 0.7873749999999999,
+   "score": 0.8191229166666667,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.8449583333333334,
+    "gaussian": 0.8569583333333334,
+    "signflip": 0.85725,
+    "labelflip": 0.8413541666666666,
+    "alie": 0.8538333333333333
+   }
+  },
+  "val": {
+   "mean_acc": 0.8468666666666667,
+   "worst_acc": 0.7509375,
+   "score": 0.7989020833333333,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.8093541666666666,
+    "gaussian": 0.8639791666666667,
+    "signflip": 0.86375,
+    "labelflip": 0.8364375000000001,
+    "alie": 0.8608125000000001
+   }
+  },
+  "error": null
+ },
+ {
+  "name": "B2.4_B2_4_SemanticAlignment",
+  "round": 2,
+  "desc": "This adds a new test for class meaning. For each neighbour, the node builds the soft confusion matrix between that neighbour's predictions and a robust reference (half the node's own state, half the median). An honest neighbour uses the same class names, so each row of the matrix peaks on its diagonal. Any relabelling, permutation or mixing attack moves the mass off the diagonal, whatever form it takes. This alignment score is combined with distance and simplex-validity weights in a memory-based reputation. The node's own weight goes up or down with how well it agrees with its trusted neighbours, so honest nodes with noisy labels move toward the consensus.",
+  "src": "def aggregate(x_self, X_nb, t, T, state):\n    C = x_self.shape[-1]\n\n    def clean(X):\n        X = np.nan_to_num(np.asarray(X, dtype=np.float64), nan=0.0, posinf=0.0, neginf=0.0)\n        return np.clip(X, -1e6, 1e6)\n\n    def proj(X):\n        X = np.clip(X, 0.0, None)\n        s = X.sum(-1, keepdims=True)\n        return np.where(s > 1e-12, X / np.maximum(s, 1e-12), 1.0 / C)\n\n    R = clean(X_nb)\n    k = R.shape[0]\n    P = proj(R)\n    xs = proj(clean(x_self))\n    viol = np.abs(R - P).sum(-1).mean(1)\n    Z = np.concatenate([xs[None], P], 0)\n    center = np.median(Z, 0)\n    ref = 0.5 * (xs + center)\n    M = np.einsum('kmc,md->kcd', P, ref)               # (k, C, C) soft confusion\n    rowsum = M.sum(2)\n    diag = np.einsum('kcc->kc', M)\n    rmax = M.max(2)\n    ratio = diag / np.maximum(rmax, 1e-12)\n    mass = rowsum / np.maximum(rowsum.sum(1, keepdims=True), 1e-12)\n    align = (mass * ratio).sum(1)\n    w_align = np.clip((align - 0.4) / 0.4, 0.0, 1.0)\n    dist = np.abs(Z - center[None]).sum(-1).mean(1)\n    d_ref = float(np.median(dist)) + 1e-3\n    w_dist = 1.0 / (1.0 + (dist[1:] / (2.0 * d_ref)) ** 4)\n    w_new = w_align * w_dist * np.exp(-viol / 0.05)\n    prev = state.get('trust')\n    if prev is None or len(prev) != k:\n        trust = w_new\n    else:\n        trust = np.where(w_new < prev, w_new, 0.7 * prev + 0.3 * w_new)\n    state['trust'] = trust\n    tsum = float(trust.sum())\n    if tsum > 1e-6:\n        nb = (trust[:, None, None] * P).sum(0) / tsum\n        s_agree = float((xs.argmax(-1) == nb.argmax(-1)).mean())\n        w_self = 0.5 + 0.5 * s_agree\n    else:\n        w_self = 1.0\n    return (w_self * xs + (trust[:, None, None] * P).sum(0)) / (w_self + tsum)\n",
+  "file": "<repo>/design_runs/B/B2.4_B2_4_SemanticAlignment.py",
+  "design": {
+   "mean_acc": 0.8552166666666666,
+   "worst_acc": 0.8132499999999999,
+   "score": 0.8342333333333333,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.8481041666666668,
+    "gaussian": 0.8570416666666666,
+    "signflip": 0.8570000000000001,
+    "labelflip": 0.8577916666666666,
+    "alie": 0.8561458333333333
+   }
+  },
+  "val": {
+   "mean_acc": 0.8456375000000003,
+   "worst_acc": 0.750125,
+   "score": 0.7978812500000001,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.8054479166666667,
+    "gaussian": 0.8640729166666667,
+    "signflip": 0.86325,
+    "labelflip": 0.8366145833333333,
+    "alie": 0.8588020833333333
+   }
+  },
+  "error": null
+ },
+ {
+  "name": "B3.1_R3_1_ReliabilityCore",
+  "round": 3,
+  "desc": "TrustCore's Hellinger medoid core with viol-gating, plus a new step: each node's reliability is estimated as its argmax agreement with a *leave-one-out* core centre on the confident half of the samples. That agreement is turned into the optimal weighted-voting weight log(p(C-1)/(1-p)), normalised by the core median. Honest nodes with noisy labels are then down-weighted (including self), so consensus can do better than the uniform honest average, and Byzantine nodes are still gated out.",
+  "src": "def aggregate(x_self, X_nb, t, T, state):\n    C = x_self.shape[-1]\n\n    def clean(X):\n        X = np.nan_to_num(np.asarray(X, dtype=np.float64), nan=0.0, posinf=0.0, neginf=0.0)\n        return np.clip(X, -1e6, 1e6)\n\n    def proj(X):\n        X = np.clip(X, 0.0, None)\n        s = X.sum(-1, keepdims=True)\n        return np.where(s > 1e-12, X / np.maximum(s, 1e-12), 1.0 / C)\n\n    R = clean(X_nb)\n    k = R.shape[0]\n    P = proj(R)\n    xs = proj(clean(x_self))\n    viol = np.abs(R - P).sum(-1).mean(1)\n    Z = np.concatenate([xs[None], P], 0)\n    n = k + 1\n    S = np.sqrt(Z)\n    BC = np.einsum('imc,jmc->ijm', S, S)\n    H = np.sqrt(np.clip(1.0 - BC, 0.0, 1.0)).mean(-1)\n    vv = np.concatenate([[0.0], viol])\n    Dm = H + 5.0 * (vv[:, None] + vv[None, :])\n    np.fill_diagonal(Dm, 0.0)\n    q = max(1, (n + 1) // 2 - 1)\n    sc = np.sort(Dm, 1)[:, 1:q + 1].mean(1)\n    sc[0] *= 0.9\n    med = int(np.argmin(sc))\n    d = Dm[med]\n    r = max(float(np.sort(d)[min(q, n - 1)]), 0.02)\n    w_core = 1.0 / (1.0 + (d / (2.0 * r)) ** 4)\n    w_core[med] = 1.0\n    Wz = w_core[:, None, None] * Z\n    tot = Wz.sum(0)\n    wsum = float(w_core.sum())\n    center = tot / wsum\n    den = wsum - w_core\n    loo = np.where(den[:, None, None] > 1e-6,\n                   (tot[None] - Wz) / np.maximum(den, 1e-6)[:, None, None],\n                   center[None])\n    lab = Z.argmax(-1)\n    lab_l = loo.argmax(-1)\n    lab_c = center.argmax(-1)\n    srt = np.sort(center, -1)\n    marg = srt[:, -1] - srt[:, -2]\n    conf = marg >= np.median(marg)\n    nc = float(conf.sum())\n    hits = ((lab == lab_l) & conf[None]).sum(1).astype(np.float64)\n    p = (hits + 1.0) / (nc + 2.0)\n    lo = np.maximum(np.log(p * (C - 1) / np.maximum(1.0 - p, 1e-6)), 0.0)\n    members = w_core > 0.5\n    ref = max(float(np.median(lo[members])), 1e-6)\n    rel = np.clip(lo / ref, 0.0, 1.5)\n    agree = 0.5 * ((lab == lab_c[None]).mean(1) + (lab == lab[0][None]).mean(1))\n    w_agree = np.clip((agree - 2.5 / C) / (2.5 / C), 0.0, 1.0)\n    w_new = (w_core * w_agree * rel)[1:] * np.exp(-viol / 0.05)\n    prev = state.get('trust')\n    if prev is None or len(prev) != k:\n        trust = w_new\n    else:\n        trust = np.where(w_new < prev, w_new, 0.6 * prev + 0.4 * w_new)\n    state['trust'] = trust\n    w_self = max(0.5, float(w_core[0])) * float(np.clip(rel[0], 0.5, 1.5))\n    return (w_self * xs + (trust[:, None, None] * P).sum(0)) / (w_self + trust.sum())\n",
+  "file": "<repo>/design_runs/B/B3.1_R3_1_ReliabilityCore.py",
+  "design": {
+   "mean_acc": 0.8476000000000001,
+   "worst_acc": 0.7730625,
+   "score": 0.8103312500000001,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.8441458333333333,
+    "gaussian": 0.8527291666666666,
+    "signflip": 0.8527291666666666,
+    "labelflip": 0.8356458333333333,
+    "alie": 0.85275
+   }
+  },
+  "val": {
+   "mean_acc": 0.8324041666666666,
+   "worst_acc": 0.6906874999999999,
+   "score": 0.7615458333333333,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.7887916666666667,
+    "gaussian": 0.85778125,
+    "signflip": 0.85778125,
+    "labelflip": 0.7999166666666667,
+    "alie": 0.8577499999999999
+   }
+  },
+  "error": null
+ },
+ {
+  "name": "B3.2_R3_2_ClassConditionalReliability",
+  "round": 3,
+  "desc": "New idea for non-IID data: a node is usually reliable on the classes it trained on and unreliable on the others. After the robust core gate, I estimate each node's per-class recall against its leave-one-out centre, shrunk toward its overall accuracy, and convert it to per-class log-odds weights. Each sample is then weighted per node by those weights, taken in expectation under the centre's class distribution, so each sample listens to the nodes that are competent on its class.",
+  "src": "def aggregate(x_self, X_nb, t, T, state):\n    C = x_self.shape[-1]\n\n    def clean(X):\n        X = np.nan_to_num(np.asarray(X, dtype=np.float64), nan=0.0, posinf=0.0, neginf=0.0)\n        return np.clip(X, -1e6, 1e6)\n\n    def proj(X):\n        X = np.clip(X, 0.0, None)\n        s = X.sum(-1, keepdims=True)\n        return np.where(s > 1e-12, X / np.maximum(s, 1e-12), 1.0 / C)\n\n    R = clean(X_nb)\n    k = R.shape[0]\n    P = proj(R)\n    xs = proj(clean(x_self))\n    viol = np.abs(R - P).sum(-1).mean(1)\n    Z = np.concatenate([xs[None], P], 0)\n    n = k + 1\n    S = np.sqrt(Z)\n    BC = np.einsum('imc,jmc->ijm', S, S)\n    H = np.sqrt(np.clip(1.0 - BC, 0.0, 1.0)).mean(-1)\n    vv = np.concatenate([[0.0], viol])\n    Dm = H + 5.0 * (vv[:, None] + vv[None, :])\n    np.fill_diagonal(Dm, 0.0)\n    q = max(1, (n + 1) // 2 - 1)\n    sc = np.sort(Dm, 1)[:, 1:q + 1].mean(1)\n    sc[0] *= 0.9\n    med = int(np.argmin(sc))\n    d = Dm[med]\n    r = max(float(np.sort(d)[min(q, n - 1)]), 0.02)\n    w_core = 1.0 / (1.0 + (d / (2.0 * r)) ** 4)\n    w_core[med] = 1.0\n    Wz = w_core[:, None, None] * Z\n    tot = Wz.sum(0)\n    wsum = float(w_core.sum())\n    center = tot / wsum\n    den = wsum - w_core\n    loo = np.where(den[:, None, None] > 1e-6,\n                   (tot[None] - Wz) / np.maximum(den, 1e-6)[:, None, None],\n                   center[None])\n    lab = Z.argmax(-1)\n    lab_l = loo.argmax(-1)\n    lab_c = center.argmax(-1)\n    hitm = (lab == lab_l)\n    L = np.eye(C)[lab_l]                                   # (n, m, C)\n    cnt = L.sum(1)                                         # (n, C)\n    hit = (L * hitm[..., None]).sum(1)                     # (n, C)\n    pa = hitm.mean(1)\n    rc = (hit + 4.0 * pa[:, None]) / (cnt + 4.0)\n    rc = np.clip(rc, 1e-3, 1.0 - 1e-3)\n    lw = np.clip(np.log(rc * (C - 1) / (1.0 - rc)), 0.0, 6.0)   # (n, C)\n    u = (center @ lw.T).T                                  # (n, m)\n    members = w_core > 0.5\n    ref = max(float(np.median(u.mean(1)[members])), 1e-6)\n    u = np.clip(u / ref, 0.0, 2.0)\n    agree = 0.5 * ((lab == lab_c[None]).mean(1) + (lab == lab[0][None]).mean(1))\n    w_agree = np.clip((agree - 2.5 / C) / (2.5 / C), 0.0, 1.0)\n    w_new = (w_core * w_agree)[1:] * np.exp(-viol / 0.05)\n    prev = state.get('trust')\n    if prev is None or len(prev) != k:\n        trust = w_new\n    else:\n        trust = np.where(w_new < prev, w_new, 0.6 * prev + 0.4 * w_new)\n    state['trust'] = trust\n    g = np.concatenate([[max(0.5, float(w_core[0]))], trust])\n    W = g[:, None] * u\n    W[0] = np.maximum(W[0], 0.25)\n    return (W[:, :, None] * Z).sum(0) / W.sum(0)[:, None]\n",
+  "file": "<repo>/design_runs/B/B3.2_R3_2_ClassConditionalReliability.py",
+  "design": {
+   "mean_acc": 0.8541249999999998,
+   "worst_acc": 0.78975,
+   "score": 0.8219374999999999,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.8507916666666665,
+    "gaussian": 0.8592291666666666,
+    "signflip": 0.8592291666666666,
+    "labelflip": 0.8421249999999999,
+    "alie": 0.85925
+   }
+  },
+  "val": {
+   "mean_acc": 0.8419958333333336,
+   "worst_acc": 0.7415,
+   "score": 0.7917479166666668,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.81540625,
+    "gaussian": 0.8633020833333335,
+    "signflip": 0.8633020833333335,
+    "labelflip": 0.8047083333333335,
+    "alie": 0.8632604166666669
+   }
+  },
+  "error": null
+ },
+ {
+  "name": "B3.3_R3_3_SemanticAlignmentMomentum",
+  "round": 3,
+  "desc": "This keeps the best previous rule (soft-confusion semantic alignment, distance and validity gating, fast-down trust memory) and adds heavy-ball acceleration, x_{t+1} = A(x_t) + beta (x_t - x_{t-1}). With only T=10 gossip steps on a sparse graph, consensus is far from mixed, and momentum brings honest states closer to the network-wide honest average. Gating is applied before the momentum step, so Byzantine messages are not amplified.",
+  "src": "def aggregate(x_self, X_nb, t, T, state):\n    C = x_self.shape[-1]\n\n    def clean(X):\n        X = np.nan_to_num(np.asarray(X, dtype=np.float64), nan=0.0, posinf=0.0, neginf=0.0)\n        return np.clip(X, -1e6, 1e6)\n\n    def proj(X):\n        X = np.clip(X, 0.0, None)\n        s = X.sum(-1, keepdims=True)\n        return np.where(s > 1e-12, X / np.maximum(s, 1e-12), 1.0 / C)\n\n    R = clean(X_nb)\n    k = R.shape[0]\n    P = proj(R)\n    xs = proj(clean(x_self))\n    viol = np.abs(R - P).sum(-1).mean(1)\n    Z = np.concatenate([xs[None], P], 0)\n    center = np.median(Z, 0)\n    ref = 0.5 * (xs + center)\n    M = np.einsum('kmc,md->kcd', P, ref)\n    rowsum = M.sum(2)\n    diag = np.einsum('kcc->kc', M)\n    rmax = M.max(2)\n    ratio = diag / np.maximum(rmax, 1e-12)\n    mass = rowsum / np.maximum(rowsum.sum(1, keepdims=True), 1e-12)\n    align = (mass * ratio).sum(1)\n    w_align = np.clip((align - 0.4) / 0.4, 0.0, 1.0)\n    dist = np.abs(Z - center[None]).sum(-1).mean(1)\n    d_ref = float(np.median(dist)) + 1e-3\n    w_dist = 1.0 / (1.0 + (dist[1:] / (2.0 * d_ref)) ** 4)\n    w_new = w_align * w_dist * np.exp(-viol / 0.05)\n    prev = state.get('trust')\n    if prev is None or len(prev) != k:\n        trust = w_new\n    else:\n        trust = np.where(w_new < prev, w_new, 0.7 * prev + 0.3 * w_new)\n    state['trust'] = trust\n    tsum = float(trust.sum())\n    if tsum > 1e-6:\n        nb = (trust[:, None, None] * P).sum(0) / tsum\n        s_agree = float((xs.argmax(-1) == nb.argmax(-1)).mean())\n        w_self = 0.5 + 0.5 * s_agree\n    else:\n        w_self = 1.0\n    y = (w_self * xs + (trust[:, None, None] * P).sum(0)) / (w_self + tsum)\n    xp = state.get('x_prev')\n    if xp is not None and xp.shape == xs.shape and tsum > 1e-6:\n        beta = 0.3 if t < T - 1 else 0.15\n        y = y + beta * (xs - xp)\n    state['x_prev'] = xs.copy()\n    return proj(y)\n",
+  "file": "<repo>/design_runs/B/B3.3_R3_3_SemanticAlignmentMomentum.py",
+  "design": {
+   "mean_acc": 0.8510291666666665,
+   "worst_acc": 0.796125,
+   "score": 0.8235770833333332,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.8383125000000001,
+    "gaussian": 0.8576666666666667,
+    "signflip": 0.8569999999999999,
+    "labelflip": 0.8437708333333335,
+    "alie": 0.8583958333333334
+   }
+  },
+  "val": {
+   "mean_acc": 0.8358687499999999,
+   "worst_acc": 0.62325,
+   "score": 0.729559375,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.7546666666666666,
+    "gaussian": 0.8640520833333333,
+    "signflip": 0.8634479166666668,
+    "labelflip": 0.8368749999999999,
+    "alie": 0.8603020833333334
+   }
+  },
+  "error": null
+ },
+ {
+  "name": "B3.4_R3_4_LogLinearPooling",
+  "round": 3,
+  "desc": "The robust core gate and log-odds reliability weights are the same as in R3_1, but the fusion of the accepted messages changes: it is a 50/50 mix of linear pooling and reliability-weighted log-linear (geometric, product-of-experts) pooling with an epsilon floor. Geometric pooling counts a class as supported only when most trusted experts give it mass. This sharpens consensus on ambiguous samples and suppresses diffuse or stray mass from noisy-label nodes and any residual Byzantine leakage.",
+  "src": "def aggregate(x_self, X_nb, t, T, state):\n    C = x_self.shape[-1]\n\n    def clean(X):\n        X = np.nan_to_num(np.asarray(X, dtype=np.float64), nan=0.0, posinf=0.0, neginf=0.0)\n        return np.clip(X, -1e6, 1e6)\n\n    def proj(X):\n        X = np.clip(X, 0.0, None)\n        s = X.sum(-1, keepdims=True)\n        return np.where(s > 1e-12, X / np.maximum(s, 1e-12), 1.0 / C)\n\n    R = clean(X_nb)\n    k = R.shape[0]\n    P = proj(R)\n    xs = proj(clean(x_self))\n    viol = np.abs(R - P).sum(-1).mean(1)\n    Z = np.concatenate([xs[None], P], 0)\n    n = k + 1\n    S = np.sqrt(Z)\n    BC = np.einsum('imc,jmc->ijm', S, S)\n    H = np.sqrt(np.clip(1.0 - BC, 0.0, 1.0)).mean(-1)\n    vv = np.concatenate([[0.0], viol])\n    Dm = H + 5.0 * (vv[:, None] + vv[None, :])\n    np.fill_diagonal(Dm, 0.0)\n    q = max(1, (n + 1) // 2 - 1)\n    sc = np.sort(Dm, 1)[:, 1:q + 1].mean(1)\n    sc[0] *= 0.9\n    med = int(np.argmin(sc))\n    d = Dm[med]\n    r = max(float(np.sort(d)[min(q, n - 1)]), 0.02)\n    w_core = 1.0 / (1.0 + (d / (2.0 * r)) ** 4)\n    w_core[med] = 1.0\n    Wz = w_core[:, None, None] * Z\n    tot = Wz.sum(0)\n    wsum = float(w_core.sum())\n    center = tot / wsum\n    den = wsum - w_core\n    loo = np.where(den[:, None, None] > 1e-6,\n                   (tot[None] - Wz) / np.maximum(den, 1e-6)[:, None, None],\n                   center[None])\n    lab = Z.argmax(-1)\n    lab_l = loo.argmax(-1)\n    lab_c = center.argmax(-1)\n    srt = np.sort(center, -1)\n    marg = srt[:, -1] - srt[:, -2]\n    conf = marg >= np.median(marg)\n    nc = float(conf.sum())\n    hits = ((lab == lab_l) & conf[None]).sum(1).astype(np.float64)\n    p = (hits + 1.0) / (nc + 2.0)\n    lo = np.maximum(np.log(p * (C - 1) / np.maximum(1.0 - p, 1e-6)), 0.0)\n    members = w_core > 0.5\n    ref = max(float(np.median(lo[members])), 1e-6)\n    rel = np.clip(lo / ref, 0.0, 1.5)\n    agree = 0.5 * ((lab == lab_c[None]).mean(1) + (lab == lab[0][None]).mean(1))\n    w_agree = np.clip((agree - 2.5 / C) / (2.5 / C), 0.0, 1.0)\n    w_new = (w_core * w_agree * rel)[1:] * np.exp(-viol / 0.05)\n    prev = state.get('trust')\n    if prev is None or len(prev) != k:\n        trust = w_new\n    else:\n        trust = np.where(w_new < prev, w_new, 0.6 * prev + 0.4 * w_new)\n    state['trust'] = trust\n    w_self = max(0.5, float(w_core[0])) * float(np.clip(rel[0], 0.5, 1.5))\n    w = np.concatenate([[w_self], trust])\n    ws = float(w.sum())\n    lin = (w[:, None, None] * Z).sum(0) / ws\n    eps = 0.01\n    lg = (w[:, None, None] * np.log(Z + eps)).sum(0) / ws\n    lg = lg - lg.max(-1, keepdims=True)\n    geo = np.exp(lg)\n    geo = geo / geo.sum(-1, keepdims=True)\n    return proj(0.5 * lin + 0.5 * geo)\n",
+  "file": "<repo>/design_runs/B/B3.4_R3_4_LogLinearPooling.py",
+  "design": {
+   "mean_acc": 0.8443791666666667,
+   "worst_acc": 0.7620625000000001,
+   "score": 0.8032208333333334,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.8458958333333334,
+    "gaussian": 0.8482083333333333,
+    "signflip": 0.8482083333333333,
+    "labelflip": 0.8313125000000001,
+    "alie": 0.8482708333333333
+   }
+  },
+  "val": {
+   "mean_acc": 0.8315166666666667,
+   "worst_acc": 0.6723750000000001,
+   "score": 0.7519458333333333,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.7935,
+    "gaussian": 0.8553020833333335,
+    "signflip": 0.8553020833333335,
+    "labelflip": 0.7981666666666668,
+    "alie": 0.8553125000000001
+   }
+  },
+  "error": null
+ },
+ {
+  "name": "B4.1_R4_1_SemanticAlignmentRowClip",
+  "round": 4,
+  "desc": "Refines the best rule (SemanticAlignment): after t = 0 the alignment reference leans on the robust centre rather than on the node's own (possibly noisy-label) state, a node that disagrees with its trusted neighbourhood defers more (w_self down to 0.35), and a new per-sample (row-level) soft clipping stage down-weights a trusted neighbour only on the samples where it deviates strongly from the provisional consensus, which limits the damage of partially-malicious or time-varying neighbours.",
+  "src": "def aggregate(x_self, X_nb, t, T, state):\n    C = x_self.shape[-1]\n\n    def clean(X):\n        X = np.nan_to_num(np.asarray(X, dtype=np.float64), nan=0.0, posinf=0.0, neginf=0.0)\n        return np.clip(X, -1e6, 1e6)\n\n    def proj(X):\n        X = np.clip(X, 0.0, None)\n        s = X.sum(-1, keepdims=True)\n        return np.where(s > 1e-12, X / np.maximum(s, 1e-12), 1.0 / C)\n\n    R = clean(X_nb)\n    k = R.shape[0]\n    P = proj(R)\n    xs = proj(clean(x_self))\n    viol = np.abs(R - P).sum(-1).mean(1)\n    Z = np.concatenate([xs[None], P], 0)\n    center = proj(np.median(Z, 0))\n    a = 0.5 if t == 0 else 0.3\n    ref = a * xs + (1.0 - a) * center\n    M = np.einsum('kmc,md->kcd', P, ref)\n    rowsum = M.sum(2)\n    diag = np.einsum('kcc->kc', M)\n    rmax = M.max(2)\n    ratio = diag / np.maximum(rmax, 1e-12)\n    mass = rowsum / np.maximum(rowsum.sum(1, keepdims=True), 1e-12)\n    align = (mass * ratio).sum(1)\n    w_align = np.clip((align - 0.4) / 0.4, 0.0, 1.0)\n    dist = np.abs(Z - center[None]).sum(-1).mean(1)\n    d_ref = float(np.median(dist)) + 1e-3\n    w_dist = 1.0 / (1.0 + (dist[1:] / (2.0 * d_ref)) ** 4)\n    w_new = w_align * w_dist * np.exp(-viol / 0.05)\n    prev = state.get('trust')\n    if prev is None or len(prev) != k:\n        trust = w_new\n    else:\n        trust = np.where(w_new < prev, w_new, 0.7 * prev + 0.3 * w_new)\n    state['trust'] = trust\n    tsum = float(trust.sum())\n    if tsum <= 1e-6:\n        return xs\n    nb = (trust[:, None, None] * P).sum(0) / tsum\n    s_agree = float((xs.argmax(-1) == nb.argmax(-1)).mean())\n    w_self = 0.35 + 0.65 * s_agree\n    cons = (w_self * xs + tsum * nb) / (w_self + tsum)\n    rd = np.abs(P - cons[None]).sum(-1)                     # (k, m)\n    good = trust > 0.5\n    base = rd[good] if good.any() else rd\n    tau = 2.0 * float(np.median(base)) + 0.05\n    rw = np.minimum(1.0, tau / np.maximum(rd, 1e-12))\n    W = trust[:, None] * rw                                 # (k, m)\n    num = w_self * xs + (W[:, :, None] * P).sum(0)\n    den = w_self + W.sum(0)\n    return num / den[:, None]\n",
+  "file": "<repo>/design_runs/B/B4.1_R4_1_SemanticAlignmentRowClip.py",
+  "design": {
+   "mean_acc": 0.8548041666666666,
+   "worst_acc": 0.814,
+   "score": 0.8344020833333332,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.8481041666666665,
+    "gaussian": 0.8568958333333333,
+    "signflip": 0.8566874999999999,
+    "labelflip": 0.8574999999999999,
+    "alie": 0.8548333333333332
+   }
+  },
+  "val": {
+   "mean_acc": 0.8454520833333333,
+   "worst_acc": 0.7519375,
+   "score": 0.7986947916666667,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.8079479166666665,
+    "gaussian": 0.86321875,
+    "signflip": 0.8620312500000001,
+    "labelflip": 0.8363541666666666,
+    "alie": 0.8577083333333334
+   }
+  },
+  "error": null
+ },
+ {
+  "name": "B4.2_R4_2_CoreAlignmentFusion",
+  "round": 4,
+  "desc": "Combines the two strongest complementary signals: a Hellinger-medoid core (TrustCore) gives a geometric, collusion-resistant centre and radius-based weights, while the soft-confusion alignment score (SemanticAlignment) computed against that core detects semantically permuted or uninformative senders that may be geometrically close; the asymmetric (fast-down, slow-up) trust memory is kept.",
+  "src": "def aggregate(x_self, X_nb, t, T, state):\n    C = x_self.shape[-1]\n\n    def clean(X):\n        X = np.nan_to_num(np.asarray(X, dtype=np.float64), nan=0.0, posinf=0.0, neginf=0.0)\n        return np.clip(X, -1e6, 1e6)\n\n    def proj(X):\n        X = np.clip(X, 0.0, None)\n        s = X.sum(-1, keepdims=True)\n        return np.where(s > 1e-12, X / np.maximum(s, 1e-12), 1.0 / C)\n\n    R = clean(X_nb)\n    k = R.shape[0]\n    P = proj(R)\n    xs = proj(clean(x_self))\n    viol = np.abs(R - P).sum(-1).mean(1)\n    Z = np.concatenate([xs[None], P], 0)\n    n = k + 1\n    S = np.sqrt(Z)\n    BC = np.einsum('imc,jmc->ijm', S, S)\n    H = np.sqrt(np.clip(1.0 - BC, 0.0, 1.0)).mean(-1)\n    vv = np.concatenate([[0.0], viol])\n    Dm = H + 5.0 * (vv[:, None] + vv[None, :])\n    np.fill_diagonal(Dm, 0.0)\n    q = max(1, (n + 1) // 2 - 1)\n    sc = np.sort(Dm, 1)[:, 1:q + 1].mean(1)\n    sc[0] *= 0.9\n    med = int(np.argmin(sc))\n    d = Dm[med]\n    r = max(float(np.sort(d)[min(q, n - 1)]), 0.02)\n    w_core = 1.0 / (1.0 + (d / (2.0 * r)) ** 4)\n    w_core[med] = 1.0\n    center = (w_core[:, None, None] * Z).sum(0) / w_core.sum()\n    ref = 0.5 * (xs + center)\n    Mx = np.einsum('kmc,md->kcd', P, ref)\n    rowsum = Mx.sum(2)\n    diag = np.einsum('kcc->kc', Mx)\n    rmax = Mx.max(2)\n    ratio = diag / np.maximum(rmax, 1e-12)\n    mass = rowsum / np.maximum(rowsum.sum(1, keepdims=True), 1e-12)\n    align = (mass * ratio).sum(1)\n    w_align = np.clip((align - 0.4) / 0.4, 0.0, 1.0)\n    w_new = w_core[1:] * w_align * np.exp(-viol / 0.05)\n    prev = state.get('trust')\n    if prev is None or len(prev) != k:\n        trust = w_new\n    else:\n        trust = np.where(w_new < prev, w_new, 0.7 * prev + 0.3 * w_new)\n    state['trust'] = trust\n    tsum = float(trust.sum())\n    if tsum <= 1e-6:\n        return xs\n    nb = (trust[:, None, None] * P).sum(0) / tsum\n    s_agree = float((xs.argmax(-1) == nb.argmax(-1)).mean())\n    w_self = max(0.5, 0.5 * float(w_core[0]) + 0.5 * s_agree)\n    return (w_self * xs + (trust[:, None, None] * P).sum(0)) / (w_self + tsum)\n",
+  "file": "<repo>/design_runs/B/B4.2_R4_2_CoreAlignmentFusion.py",
+  "design": {
+   "mean_acc": 0.8555583333333331,
+   "worst_acc": 0.8119375,
+   "score": 0.8337479166666666,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.8459375000000001,
+    "gaussian": 0.8578958333333334,
+    "signflip": 0.8578958333333334,
+    "labelflip": 0.8581458333333334,
+    "alie": 0.8579166666666665
+   }
+  },
+  "val": {
+   "mean_acc": 0.8424458333333332,
+   "worst_acc": 0.7341249999999999,
+   "score": 0.7882854166666666,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.8126979166666666,
+    "gaussian": 0.8600625000000001,
+    "signflip": 0.8600625000000001,
+    "labelflip": 0.819375,
+    "alie": 0.8600312499999999
+   }
+  },
+  "error": null
+ },
+ {
+  "name": "B4.3_R4_3_PersonalizedPageRankTrust",
+  "round": 4,
+  "desc": "New idea: build an agreement graph over {self, neighbours} (chance-corrected argmax agreement times Hellinger affinity, with simplex-violation penalty) and score each neighbour by personalized PageRank restarted at the node itself. Trust then flows from the node through mutually consistent senders, so a colluding Byzantine clique that agrees internally but is weakly linked to the node's own view gets little mass, even when it is a local majority; the result is combined with direct affinity and the asymmetric trust memory.",
+  "src": "def aggregate(x_self, X_nb, t, T, state):\n    C = x_self.shape[-1]\n\n    def clean(X):\n        X = np.nan_to_num(np.asarray(X, dtype=np.float64), nan=0.0, posinf=0.0, neginf=0.0)\n        return np.clip(X, -1e6, 1e6)\n\n    def proj(X):\n        X = np.clip(X, 0.0, None)\n        s = X.sum(-1, keepdims=True)\n        return np.where(s > 1e-12, X / np.maximum(s, 1e-12), 1.0 / C)\n\n    R = clean(X_nb)\n    k = R.shape[0]\n    P = proj(R)\n    xs = proj(clean(x_self))\n    viol = np.abs(R - P).sum(-1).mean(1)\n    Z = np.concatenate([xs[None], P], 0)\n    n = k + 1\n    S = np.sqrt(Z)\n    BC = np.einsum('imc,jmc->ijm', S, S)\n    H = np.sqrt(np.clip(1.0 - BC, 0.0, 1.0)).mean(-1)\n    lab = Z.argmax(-1)\n    AG = (lab[:, None, :] == lab[None, :, :]).mean(-1)\n    kappa = np.clip((AG - 1.0 / C) / (1.0 - 1.0 / C), 0.0, 1.0)\n    vv = np.concatenate([[0.0], viol])\n    A = (kappa ** 2) * np.clip(1.0 - H, 0.0, 1.0) * np.exp(-(vv[:, None] + vv[None, :]) / 0.05)\n    np.fill_diagonal(A, 0.0)\n    rs = A.sum(1, keepdims=True)\n    Pm = np.where(rs > 1e-12, A / np.maximum(rs, 1e-12), 0.0)\n    alpha = 0.25\n    e0 = np.zeros(n)\n    e0[0] = 1.0\n    pi = e0.copy()\n    for _ in range(40):\n        nxt = alpha * e0 + (1.0 - alpha) * (pi @ Pm)\n        nxt[0] += max(0.0, 1.0 - float(nxt.sum()))\n        pi = nxt\n    r = pi[1:]\n    rmx = float(r.max()) if k > 0 else 0.0\n    if rmx <= 1e-12:\n        w_ppr = np.zeros(k)\n    else:\n        w_ppr = np.clip((r / rmx - 0.2) / 0.5, 0.0, 1.0)\n    a0 = A[0, 1:]\n    amx = float(a0.max()) if k > 0 else 0.0\n    if amx <= 1e-12:\n        w_dir = np.zeros(k)\n    else:\n        w_dir = np.clip(a0 / (0.6 * amx), 0.0, 1.0)\n    w_new = w_ppr * w_dir * np.exp(-viol / 0.05)\n    prev = state.get('trust')\n    if prev is None or len(prev) != k:\n        trust = w_new\n    else:\n        trust = np.where(w_new < prev, w_new, 0.7 * prev + 0.3 * w_new)\n    state['trust'] = trust\n    tsum = float(trust.sum())\n    if tsum <= 1e-6:\n        return xs\n    nb = (trust[:, None, None] * P).sum(0) / tsum\n    s_agree = float((xs.argmax(-1) == nb.argmax(-1)).mean())\n    w_self = 0.4 + 0.6 * s_agree\n    return (w_self * xs + (trust[:, None, None] * P).sum(0)) / (w_self + tsum)\n",
+  "file": "<repo>/design_runs/B/B4.3_R4_3_PersonalizedPageRankTrust.py",
+  "design": {
+   "mean_acc": 0.8486333333333332,
+   "worst_acc": 0.7866875,
+   "score": 0.8176604166666666,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.8219791666666666,
+    "gaussian": 0.8552708333333333,
+    "signflip": 0.8552708333333333,
+    "labelflip": 0.8552708333333333,
+    "alie": 0.855375
+   }
+  },
+  "val": {
+   "mean_acc": 0.8337791666666665,
+   "worst_acc": 0.60575,
+   "score": 0.7197645833333333,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.7266041666666666,
+    "gaussian": 0.8605625,
+    "signflip": 0.8605625,
+    "labelflip": 0.8605833333333334,
+    "alie": 0.8605833333333334
+   }
+  },
+  "error": null
+ },
+ {
+  "name": "B4.4_R4_4_OneCoinEMWeighting",
+  "round": 4,
+  "desc": "New idea grounded in crowdsourcing theory: treat every sender (self included) as a one-coin Dawid-Skene annotator, estimate its accuracy against a leave-one-out consensus by a few EM-style reweighting passes started from a self-anchored median, and weight it by the Bayes-optimal log-odds log(p(C-1)/(1-p)) minus a margin. Honest but noisy-label nodes are smoothly down-weighted (not rejected), which helps accuracy, while chance-level or permuted senders get zero weight. A fast-down/slow-up memory protects against senders that change behaviour.",
+  "src": "def aggregate(x_self, X_nb, t, T, state):\n    C = x_self.shape[-1]\n\n    def clean(X):\n        X = np.nan_to_num(np.asarray(X, dtype=np.float64), nan=0.0, posinf=0.0, neginf=0.0)\n        return np.clip(X, -1e6, 1e6)\n\n    def proj(X):\n        X = np.clip(X, 0.0, None)\n        s = X.sum(-1, keepdims=True)\n        return np.where(s > 1e-12, X / np.maximum(s, 1e-12), 1.0 / C)\n\n    R = clean(X_nb)\n    k = R.shape[0]\n    P = proj(R)\n    xs = proj(clean(x_self))\n    viol = np.abs(R - P).sum(-1).mean(1)\n    Z = np.concatenate([xs[None], P], 0)\n    n = k + 1\n    m = Z.shape[1]\n    gate = np.exp(-np.concatenate([[0.0], viol]) / 0.05)\n    lab = Z.argmax(-1)\n    y0 = proj(0.5 * xs + 0.5 * np.median(Z, 0))\n    w = gate.copy()\n    for it in range(4):\n        if it == 0:\n            ref_lab = np.broadcast_to(y0.argmax(-1), (n, m))\n        else:\n            Wz = w[:, None, None] * Z\n            tot = Wz.sum(0)\n            ws = float(w.sum())\n            den = ws - w\n            loo = np.where(den[:, None, None] > 1e-6,\n                           (tot[None] - Wz) / np.maximum(den, 1e-6)[:, None, None],\n                           y0[None])\n            ref_lab = loo.argmax(-1)\n        p = (lab == ref_lab).mean(1)\n        p = (p * m + 1.0) / (m + 2.0)\n        p = np.clip(p, 1e-3, 1.0 - 1e-3)\n        lw = np.clip(np.log(p * (C - 1) / (1.0 - p)), 0.0, 8.0)\n        w = np.clip(lw - 1.5, 0.0, None) * gate\n        w[0] = max(w[0], 0.5 * float(np.median(w)), 1e-3)\n    wmax = float(w.max())\n    wn = w / max(wmax, 1e-12)\n    w_new = wn[1:]\n    prev = state.get('trust')\n    if prev is None or len(prev) != k:\n        trust = w_new\n    else:\n        trust = np.where(w_new < prev, w_new, 0.7 * prev + 0.3 * w_new)\n    state['trust'] = trust\n    tsum = float(trust.sum())\n    if tsum <= 1e-6:\n        return xs\n    w_self = max(0.4, float(wn[0]))\n    return (w_self * xs + (trust[:, None, None] * P).sum(0)) / (w_self + tsum)\n",
+  "file": "<repo>/design_runs/B/B4.4_R4_4_OneCoinEMWeighting.py",
+  "design": {
+   "mean_acc": 0.8449541666666669,
+   "worst_acc": 0.786375,
+   "score": 0.8156645833333335,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.8245416666666667,
+    "gaussian": 0.8501875,
+    "signflip": 0.8502083333333333,
+    "labelflip": 0.8501458333333334,
+    "alie": 0.8496874999999999
+   }
+  },
+  "val": {
+   "mean_acc": 0.8330979166666664,
+   "worst_acc": 0.6026875,
+   "score": 0.7178927083333333,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.72321875,
+    "gaussian": 0.8606354166666667,
+    "signflip": 0.8605104166666666,
+    "labelflip": 0.8605833333333331,
+    "alie": 0.8605416666666666
+   }
+  },
+  "error": null
+ },
+ {
+  "name": "B5.1_R5_1_QualityWeightedRowClip",
+  "round": 5,
+  "desc": "This keeps the strongest rule so far (B4.1: semantic-alignment gate, distance gate, monotone trust and row-wise clipping) and adds a continuous *reliability* weight. The gates only decide whether a neighbour is admitted. The new weight also favours cleaner honest neighbours: it is an EMA of how often each neighbour's argmax agrees with the trusted consensus. Noisy-label honest nodes therefore get less weight, without needing a hard threshold.",
+  "src": "def aggregate(x_self, X_nb, t, T, state):\n    C = x_self.shape[-1]\n\n    def clean(X):\n        X = np.nan_to_num(np.asarray(X, dtype=np.float64), nan=0.0, posinf=0.0, neginf=0.0)\n        return np.clip(X, -1e6, 1e6)\n\n    def proj(X):\n        X = np.clip(X, 0.0, None)\n        s = X.sum(-1, keepdims=True)\n        return np.where(s > 1e-12, X / np.maximum(s, 1e-12), 1.0 / C)\n\n    R = clean(X_nb)\n    k = R.shape[0]\n    P = proj(R)\n    xs = proj(clean(x_self))\n    viol = np.abs(R - P).sum(-1).mean(1)\n    Z = np.concatenate([xs[None], P], 0)\n    center = proj(np.median(Z, 0))\n    a = 0.5 if t == 0 else 0.3\n    ref = a * xs + (1.0 - a) * center\n    M = np.einsum('kmc,md->kcd', P, ref)\n    rowsum = M.sum(2)\n    diag = np.einsum('kcc->kc', M)\n    ratio = diag / np.maximum(M.max(2), 1e-12)\n    mass = rowsum / np.maximum(rowsum.sum(1, keepdims=True), 1e-12)\n    align = (mass * ratio).sum(1)\n    w_align = np.clip((align - 0.4) / 0.4, 0.0, 1.0)\n    dist = np.abs(Z - center[None]).sum(-1).mean(1)\n    d_ref = float(np.median(dist)) + 1e-3\n    w_dist = 1.0 / (1.0 + (dist[1:] / (2.0 * d_ref)) ** 4)\n    w_new = w_align * w_dist * np.exp(-viol / 0.05)\n    prev = state.get('trust')\n    if prev is None or len(prev) != k:\n        trust = w_new\n    else:\n        trust = np.where(w_new < prev, w_new, 0.7 * prev + 0.3 * w_new)\n    state['trust'] = trust\n    tsum = float(trust.sum())\n    if tsum <= 1e-6:\n        return xs\n    nb = (trust[:, None, None] * P).sum(0) / tsum\n    lab_nb = nb.argmax(-1)\n    s_agree = float((xs.argmax(-1) == lab_nb).mean())\n    # reliability: agreement with trusted consensus, smoothed over time\n    q_now = (P.argmax(-1) == lab_nb[None]).mean(1)\n    good = trust > 0.5\n    q_top = float(np.max(q_now[good])) if good.any() else float(np.max(q_now))\n    q_rel = np.clip(q_now / max(q_top, 1e-3), 0.0, 1.0)\n    qp = state.get('qual')\n    if qp is None or len(qp) != k:\n        qual = q_rel\n    else:\n        qual = 0.6 * qp + 0.4 * q_rel\n    state['qual'] = qual\n    rel = 0.4 + 0.6 * qual ** 2\n    w_self = 0.35 + 0.65 * s_agree\n    wt = trust * rel\n    wsum = float(wt.sum())\n    cons = (w_self * xs + (wt[:, None, None] * P).sum(0)) / (w_self + wsum)\n    rd = np.abs(P - cons[None]).sum(-1)\n    base = rd[good] if good.any() else rd\n    tau = 2.0 * float(np.median(base)) + 0.05\n    rw = np.minimum(1.0, tau / np.maximum(rd, 1e-12))\n    W = wt[:, None] * rw\n    num = w_self * xs + (W[:, :, None] * P).sum(0)\n    den = w_self + W.sum(0)\n    return num / den[:, None]\n",
+  "file": "<repo>/design_runs/B/B5.1_R5_1_QualityWeightedRowClip.py",
+  "design": {
+   "mean_acc": 0.8516166666666667,
+   "worst_acc": 0.8083125,
+   "score": 0.8299645833333333,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.8436875,
+    "gaussian": 0.8536041666666666,
+    "signflip": 0.8553333333333333,
+    "labelflip": 0.8544791666666667,
+    "alie": 0.8509791666666667
+   }
+  },
+  "val": {
+   "mean_acc": 0.84199375,
+   "worst_acc": 0.7134375,
+   "score": 0.7777156249999999,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.7973333333333333,
+    "gaussian": 0.8617291666666667,
+    "signflip": 0.8613333333333334,
+    "labelflip": 0.83425,
+    "alie": 0.8553229166666666
+   }
+  },
+  "error": null
+ },
+ {
+  "name": "B5.2_R5_2_OverRelaxedTrustGossip",
+  "round": 5,
+  "desc": "This is the new idea. Trust filtering already removes most Byzantine influence, so most of the remaining gap to the oracle comes from slow mixing on a sparse graph within 10 iterations. Each node applies successive over-relaxation, x <- x + omega*(agg - x) with omega = 1.5, to its own robust update. On a lazy gossip operator (eigenvalues in [0,1]) this stays stable and shrinks the slow modes faster. It is switched off at t = 0, when trust is still unreliable, and at the last step. The output is projected back onto the simplex.",
+  "src": "def aggregate(x_self, X_nb, t, T, state):\n    C = x_self.shape[-1]\n\n    def clean(X):\n        X = np.nan_to_num(np.asarray(X, dtype=np.float64), nan=0.0, posinf=0.0, neginf=0.0)\n        return np.clip(X, -1e6, 1e6)\n\n    def proj(X):\n        X = np.clip(X, 0.0, None)\n        s = X.sum(-1, keepdims=True)\n        return np.where(s > 1e-12, X / np.maximum(s, 1e-12), 1.0 / C)\n\n    R = clean(X_nb)\n    k = R.shape[0]\n    P = proj(R)\n    xs = proj(clean(x_self))\n    viol = np.abs(R - P).sum(-1).mean(1)\n    Z = np.concatenate([xs[None], P], 0)\n    center = proj(np.median(Z, 0))\n    a = 0.5 if t == 0 else 0.3\n    ref = a * xs + (1.0 - a) * center\n    M = np.einsum('kmc,md->kcd', P, ref)\n    rowsum = M.sum(2)\n    diag = np.einsum('kcc->kc', M)\n    ratio = diag / np.maximum(M.max(2), 1e-12)\n    mass = rowsum / np.maximum(rowsum.sum(1, keepdims=True), 1e-12)\n    align = (mass * ratio).sum(1)\n    w_align = np.clip((align - 0.4) / 0.4, 0.0, 1.0)\n    dist = np.abs(Z - center[None]).sum(-1).mean(1)\n    d_ref = float(np.median(dist)) + 1e-3\n    w_dist = 1.0 / (1.0 + (dist[1:] / (2.0 * d_ref)) ** 4)\n    w_new = w_align * w_dist * np.exp(-viol / 0.05)\n    prev = state.get('trust')\n    if prev is None or len(prev) != k:\n        trust = w_new\n    else:\n        trust = np.where(w_new < prev, w_new, 0.7 * prev + 0.3 * w_new)\n    state['trust'] = trust\n    tsum = float(trust.sum())\n    if tsum <= 1e-6:\n        return xs\n    nb = (trust[:, None, None] * P).sum(0) / tsum\n    s_agree = float((xs.argmax(-1) == nb.argmax(-1)).mean())\n    w_self = 0.35 + 0.65 * s_agree\n    cons = (w_self * xs + tsum * nb) / (w_self + tsum)\n    rd = np.abs(P - cons[None]).sum(-1)\n    good = trust > 0.5\n    base = rd[good] if good.any() else rd\n    tau = 2.0 * float(np.median(base)) + 0.05\n    rw = np.minimum(1.0, tau / np.maximum(rd, 1e-12))\n    W = trust[:, None] * rw\n    num = w_self * xs + (W[:, :, None] * P).sum(0)\n    den = w_self + W.sum(0)\n    agg = num / den[:, None]\n    if 1 <= t <= T - 2 and good.any():\n        omega = 1.5\n        agg = proj(xs + omega * (agg - xs))\n    return agg\n",
+  "file": "<repo>/design_runs/B/B5.2_R5_2_OverRelaxedTrustGossip.py",
+  "design": {
+   "mean_acc": 0.8329833333333333,
+   "worst_acc": 0.729375,
+   "score": 0.7811791666666666,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.8344999999999999,
+    "gaussian": 0.8343124999999999,
+    "signflip": 0.8360416666666667,
+    "labelflip": 0.8165625,
+    "alie": 0.8435
+   }
+  },
+  "val": {
+   "mean_acc": 0.8338854166666665,
+   "worst_acc": 0.6290625000000001,
+   "score": 0.7314739583333333,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.7709270833333334,
+    "gaussian": 0.8558645833333333,
+    "signflip": 0.8576562500000001,
+    "labelflip": 0.8270729166666667,
+    "alie": 0.8579062500000001
+   }
+  },
+  "error": null
+ },
+ {
+  "name": "B5.3_R5_3_CoreHybridOpinionPool",
+  "round": 5,
+  "desc": "This uses the trust mechanism from B4.2: a Hellinger medoid core, a semantic-alignment gate and monotone trust. The fusion step changes to an equal mix of linear and log-linear (geometric) opinion pooling. The geometric pool gives extra weight to classes that the trusted peers *jointly* support. This helps argmax accuracy when individual knowledge is weak, as in the early FL snapshot that sets the worst case, while the linear half keeps averaging efficient. Probabilities are floored at 1e-4 so that no single peer can veto a class.",
+  "src": "def aggregate(x_self, X_nb, t, T, state):\n    C = x_self.shape[-1]\n\n    def clean(X):\n        X = np.nan_to_num(np.asarray(X, dtype=np.float64), nan=0.0, posinf=0.0, neginf=0.0)\n        return np.clip(X, -1e6, 1e6)\n\n    def proj(X):\n        X = np.clip(X, 0.0, None)\n        s = X.sum(-1, keepdims=True)\n        return np.where(s > 1e-12, X / np.maximum(s, 1e-12), 1.0 / C)\n\n    R = clean(X_nb)\n    k = R.shape[0]\n    P = proj(R)\n    xs = proj(clean(x_self))\n    viol = np.abs(R - P).sum(-1).mean(1)\n    Z = np.concatenate([xs[None], P], 0)\n    n = k + 1\n    S = np.sqrt(Z)\n    BC = np.einsum('imc,jmc->ijm', S, S)\n    H = np.sqrt(np.clip(1.0 - BC, 0.0, 1.0)).mean(-1)\n    vv = np.concatenate([[0.0], viol])\n    Dm = H + 5.0 * (vv[:, None] + vv[None, :])\n    np.fill_diagonal(Dm, 0.0)\n    q = max(1, (n + 1) // 2 - 1)\n    sc = np.sort(Dm, 1)[:, 1:q + 1].mean(1)\n    sc[0] *= 0.9\n    med = int(np.argmin(sc))\n    d = Dm[med]\n    r = max(float(np.sort(d)[min(q, n - 1)]), 0.02)\n    w_core = 1.0 / (1.0 + (d / (2.0 * r)) ** 4)\n    w_core[med] = 1.0\n    center = (w_core[:, None, None] * Z).sum(0) / w_core.sum()\n    ref = 0.5 * (xs + center)\n    Mx = np.einsum('kmc,md->kcd', P, ref)\n    rowsum = Mx.sum(2)\n    diag = np.einsum('kcc->kc', Mx)\n    ratio = diag / np.maximum(Mx.max(2), 1e-12)\n    mass = rowsum / np.maximum(rowsum.sum(1, keepdims=True), 1e-12)\n    align = (mass * ratio).sum(1)\n    w_align = np.clip((align - 0.4) / 0.4, 0.0, 1.0)\n    w_new = w_core[1:] * w_align * np.exp(-viol / 0.05)\n    prev = state.get('trust')\n    if prev is None or len(prev) != k:\n        trust = w_new\n    else:\n        trust = np.where(w_new < prev, w_new, 0.7 * prev + 0.3 * w_new)\n    state['trust'] = trust\n    tsum = float(trust.sum())\n    if tsum <= 1e-6:\n        return xs\n    nb = (trust[:, None, None] * P).sum(0) / tsum\n    s_agree = float((xs.argmax(-1) == nb.argmax(-1)).mean())\n    w_self = max(0.5, 0.5 * float(w_core[0]) + 0.5 * s_agree)\n    wall = np.concatenate([[w_self], trust])\n    wsum = float(wall.sum())\n    lin = (wall[:, None, None] * Z).sum(0) / wsum\n    L = np.log(np.maximum(Z, 1e-4))\n    g = (wall[:, None, None] * L).sum(0) / wsum\n    g = g - g.max(-1, keepdims=True)\n    geo = np.exp(g)\n    geo = geo / np.maximum(geo.sum(-1, keepdims=True), 1e-12)\n    return 0.5 * lin + 0.5 * geo\n",
+  "file": "<repo>/design_runs/B/B5.3_R5_3_CoreHybridOpinionPool.py",
+  "design": {
+   "mean_acc": 0.8406875000000001,
+   "worst_acc": 0.79175,
+   "score": 0.81621875,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.8392291666666667,
+    "gaussian": 0.8411874999999999,
+    "signflip": 0.8411874999999999,
+    "labelflip": 0.8406249999999998,
+    "alie": 0.8412083333333333
+   }
+  },
+  "val": {
+   "mean_acc": 0.8376187500000001,
+   "worst_acc": 0.70825,
+   "score": 0.7729343750000001,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.7919791666666667,
+    "gaussian": 0.8555208333333333,
+    "signflip": 0.8555208333333333,
+    "labelflip": 0.8295729166666667,
+    "alie": 0.8555
+   }
+  },
+  "error": null
+ },
+ {
+  "name": "B5.4_R5_4_TrustPriorRowHuberIRLS",
+  "round": 5,
+  "desc": "This keeps B2.4's semantic-alignment trust, used as a prior weight per neighbour. Instead of B4.1's single clipping step, it computes a per-sample (row-wise) Huber M-estimate in total-variation distance by iteratively reweighted least squares (IRLS), 3 iterations, with the node's own row as an anchor. A colluding attacker that survives the gate can then shift each sample's estimate by only a bounded amount, set by tau, while consistent honest rows keep their full weight. A slow-decaying EMA of each neighbour's agreement with the robust output also adjusts its trust over time.",
+  "src": "def aggregate(x_self, X_nb, t, T, state):\n    C = x_self.shape[-1]\n\n    def clean(X):\n        X = np.nan_to_num(np.asarray(X, dtype=np.float64), nan=0.0, posinf=0.0, neginf=0.0)\n        return np.clip(X, -1e6, 1e6)\n\n    def proj(X):\n        X = np.clip(X, 0.0, None)\n        s = X.sum(-1, keepdims=True)\n        return np.where(s > 1e-12, X / np.maximum(s, 1e-12), 1.0 / C)\n\n    R = clean(X_nb)\n    k = R.shape[0]\n    P = proj(R)\n    xs = proj(clean(x_self))\n    viol = np.abs(R - P).sum(-1).mean(1)\n    Z = np.concatenate([xs[None], P], 0)\n    center = np.median(Z, 0)\n    ref = 0.5 * (xs + center)\n    M = np.einsum('kmc,md->kcd', P, ref)\n    rowsum = M.sum(2)\n    diag = np.einsum('kcc->kc', M)\n    ratio = diag / np.maximum(M.max(2), 1e-12)\n    mass = rowsum / np.maximum(rowsum.sum(1, keepdims=True), 1e-12)\n    align = (mass * ratio).sum(1)\n    w_align = np.clip((align - 0.4) / 0.4, 0.0, 1.0)\n    dist = np.abs(Z - center[None]).sum(-1).mean(1)\n    d_ref = float(np.median(dist)) + 1e-3\n    w_dist = 1.0 / (1.0 + (dist[1:] / (2.0 * d_ref)) ** 4)\n    w_new = w_align * w_dist * np.exp(-viol / 0.05)\n    prev = state.get('trust')\n    if prev is None or len(prev) != k:\n        trust = w_new\n    else:\n        trust = np.where(w_new < prev, w_new, 0.7 * prev + 0.3 * w_new)\n    state['trust'] = trust\n    rep = state.get('rep')\n    if rep is None or len(rep) != k:\n        rep = np.ones(k)\n    prior = trust * (0.5 + 0.5 * rep)\n    psum = float(prior.sum())\n    if psum <= 1e-6:\n        return xs\n    nb = (prior[:, None, None] * P).sum(0) / psum\n    s_agree = float((xs.argmax(-1) == nb.argmax(-1)).mean())\n    w_self = 0.4 + 0.6 * s_agree\n    y = (w_self * xs + psum * nb) / (w_self + psum)\n    good = trust > 0.5\n    for _ in range(3):\n        rd = np.abs(P - y[None]).sum(-1)                  # (k, m)\n        base = rd[good] if good.any() else rd\n        tau = 2.0 * float(np.median(base)) + 0.05\n        hw = np.minimum(1.0, tau / np.maximum(rd, 1e-12))\n        W = prior[:, None] * hw\n        y = (w_self * xs + (W[:, :, None] * P).sum(0)) / (w_self + W.sum(0))[:, None]\n    agr = (P.argmax(-1) == y.argmax(-1)[None]).mean(1)\n    top = float(np.max(agr[good])) if good.any() else float(np.max(agr))\n    rel = np.clip(agr / max(top, 1e-3), 0.0, 1.0)\n    state['rep'] = 0.7 * rep + 0.3 * rel\n    return y\n",
+  "file": "<repo>/design_runs/B/B5.4_R5_4_TrustPriorRowHuberIRLS.py",
+  "design": {
+   "mean_acc": 0.8539833333333333,
+   "worst_acc": 0.8123749999999998,
+   "score": 0.8331791666666666,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.8476458333333333,
+    "gaussian": 0.8560625000000001,
+    "signflip": 0.8562291666666667,
+    "labelflip": 0.8565416666666666,
+    "alie": 0.8534375
+   }
+  },
+  "val": {
+   "mean_acc": 0.8455354166666667,
+   "worst_acc": 0.7506875,
+   "score": 0.7981114583333333,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.8098541666666667,
+    "gaussian": 0.8630625,
+    "signflip": 0.8618645833333333,
+    "labelflip": 0.8357708333333332,
+    "alie": 0.857125
+   }
+  },
+  "error": null
+ },
+ {
+  "name": "B6.1_TemporalStepTrustRowClip",
+  "round": 6,
+  "desc": "Refines the best rule (B4.1) with a temporal check. Honest gossip is a contraction, so each honest neighbour's message changes smoothly and by about the same amount as everyone else's from one iteration to the next. A neighbour whose step size is far above the robust median step (for example one that switches behaviour, or sends fresh noise) loses trust. The distance gate also tightens gradually over time, so a neighbour that never converges toward the consensus loses weight in late iterations.",
+  "src": "def aggregate(x_self, X_nb, t, T, state):\n    C = x_self.shape[-1]\n\n    def clean(X):\n        X = np.nan_to_num(np.asarray(X, dtype=np.float64), nan=0.0, posinf=0.0, neginf=0.0)\n        return np.clip(X, -1e6, 1e6)\n\n    def proj(X):\n        X = np.clip(X, 0.0, None)\n        s = X.sum(-1, keepdims=True)\n        return np.where(s > 1e-12, X / np.maximum(s, 1e-12), 1.0 / C)\n\n    R = clean(X_nb)\n    k = R.shape[0]\n    P = proj(R)\n    xs = proj(clean(x_self))\n    viol = np.abs(R - P).sum(-1).mean(1)\n    Z = np.concatenate([xs[None], P], 0)\n    center = proj(np.median(Z, 0))\n    a = 0.5 if t == 0 else 0.3\n    ref = a * xs + (1.0 - a) * center\n    M = np.einsum('kmc,md->kcd', P, ref)\n    rowsum = M.sum(2)\n    diag = np.einsum('kcc->kc', M)\n    ratio = diag / np.maximum(M.max(2), 1e-12)\n    mass = rowsum / np.maximum(rowsum.sum(1, keepdims=True), 1e-12)\n    align = (mass * ratio).sum(1)\n    w_align = np.clip((align - 0.4) / 0.4, 0.0, 1.0)\n    dist = np.abs(Z - center[None]).sum(-1).mean(1)\n    d_ref = float(np.median(dist)) + 1e-3\n    cf = 2.0 - 0.6 * t / max(T - 1, 1)\n    w_dist = 1.0 / (1.0 + (dist[1:] / (cf * d_ref)) ** 4)\n    w_new = w_align * w_dist * np.exp(-viol / 0.05)\n    prevP = state.get('prevP')\n    prevx = state.get('prevx')\n    if prevP is not None and prevP.shape == P.shape and prevx is not None:\n        step = np.abs(P - prevP).sum(-1).mean(1)\n        sstep = float(np.abs(xs - prevx).sum(-1).mean())\n        s_ref = float(np.median(np.concatenate([[sstep], step]))) + 0.02\n        w_temp = 1.0 / (1.0 + (step / (3.0 * s_ref)) ** 4)\n        w_new = w_new * w_temp\n    state['prevP'] = P.copy()\n    state['prevx'] = xs.copy()\n    prev = state.get('trust')\n    if prev is None or len(prev) != k:\n        trust = w_new\n    else:\n        trust = np.where(w_new < prev, w_new, 0.7 * prev + 0.3 * w_new)\n    state['trust'] = trust\n    tsum = float(trust.sum())\n    if tsum <= 1e-6:\n        return xs\n    nb = (trust[:, None, None] * P).sum(0) / tsum\n    s_agree = float((xs.argmax(-1) == nb.argmax(-1)).mean())\n    w_self = 0.35 + 0.65 * s_agree\n    cons = (w_self * xs + tsum * nb) / (w_self + tsum)\n    rd = np.abs(P - cons[None]).sum(-1)\n    good = trust > 0.5\n    base = rd[good] if good.any() else rd\n    tau = 2.0 * float(np.median(base)) + 0.05\n    rw = np.minimum(1.0, tau / np.maximum(rd, 1e-12))\n    W = trust[:, None] * rw\n    num = w_self * xs + (W[:, :, None] * P).sum(0)\n    den = w_self + W.sum(0)\n    return num / den[:, None]\n",
+  "file": "<repo>/design_runs/B/B6.1_TemporalStepTrustRowClip.py",
+  "design": {
+   "mean_acc": 0.8535125,
+   "worst_acc": 0.812375,
+   "score": 0.83294375,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.8470833333333333,
+    "gaussian": 0.8554999999999998,
+    "signflip": 0.8568333333333333,
+    "labelflip": 0.8552083333333332,
+    "alie": 0.8529375
+   }
+  },
+  "val": {
+   "mean_acc": 0.8454583333333333,
+   "worst_acc": 0.7503124999999999,
+   "score": 0.7978854166666667,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.8089270833333332,
+    "gaussian": 0.8631979166666667,
+    "signflip": 0.8618333333333333,
+    "labelflip": 0.8356979166666667,
+    "alie": 0.8576354166666667
+   }
+  },
+  "error": null
+ },
+ {
+  "name": "B6.2_ClassConditionalReliability",
+  "round": 6,
+  "desc": "New idea for non-IID data. Each node is reliable on some classes and not others. From the soft confusion of each neighbour against the robust consensus we estimate a per-class precision (smoothed toward a prior). Each row of a neighbour's message is then weighted by that neighbour's relative precision on the class it predicts for that row, so a neighbour counts where it is competent and counts less elsewhere. This works on top of B4.1's trust gating and row clipping, and the node applies the same rule to its own message.",
+  "src": "def aggregate(x_self, X_nb, t, T, state):\n    C = x_self.shape[-1]\n\n    def clean(X):\n        X = np.nan_to_num(np.asarray(X, dtype=np.float64), nan=0.0, posinf=0.0, neginf=0.0)\n        return np.clip(X, -1e6, 1e6)\n\n    def proj(X):\n        X = np.clip(X, 0.0, None)\n        s = X.sum(-1, keepdims=True)\n        return np.where(s > 1e-12, X / np.maximum(s, 1e-12), 1.0 / C)\n\n    R = clean(X_nb)\n    k = R.shape[0]\n    P = proj(R)\n    xs = proj(clean(x_self))\n    viol = np.abs(R - P).sum(-1).mean(1)\n    Z = np.concatenate([xs[None], P], 0)\n    center = proj(np.median(Z, 0))\n    a = 0.5 if t == 0 else 0.3\n    ref = a * xs + (1.0 - a) * center\n    M = np.einsum('kmc,md->kcd', P, ref)\n    rowsum = M.sum(2)\n    diag = np.einsum('kcc->kc', M)\n    ratio = diag / np.maximum(M.max(2), 1e-12)\n    mass = rowsum / np.maximum(rowsum.sum(1, keepdims=True), 1e-12)\n    align = (mass * ratio).sum(1)\n    w_align = np.clip((align - 0.4) / 0.4, 0.0, 1.0)\n    dist = np.abs(Z - center[None]).sum(-1).mean(1)\n    d_ref = float(np.median(dist)) + 1e-3\n    w_dist = 1.0 / (1.0 + (dist[1:] / (2.0 * d_ref)) ** 4)\n    w_new = w_align * w_dist * np.exp(-viol / 0.05)\n    prev = state.get('trust')\n    if prev is None or len(prev) != k:\n        trust = w_new\n    else:\n        trust = np.where(w_new < prev, w_new, 0.7 * prev + 0.3 * w_new)\n    state['trust'] = trust\n    tsum = float(trust.sum())\n    if tsum <= 1e-6:\n        return xs\n    nb = (trust[:, None, None] * P).sum(0) / tsum\n    s_agree = float((xs.argmax(-1) == nb.argmax(-1)).mean())\n    w_self = 0.35 + 0.65 * s_agree\n    cons = (w_self * xs + tsum * nb) / (w_self + tsum)\n    # class-conditional precision against consensus (self judged against neighbours only)\n    pc, p0 = 5.0, 0.8\n    Mc = np.einsum('kmc,md->kcd', P, cons)\n    prec = (np.einsum('kcc->kc', Mc) + pc * p0) / (Mc.sum(2) + pc)          # (k, C)\n    Ms = np.einsum('mc,md->cd', xs, nb)\n    prec_s = (np.diag(Ms) + pc * p0) / (Ms.sum(1) + pc)                     # (C,)\n    allp = np.concatenate([prec_s[None], prec], 0)\n    allw = np.concatenate([[w_self], trust])\n    pref = (allw[:, None] * allp).sum(0) / max(float(allw.sum()), 1e-12)\n    rel = np.clip(allp / np.maximum(pref[None], 1e-3), 0.3, 1.7)            # (k+1, C)\n    f = np.einsum('kmc,kc->km', Z, rel)                                     # (k+1, m)\n    fs, fn = f[0], f[1:]\n    rd = np.abs(P - cons[None]).sum(-1)\n    good = trust > 0.5\n    base = rd[good] if good.any() else rd\n    tau = 2.0 * float(np.median(base)) + 0.05\n    rw = np.minimum(1.0, tau / np.maximum(rd, 1e-12))\n    W = trust[:, None] * rw * fn\n    ws = w_self * fs\n    num = ws[:, None] * xs + (W[:, :, None] * P).sum(0)\n    den = ws + W.sum(0)\n    return num / np.maximum(den, 1e-12)[:, None]\n",
+  "file": "<repo>/design_runs/B/B6.2_ClassConditionalReliability.py",
+  "design": {
+   "mean_acc": 0.8437166666666667,
+   "worst_acc": 0.7676875,
+   "score": 0.8057020833333333,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.8406041666666666,
+    "gaussian": 0.8494166666666666,
+    "signflip": 0.8490833333333333,
+    "labelflip": 0.8334166666666668,
+    "alie": 0.8460624999999999
+   }
+  },
+  "val": {
+   "mean_acc": 0.8384624999999999,
+   "worst_acc": 0.70825,
+   "score": 0.77335625,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.79396875,
+    "gaussian": 0.8573541666666666,
+    "signflip": 0.85890625,
+    "labelflip": 0.8309375,
+    "alie": 0.8511458333333333
+   }
+  },
+  "error": null
+ },
+ {
+  "name": "B6.3_RobustDawidSkeneFusion",
+  "round": 6,
+  "desc": "New idea that treats the neighbourhood as a crowd of annotators. Starting from the B4.1 robust linear consensus, it runs two EM steps of a trust-weighted, tempered Dawid\u2013Skene model. Each trusted source (self plus neighbours) gets a smoothed confusion matrix against the current latent labels, and a row's posterior combines the sources' averaged soft log-likelihoods with a class prior. A neighbour that is systematically confused is then partly corrected instead of only being down-weighted. The output is half posterior and half the robust linear pool, so the state stays calibrated and the gossip stays stable.",
+  "src": "def aggregate(x_self, X_nb, t, T, state):\n    C = x_self.shape[-1]\n\n    def clean(X):\n        X = np.nan_to_num(np.asarray(X, dtype=np.float64), nan=0.0, posinf=0.0, neginf=0.0)\n        return np.clip(X, -1e6, 1e6)\n\n    def proj(X):\n        X = np.clip(X, 0.0, None)\n        s = X.sum(-1, keepdims=True)\n        return np.where(s > 1e-12, X / np.maximum(s, 1e-12), 1.0 / C)\n\n    R = clean(X_nb)\n    k = R.shape[0]\n    P = proj(R)\n    xs = proj(clean(x_self))\n    viol = np.abs(R - P).sum(-1).mean(1)\n    Z = np.concatenate([xs[None], P], 0)\n    center = proj(np.median(Z, 0))\n    a = 0.5 if t == 0 else 0.3\n    ref = a * xs + (1.0 - a) * center\n    M = np.einsum('kmc,md->kcd', P, ref)\n    rowsum = M.sum(2)\n    diag = np.einsum('kcc->kc', M)\n    ratio = diag / np.maximum(M.max(2), 1e-12)\n    mass = rowsum / np.maximum(rowsum.sum(1, keepdims=True), 1e-12)\n    align = (mass * ratio).sum(1)\n    w_align = np.clip((align - 0.4) / 0.4, 0.0, 1.0)\n    dist = np.abs(Z - center[None]).sum(-1).mean(1)\n    d_ref = float(np.median(dist)) + 1e-3\n    w_dist = 1.0 / (1.0 + (dist[1:] / (2.0 * d_ref)) ** 4)\n    w_new = w_align * w_dist * np.exp(-viol / 0.05)\n    prev = state.get('trust')\n    if prev is None or len(prev) != k:\n        trust = w_new\n    else:\n        trust = np.where(w_new < prev, w_new, 0.7 * prev + 0.3 * w_new)\n    state['trust'] = trust\n    tsum = float(trust.sum())\n    if tsum <= 1e-6:\n        return xs\n    nb = (trust[:, None, None] * P).sum(0) / tsum\n    s_agree = float((xs.argmax(-1) == nb.argmax(-1)).mean())\n    w_self = 0.35 + 0.65 * s_agree\n    cons = (w_self * xs + tsum * nb) / (w_self + tsum)\n    rd = np.abs(P - cons[None]).sum(-1)\n    good = trust > 0.5\n    base = rd[good] if good.any() else rd\n    tau = 2.0 * float(np.median(base)) + 0.05\n    rw = np.minimum(1.0, tau / np.maximum(rd, 1e-12))\n    W = trust[:, None] * rw\n    num = w_self * xs + (W[:, :, None] * P).sum(0)\n    den = w_self + W.sum(0)\n    y_lin = num / den[:, None]\n    # trust-weighted tempered Dawid-Skene refinement\n    act = trust > 0.05\n    A = np.concatenate([xs[None], P[act]], 0)                       # (a, m, C)\n    wa = np.concatenate([[w_self], trust[act]])\n    wsum = float(wa.sum())\n    eye = np.eye(C)\n    q = y_lin\n    for _ in range(2):\n        Cm = np.einsum('mc,amd->acd', q, A) + 2.0 * eye[None] + 0.2\n        Cm = Cm / Cm.sum(2, keepdims=True)\n        L = np.einsum('amd,acd->amc', A, np.log(Cm))                # (a, m, C)\n        prior = q.mean(0) + 1e-3\n        S = (wa[:, None, None] * L).sum(0) / wsum + 0.5 * np.log(prior / prior.sum())[None]\n        S = S - S.max(1, keepdims=True)\n        E = np.exp(S)\n        q = E / E.sum(1, keepdims=True)\n    return 0.5 * y_lin + 0.5 * q\n",
+  "file": "<repo>/design_runs/B/B6.3_RobustDawidSkeneFusion.py",
+  "design": {
+   "mean_acc": 0.7412000000000002,
+   "worst_acc": 0.65225,
+   "score": 0.696725,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.7525416666666667,
+    "gaussian": 0.7315833333333334,
+    "signflip": 0.7437083333333335,
+    "labelflip": 0.7316666666666668,
+    "alie": 0.7465
+   }
+  },
+  "val": {
+   "mean_acc": 0.7940458333333335,
+   "worst_acc": 0.566,
+   "score": 0.6800229166666667,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.7228229166666665,
+    "gaussian": 0.8228958333333333,
+    "signflip": 0.8182395833333332,
+    "labelflip": 0.7966354166666666,
+    "alie": 0.8096354166666666
+   }
+  },
+  "error": null
+ },
+ {
+  "name": "B6.4_AnnealedMixingHuberIRLS",
+  "round": 6,
+  "desc": "Combines B4.1's single-pass row clip with B5.4's iterative Huber refinement, but drops the reputation term that did not help. It adds annealed mixing: the self-weight shrinks as t grows, so a node that has already filtered its neighbours mixes faster with them in later iterations, moving it closer to the honest-average oracle on sparse graphs. Meanwhile the distance gate tightens over time, which bounds the extra exposure to attackers.",
+  "src": "def aggregate(x_self, X_nb, t, T, state):\n    C = x_self.shape[-1]\n\n    def clean(X):\n        X = np.nan_to_num(np.asarray(X, dtype=np.float64), nan=0.0, posinf=0.0, neginf=0.0)\n        return np.clip(X, -1e6, 1e6)\n\n    def proj(X):\n        X = np.clip(X, 0.0, None)\n        s = X.sum(-1, keepdims=True)\n        return np.where(s > 1e-12, X / np.maximum(s, 1e-12), 1.0 / C)\n\n    R = clean(X_nb)\n    k = R.shape[0]\n    P = proj(R)\n    xs = proj(clean(x_self))\n    viol = np.abs(R - P).sum(-1).mean(1)\n    Z = np.concatenate([xs[None], P], 0)\n    center = proj(np.median(Z, 0))\n    a = 0.5 if t == 0 else 0.3\n    ref = a * xs + (1.0 - a) * center\n    M = np.einsum('kmc,md->kcd', P, ref)\n    rowsum = M.sum(2)\n    diag = np.einsum('kcc->kc', M)\n    ratio = diag / np.maximum(M.max(2), 1e-12)\n    mass = rowsum / np.maximum(rowsum.sum(1, keepdims=True), 1e-12)\n    align = (mass * ratio).sum(1)\n    w_align = np.clip((align - 0.4) / 0.4, 0.0, 1.0)\n    dist = np.abs(Z - center[None]).sum(-1).mean(1)\n    d_ref = float(np.median(dist)) + 1e-3\n    prog = t / max(T - 1, 1)\n    cf = 2.0 - 0.5 * prog\n    w_dist = 1.0 / (1.0 + (dist[1:] / (cf * d_ref)) ** 4)\n    w_new = w_align * w_dist * np.exp(-viol / 0.05)\n    prev = state.get('trust')\n    if prev is None or len(prev) != k:\n        trust = w_new\n    else:\n        trust = np.where(w_new < prev, w_new, 0.7 * prev + 0.3 * w_new)\n    state['trust'] = trust\n    tsum = float(trust.sum())\n    if tsum <= 1e-6:\n        return xs\n    nb = (trust[:, None, None] * P).sum(0) / tsum\n    s_agree = float((xs.argmax(-1) == nb.argmax(-1)).mean())\n    w_self = (0.35 + 0.65 * s_agree) * (1.0 - 0.4 * prog)\n    y = (w_self * xs + tsum * nb) / (w_self + tsum)\n    good = trust > 0.5\n    for _ in range(2):\n        rd = np.abs(P - y[None]).sum(-1)\n        base = rd[good] if good.any() else rd\n        tau = 2.0 * float(np.median(base)) + 0.05\n        rw = np.minimum(1.0, tau / np.maximum(rd, 1e-12))\n        W = trust[:, None] * rw\n        y = (w_self * xs + (W[:, :, None] * P).sum(0)) / (w_self + W.sum(0))[:, None]\n    return y\n",
+  "file": "<repo>/design_runs/B/B6.4_AnnealedMixingHuberIRLS.py",
+  "design": {
+   "mean_acc": 0.8537375,
+   "worst_acc": 0.8123125,
+   "score": 0.833025,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.8476875,
+    "gaussian": 0.8554583333333333,
+    "signflip": 0.8564583333333333,
+    "labelflip": 0.8558125,
+    "alie": 0.8532708333333332
+   }
+  },
+  "val": {
+   "mean_acc": 0.84559375,
+   "worst_acc": 0.7515625,
+   "score": 0.798578125,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.8102395833333333,
+    "gaussian": 0.8630729166666669,
+    "signflip": 0.8616562499999999,
+    "labelflip": 0.8360729166666667,
+    "alie": 0.8569270833333332
+   }
+  },
+  "error": null
+ }
+]

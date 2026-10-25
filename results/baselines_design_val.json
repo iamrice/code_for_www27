@@ -1,0 +1,4218 @@
+{
+ "Mean": {
+  "summary": {
+   "mean_acc": 0.37632708333333337,
+   "worst_acc": 0.0050625,
+   "score": 0.1906947916666667,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.7240416666666666,
+    "gaussian": 0.20576041666666667,
+    "signflip": 0.06659375,
+    "labelflip": 0.022572916666666665,
+    "alie": 0.8626666666666666
+   }
+  },
+  "rows": [
+   {
+    "scenario": [
+     "fmnist",
+     1,
+     "none",
+     "er",
+     0.2,
+     "random",
+     1
+    ],
+    "ok": true,
+    "acc": 0.60875,
+    "disagree": 0.02789211865740674,
+    "oracle_acc": 0.851,
+    "local_acc": 0.5814375,
+    "time": 0.01304006576538086
+   },
+   {
+    "scenario": [
+     "fmnist",
+     1,
+     "none",
+     "er",
+     0.2,
+     "random",
+     2
+    ],
+    "ok": true,
+    "acc": 0.6693125,
+    "disagree": 0.07464940975319166,
+    "oracle_acc": 0.844,
+    "local_acc": 0.579375,
+    "time": 0.011158943176269531
+   },
+   {
+    "scenario": [
+     "fmnist",
+     1,
+     "gaussian",
+     "er",
+     0.2,
+     "random",
+     1
+    ],
+    "ok": true,
+    "acc": 0.2276875,
+    "disagree": 0.44278500605870497,
+    "oracle_acc": 0.851,
+    "local_acc": 0.5814375,
+    "time": 0.018612146377563477
+   },
+   {
+    "scenario": [
+     "fmnist",
+     1,
+     "gaussian",
+     "er",
+     0.2,
+     "random",
+     2
+    ],
+    "ok": true,
+    "acc": 0.131875,
+    "disagree": 0.5062593775466964,
+    "oracle_acc": 0.844,
+    "local_acc": 0.579375,
+    "time": 0.01921701431274414
+   },
+   {
+    "scenario": [
+     "fmnist",
+     1,
+     "signflip",
+     "er",
+     0.2,
+     "random",
+     1
+    ],
+    "ok": true,
+    "acc": 0.23475000000000001,
+    "disagree": 0.0880764102935142,
+    "oracle_acc": 0.851,
+    "local_acc": 0.5814375,
+    "time": 0.013684988021850586
+   },
+   {
+    "scenario": [
+     "fmnist",
+     1,
+     "signflip",
+     "er",
+     0.2,
+     "random",
+     2
+    ],
+    "ok": true,
+    "acc": 0.008125,
+    "disagree": 0.11303166701618662,
+    "oracle_acc": 0.844,
+    "local_acc": 0.579375,
+    "time": 0.011373758316040039
+   },
+   {
+    "scenario": [
+     "fmnist",
+     1,
+     "labelflip",
+     "er",
+     0.2,
+     "random",
+     1
+    ],
+    "ok": true,
+    "acc": 0.0055625,
+    "disagree": 0.04550291992962319,
+    "oracle_acc": 0.851,
+    "local_acc": 0.5814375,
+    "time": 0.013750076293945312
+   },
+   {
+    "scenario": [
+     "fmnist",
+     1,
+     "labelflip",
+     "er",
+     0.2,
+     "random",
+     2
+    ],
+    "ok": true,
+    "acc": 0.0463125,
+    "disagree": 0.08109746499952389,
+    "oracle_acc": 0.844,
+    "local_acc": 0.579375,
+    "time": 0.011734962463378906
+   },
+   {
+    "scenario": [
+     "fmnist",
+     1,
+     "alie",
+     "er",
+     0.2,
+     "random",
+     1
+    ],
+    "ok": true,
+    "acc": 0.843,
+    "disagree": 0.005211093804915525,
+    "oracle_acc": 0.851,
+    "local_acc": 0.5814375,
+    "time": 0.02553701400756836
+   },
+   {
+    "scenario": [
+     "fmnist",
+     1,
+     "alie",
+     "er",
+     0.2,
+     "random",
+     2
+    ],
+    "ok": true,
+    "acc": 0.8373125,
+    "disagree": 0.011261739938918904,
+    "oracle_acc": 0.844,
+    "local_acc": 0.579375,
+    "time": 0.029198884963989258
+   },
+   {
+    "scenario": [
+     "fmnist",
+     4,
+     "none",
+     "er",
+     0.2,
+     "random",
+     1
+    ],
+    "ok": true,
+    "acc": 0.7174375,
+    "disagree": 0.022722587844553527,
+    "oracle_acc": 0.86,
+    "local_acc": 0.7022499999999999,
+    "time": 0.01324915885925293
+   },
+   {
+    "scenario": [
+     "fmnist",
+     4,
+     "none",
+     "er",
+     0.2,
+     "random",
+     2
+    ],
+    "ok": true,
+    "acc": 0.740375,
+    "disagree": 0.0720131902056269,
+    "oracle_acc": 0.869,
+    "local_acc": 0.7090624999999999,
+    "time": 0.008294820785522461
+   },
+   {
+    "scenario": [
+     "fmnist",
+     4,
+     "gaussian",
+     "er",
+     0.2,
+     "random",
+     1
+    ],
+    "ok": true,
+    "acc": 0.26868749999999997,
+    "disagree": 0.4406013642788638,
+    "oracle_acc": 0.86,
+    "local_acc": 0.7022499999999999,
+    "time": 0.0189969539642334
+   },
+   {
+    "scenario": [
+     "fmnist",
+     4,
+     "gaussian",
+     "er",
+     0.2,
+     "random",
+     2
+    ],
+    "ok": true,
+    "acc": 0.14087500000000003,
+    "disagree": 0.5055411584906203,
+    "oracle_acc": 0.869,
+    "local_acc": 0.7090624999999999,
+    "time": 0.019724130630493164
+   },
+   {
+    "scenario": [
+     "fmnist",
+     4,
+     "signflip",
+     "er",
+     0.2,
+     "random",
+     1
+    ],
+    "ok": true,
+    "acc": 0.0991875,
+    "disagree": 0.11939435395859516,
+    "oracle_acc": 0.86,
+    "local_acc": 0.7022499999999999,
+    "time": 0.01098322868347168
+   },
+   {
+    "scenario": [
+     "fmnist",
+     4,
+     "signflip",
+     "er",
+     0.2,
+     "random",
+     2
+    ],
+    "ok": true,
+    "acc": 0.0050625,
+    "disagree": 0.12334665378751035,
+    "oracle_acc": 0.869,
+    "local_acc": 0.7090624999999999,
+    "time": 0.014274835586547852
+   },
+   {
+    "scenario": [
+     "fmnist",
+     4,
+     "labelflip",
+     "er",
+     0.2,
+     "random",
+     1
+    ],
+    "ok": true,
+    "acc": 0.0146875,
+    "disagree": 0.04327297818120591,
+    "oracle_acc": 0.86,
+    "local_acc": 0.7022499999999999,
+    "time": 0.014365911483764648
+   },
+   {
+    "scenario": [
+     "fmnist",
+     4,
+     "labelflip",
+     "er",
+     0.2,
+     "random",
+     2
+    ],
+    "ok": true,
+    "acc": 0.02525,
+    "disagree": 0.08002446459292346,
+    "oracle_acc": 0.869,
+    "local_acc": 0.7090624999999999,
+    "time": 0.012878179550170898
+   },
+   {
+    "scenario": [
+     "fmnist",
+     4,
+     "alie",
+     "er",
+     0.2,
+     "random",
+     1
+    ],
+    "ok": true,
+    "acc": 0.8691249999999999,
+    "disagree": 0.0036876494828794633,
+    "oracle_acc": 0.86,
+    "local_acc": 0.7022499999999999,
+    "time": 0.02753901481628418
+   },
+   {
+    "scenario": [
+     "fmnist",
+     4,
+     "alie",
+     "er",
+     0.2,
+     "random",
+     2
+    ],
+    "ok": true,
+    "acc": 0.8681249999999999,
+    "disagree": 0.008008013004426454,
+    "oracle_acc": 0.869,
+    "local_acc": 0.7090624999999999,
+    "time": 0.03602313995361328
+   },
+   {
+    "scenario": [
+     "fmnist",
+     10,
+     "none",
+     "er",
+     0.2,
+     "random",
+     1
+    ],
+    "ok": true,
+    "acc": 0.8117500000000001,
+    "disagree": 0.01660690565919839,
+    "oracle_acc": 0.879,
+    "local_acc": 0.7844375,
+    "time": 0.010887861251831055
+   },
+   {
+    "scenario": [
+     "fmnist",
+     10,
+     "none",
+     "er",
+     0.2,
+     "random",
+     2
+    ],
+    "ok": true,
+    "acc": 0.7966249999999999,
+    "disagree": 0.04504267449907867,
+    "oracle_acc": 0.881,
+    "local_acc": 0.791875,
+    "time": 0.014271974563598633
+   },
+   {
+    "scenario": [
+     "fmnist",
+     10,
+     "gaussian",
+     "er",
+     0.2,
+     "random",
+     1
+    ],
+    "ok": true,
+    "acc": 0.3131875,
+    "disagree": 0.4381141866897299,
+    "oracle_acc": 0.879,
+    "local_acc": 0.7844375,
+    "time": 0.0190887451171875
+   },
+   {
+    "scenario": [
+     "fmnist",
+     10,
+     "gaussian",
+     "er",
+     0.2,
+     "random",
+     2
+    ],
+    "ok": true,
+    "acc": 0.15225,
+    "disagree": 0.504741043875999,
+    "oracle_acc": 0.881,
+    "local_acc": 0.791875,
+    "time": 0.0209200382232666
+   },
+   {
+    "scenario": [
+     "fmnist",
+     10,
+     "signflip",
+     "er",
+     0.2,
+     "random",
+     1
+    ],
+    "ok": true,
+    "acc": 0.0336875,
+    "disagree": 0.13112153136585394,
+    "oracle_acc": 0.879,
+    "local_acc": 0.7844375,
+    "time": 0.009616851806640625
+   },
+   {
+    "scenario": [
+     "fmnist",
+     10,
+     "signflip",
+     "er",
+     0.2,
+     "random",
+     2
+    ],
+    "ok": true,
+    "acc": 0.018750000000000003,
+    "disagree": 0.14441358326103232,
+    "oracle_acc": 0.881,
+    "local_acc": 0.791875,
+    "time": 0.020416975021362305
+   },
+   {
+    "scenario": [
+     "fmnist",
+     10,
+     "labelflip",
+     "er",
+     0.2,
+     "random",
+     1
+    ],
+    "ok": true,
+    "acc": 0.019375000000000003,
+    "disagree": 0.04274855252788578,
+    "oracle_acc": 0.879,
+    "local_acc": 0.7844375,
+    "time": 0.014603853225708008
+   },
+   {
+    "scenario": [
+     "fmnist",
+     10,
+     "labelflip",
+     "er",
+     0.2,
+     "random",
+     2
+    ],
+    "ok": true,
+    "acc": 0.02425,
+    "disagree": 0.05456376691390153,
+    "oracle_acc": 0.881,
+    "local_acc": 0.791875,
+    "time": 0.01528024673461914
+   },
+   {
+    "scenario": [
+     "fmnist",
+     10,
+     "alie",
+     "er",
+     0.2,
+     "random",
+     1
+    ],
+    "ok": true,
+    "acc": 0.877,
+    "disagree": 0.002750292292747371,
+    "oracle_acc": 0.879,
+    "local_acc": 0.7844375,
+    "time": 0.019304990768432617
+   },
+   {
+    "scenario": [
+     "fmnist",
+     10,
+     "alie",
+     "er",
+     0.2,
+     "random",
+     2
+    ],
+    "ok": true,
+    "acc": 0.8814375,
+    "disagree": 0.006371756545358174,
+    "oracle_acc": 0.881,
+    "local_acc": 0.791875,
+    "time": 0.022565841674804688
+   }
+  ]
+ },
+ "CW-Median": {
+  "summary": {
+   "mean_acc": 0.8171791666666667,
+   "worst_acc": 0.6771875,
+   "score": 0.7471833333333333,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.8133645833333333,
+    "gaussian": 0.82796875,
+    "signflip": 0.8150104166666666,
+    "labelflip": 0.78025,
+    "alie": 0.8493020833333332
+   }
+  },
+  "rows": [
+   {
+    "scenario": [
+     "fmnist",
+     1,
+     "none",
+     "er",
+     0.2,
+     "random",
+     1
+    ],
+    "ok": true,
+    "acc": 0.7674375,
+    "disagree": 0.048810072347691656,
+    "oracle_acc": 0.851,
+    "local_acc": 0.5814375,
+    "time": 0.12204599380493164
+   },
+   {
+    "scenario": [
+     "fmnist",
+     1,
+     "none",
+     "er",
+     0.2,
+     "random",
+     2
+    ],
+    "ok": true,
+    "acc": 0.76375,
+    "disagree": 0.08576238150509372,
+    "oracle_acc": 0.844,
+    "local_acc": 0.579375,
+    "time": 0.14034581184387207
+   },
+   {
+    "scenario": [
+     "fmnist",
+     1,
+     "gaussian",
+     "er",
+     0.2,
+     "random",
+     1
+    ],
+    "ok": true,
+    "acc": 0.790875,
+    "disagree": 0.08775966343228497,
+    "oracle_acc": 0.851,
+    "local_acc": 0.5814375,
+    "time": 0.1461796760559082
+   },
+   {
+    "scenario": [
+     "fmnist",
+     1,
+     "gaussian",
+     "er",
+     0.2,
+     "random",
+     2
+    ],
+    "ok": true,
+    "acc": 0.7928124999999999,
+    "disagree": 0.0563581073606538,
+    "oracle_acc": 0.844,
+    "local_acc": 0.579375,
+    "time": 0.1765460968017578
+   },
+   {
+    "scenario": [
+     "fmnist",
+     1,
+     "signflip",
+     "er",
+     0.2,
+     "random",
+     1
+    ],
+    "ok": true,
+    "acc": 0.7644374999999999,
+    "disagree": 0.14227464395750755,
+    "oracle_acc": 0.851,
+    "local_acc": 0.5814375,
+    "time": 0.11532187461853027
+   },
+   {
+    "scenario": [
+     "fmnist",
+     1,
+     "signflip",
+     "er",
+     0.2,
+     "random",
+     2
+    ],
+    "ok": true,
+    "acc": 0.7600625,
+    "disagree": 0.13419645374825354,
+    "oracle_acc": 0.844,
+    "local_acc": 0.579375,
+    "time": 0.12758517265319824
+   },
+   {
+    "scenario": [
+     "fmnist",
+     1,
+     "labelflip",
+     "er",
+     0.2,
+     "random",
+     1
+    ],
+    "ok": true,
+    "acc": 0.724875,
+    "disagree": 0.16043387674277368,
+    "oracle_acc": 0.851,
+    "local_acc": 0.5814375,
+    "time": 0.12673521041870117
+   },
+   {
+    "scenario": [
+     "fmnist",
+     1,
+     "labelflip",
+     "er",
+     0.2,
+     "random",
+     2
+    ],
+    "ok": true,
+    "acc": 0.6771875,
+    "disagree": 0.16923308541797175,
+    "oracle_acc": 0.844,
+    "local_acc": 0.579375,
+    "time": 0.1447000503540039
+   },
+   {
+    "scenario": [
+     "fmnist",
+     1,
+     "alie",
+     "er",
+     0.2,
+     "random",
+     1
+    ],
+    "ok": true,
+    "acc": 0.8256249999999999,
+    "disagree": 0.05584156142063553,
+    "oracle_acc": 0.851,
+    "local_acc": 0.5814375,
+    "time": 0.1850419044494629
+   },
+   {
+    "scenario": [
+     "fmnist",
+     1,
+     "alie",
+     "er",
+     0.2,
+     "random",
+     2
+    ],
+    "ok": true,
+    "acc": 0.804375,
+    "disagree": 0.06989784871012115,
+    "oracle_acc": 0.844,
+    "local_acc": 0.579375,
+    "time": 0.14081215858459473
+   },
+   {
+    "scenario": [
+     "fmnist",
+     4,
+     "none",
+     "er",
+     0.2,
+     "random",
+     1
+    ],
+    "ok": true,
+    "acc": 0.8279375,
+    "disagree": 0.0410773241211386,
+    "oracle_acc": 0.86,
+    "local_acc": 0.7022499999999999,
+    "time": 0.17044401168823242
+   },
+   {
+    "scenario": [
+     "fmnist",
+     4,
+     "none",
+     "er",
+     0.2,
+     "random",
+     2
+    ],
+    "ok": true,
+    "acc": 0.81825,
+    "disagree": 0.07278340269017324,
+    "oracle_acc": 0.869,
+    "local_acc": 0.7090624999999999,
+    "time": 0.1394028663635254
+   },
+   {
+    "scenario": [
+     "fmnist",
+     4,
+     "gaussian",
+     "er",
+     0.2,
+     "random",
+     1
+    ],
+    "ok": true,
+    "acc": 0.8205625,
+    "disagree": 0.09011253818369716,
+    "oracle_acc": 0.86,
+    "local_acc": 0.7022499999999999,
+    "time": 0.19626998901367188
+   },
+   {
+    "scenario": [
+     "fmnist",
+     4,
+     "gaussian",
+     "er",
+     0.2,
+     "random",
+     2
+    ],
+    "ok": true,
+    "acc": 0.8528125,
+    "disagree": 0.034088723227212674,
+    "oracle_acc": 0.869,
+    "local_acc": 0.7090624999999999,
+    "time": 0.15332603454589844
+   },
+   {
+    "scenario": [
+     "fmnist",
+     4,
+     "signflip",
+     "er",
+     0.2,
+     "random",
+     1
+    ],
+    "ok": true,
+    "acc": 0.8045,
+    "disagree": 0.12319939847329245,
+    "oracle_acc": 0.86,
+    "local_acc": 0.7022499999999999,
+    "time": 0.1443467140197754
+   },
+   {
+    "scenario": [
+     "fmnist",
+     4,
+     "signflip",
+     "er",
+     0.2,
+     "random",
+     2
+    ],
+    "ok": true,
+    "acc": 0.8512500000000001,
+    "disagree": 0.04677778230031493,
+    "oracle_acc": 0.869,
+    "local_acc": 0.7090624999999999,
+    "time": 0.13057994842529297
+   },
+   {
+    "scenario": [
+     "fmnist",
+     4,
+     "labelflip",
+     "er",
+     0.2,
+     "random",
+     1
+    ],
+    "ok": true,
+    "acc": 0.782,
+    "disagree": 0.13936179060288387,
+    "oracle_acc": 0.86,
+    "local_acc": 0.7022499999999999,
+    "time": 0.1377582550048828
+   },
+   {
+    "scenario": [
+     "fmnist",
+     4,
+     "labelflip",
+     "er",
+     0.2,
+     "random",
+     2
+    ],
+    "ok": true,
+    "acc": 0.8223750000000001,
+    "disagree": 0.08198782803746896,
+    "oracle_acc": 0.869,
+    "local_acc": 0.7090624999999999,
+    "time": 0.1351480484008789
+   },
+   {
+    "scenario": [
+     "fmnist",
+     4,
+     "alie",
+     "er",
+     0.2,
+     "random",
+     1
+    ],
+    "ok": true,
+    "acc": 0.8598125,
+    "disagree": 0.03414796968649306,
+    "oracle_acc": 0.86,
+    "local_acc": 0.7022499999999999,
+    "time": 0.14954590797424316
+   },
+   {
+    "scenario": [
+     "fmnist",
+     4,
+     "alie",
+     "er",
+     0.2,
+     "random",
+     2
+    ],
+    "ok": true,
+    "acc": 0.8520625,
+    "disagree": 0.03851022672087931,
+    "oracle_acc": 0.869,
+    "local_acc": 0.7090624999999999,
+    "time": 0.13622593879699707
+   },
+   {
+    "scenario": [
+     "fmnist",
+     10,
+     "none",
+     "er",
+     0.2,
+     "random",
+     1
+    ],
+    "ok": true,
+    "acc": 0.852625,
+    "disagree": 0.030474276813490304,
+    "oracle_acc": 0.879,
+    "local_acc": 0.7844375,
+    "time": 0.13180994987487793
+   },
+   {
+    "scenario": [
+     "fmnist",
+     10,
+     "none",
+     "er",
+     0.2,
+     "random",
+     2
+    ],
+    "ok": true,
+    "acc": 0.8501875,
+    "disagree": 0.04254692069700914,
+    "oracle_acc": 0.881,
+    "local_acc": 0.791875,
+    "time": 0.13351702690124512
+   },
+   {
+    "scenario": [
+     "fmnist",
+     10,
+     "gaussian",
+     "er",
+     0.2,
+     "random",
+     1
+    ],
+    "ok": true,
+    "acc": 0.8340624999999999,
+    "disagree": 0.09287970397319137,
+    "oracle_acc": 0.879,
+    "local_acc": 0.7844375,
+    "time": 0.153519868850708
+   },
+   {
+    "scenario": [
+     "fmnist",
+     10,
+     "gaussian",
+     "er",
+     0.2,
+     "random",
+     2
+    ],
+    "ok": true,
+    "acc": 0.8766875000000001,
+    "disagree": 0.020907576240366658,
+    "oracle_acc": 0.881,
+    "local_acc": 0.791875,
+    "time": 0.1448960304260254
+   },
+   {
+    "scenario": [
+     "fmnist",
+     10,
+     "signflip",
+     "er",
+     0.2,
+     "random",
+     1
+    ],
+    "ok": true,
+    "acc": 0.8309375,
+    "disagree": 0.11251406410248202,
+    "oracle_acc": 0.879,
+    "local_acc": 0.7844375,
+    "time": 0.1179351806640625
+   },
+   {
+    "scenario": [
+     "fmnist",
+     10,
+     "signflip",
+     "er",
+     0.2,
+     "random",
+     2
+    ],
+    "ok": true,
+    "acc": 0.8788750000000001,
+    "disagree": 0.02925847827098621,
+    "oracle_acc": 0.881,
+    "local_acc": 0.791875,
+    "time": 0.12015819549560547
+   },
+   {
+    "scenario": [
+     "fmnist",
+     10,
+     "labelflip",
+     "er",
+     0.2,
+     "random",
+     1
+    ],
+    "ok": true,
+    "acc": 0.815875,
+    "disagree": 0.1271156105002074,
+    "oracle_acc": 0.879,
+    "local_acc": 0.7844375,
+    "time": 0.12328410148620605
+   },
+   {
+    "scenario": [
+     "fmnist",
+     10,
+     "labelflip",
+     "er",
+     0.2,
+     "random",
+     2
+    ],
+    "ok": true,
+    "acc": 0.8591875,
+    "disagree": 0.05213292334179789,
+    "oracle_acc": 0.881,
+    "local_acc": 0.791875,
+    "time": 0.13008379936218262
+   },
+   {
+    "scenario": [
+     "fmnist",
+     10,
+     "alie",
+     "er",
+     0.2,
+     "random",
+     1
+    ],
+    "ok": true,
+    "acc": 0.877875,
+    "disagree": 0.024022478767016804,
+    "oracle_acc": 0.879,
+    "local_acc": 0.7844375,
+    "time": 0.13007426261901855
+   },
+   {
+    "scenario": [
+     "fmnist",
+     10,
+     "alie",
+     "er",
+     0.2,
+     "random",
+     2
+    ],
+    "ok": true,
+    "acc": 0.8760625,
+    "disagree": 0.023897278327131986,
+    "oracle_acc": 0.881,
+    "local_acc": 0.791875,
+    "time": 0.13275504112243652
+   }
+  ]
+ },
+ "BRIDGE-T": {
+  "summary": {
+   "mean_acc": 0.7823833333333333,
+   "worst_acc": 0.6203125,
+   "score": 0.7013479166666667,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.8051041666666667,
+    "gaussian": 0.7869791666666668,
+    "signflip": 0.7504270833333333,
+    "labelflip": 0.7171249999999999,
+    "alie": 0.85228125
+   }
+  },
+  "rows": [
+   {
+    "scenario": [
+     "fmnist",
+     1,
+     "none",
+     "er",
+     0.2,
+     "random",
+     1
+    ],
+    "ok": true,
+    "acc": 0.766,
+    "disagree": 0.03227973177232967,
+    "oracle_acc": 0.851,
+    "local_acc": 0.5814375,
+    "time": 0.09061074256896973
+   },
+   {
+    "scenario": [
+     "fmnist",
+     1,
+     "none",
+     "er",
+     0.2,
+     "random",
+     2
+    ],
+    "ok": true,
+    "acc": 0.7468125000000001,
+    "disagree": 0.09944796969255307,
+    "oracle_acc": 0.844,
+    "local_acc": 0.579375,
+    "time": 0.09912395477294922
+   },
+   {
+    "scenario": [
+     "fmnist",
+     1,
+     "gaussian",
+     "er",
+     0.2,
+     "random",
+     1
+    ],
+    "ok": true,
+    "acc": 0.796875,
+    "disagree": 0.0883313146265165,
+    "oracle_acc": 0.851,
+    "local_acc": 0.5814375,
+    "time": 0.11255407333374023
+   },
+   {
+    "scenario": [
+     "fmnist",
+     1,
+     "gaussian",
+     "er",
+     0.2,
+     "random",
+     2
+    ],
+    "ok": true,
+    "acc": 0.7190624999999999,
+    "disagree": 0.18317056108392576,
+    "oracle_acc": 0.844,
+    "local_acc": 0.579375,
+    "time": 0.11141490936279297
+   },
+   {
+    "scenario": [
+     "fmnist",
+     1,
+     "signflip",
+     "er",
+     0.2,
+     "random",
+     1
+    ],
+    "ok": true,
+    "acc": 0.8014999999999999,
+    "disagree": 0.0877886585892995,
+    "oracle_acc": 0.851,
+    "local_acc": 0.5814375,
+    "time": 0.08827400207519531
+   },
+   {
+    "scenario": [
+     "fmnist",
+     1,
+     "signflip",
+     "er",
+     0.2,
+     "random",
+     2
+    ],
+    "ok": true,
+    "acc": 0.6661874999999999,
+    "disagree": 0.27304416545255483,
+    "oracle_acc": 0.844,
+    "local_acc": 0.579375,
+    "time": 0.0886068344116211
+   },
+   {
+    "scenario": [
+     "fmnist",
+     1,
+     "labelflip",
+     "er",
+     0.2,
+     "random",
+     1
+    ],
+    "ok": true,
+    "acc": 0.7598125,
+    "disagree": 0.10634100470681214,
+    "oracle_acc": 0.851,
+    "local_acc": 0.5814375,
+    "time": 0.0905306339263916
+   },
+   {
+    "scenario": [
+     "fmnist",
+     1,
+     "labelflip",
+     "er",
+     0.2,
+     "random",
+     2
+    ],
+    "ok": true,
+    "acc": 0.6203125,
+    "disagree": 0.242984492423674,
+    "oracle_acc": 0.844,
+    "local_acc": 0.579375,
+    "time": 0.1070561408996582
+   },
+   {
+    "scenario": [
+     "fmnist",
+     1,
+     "alie",
+     "er",
+     0.2,
+     "random",
+     1
+    ],
+    "ok": true,
+    "acc": 0.8411249999999999,
+    "disagree": 0.025570429185990236,
+    "oracle_acc": 0.851,
+    "local_acc": 0.5814375,
+    "time": 0.09829235076904297
+   },
+   {
+    "scenario": [
+     "fmnist",
+     1,
+     "alie",
+     "er",
+     0.2,
+     "random",
+     2
+    ],
+    "ok": true,
+    "acc": 0.797,
+    "disagree": 0.07212223366293259,
+    "oracle_acc": 0.844,
+    "local_acc": 0.579375,
+    "time": 0.0839071273803711
+   },
+   {
+    "scenario": [
+     "fmnist",
+     4,
+     "none",
+     "er",
+     0.2,
+     "random",
+     1
+    ],
+    "ok": true,
+    "acc": 0.826875,
+    "disagree": 0.02647995314901154,
+    "oracle_acc": 0.86,
+    "local_acc": 0.7022499999999999,
+    "time": 0.08919286727905273
+   },
+   {
+    "scenario": [
+     "fmnist",
+     4,
+     "none",
+     "er",
+     0.2,
+     "random",
+     2
+    ],
+    "ok": true,
+    "acc": 0.7988124999999999,
+    "disagree": 0.09283063079391096,
+    "oracle_acc": 0.869,
+    "local_acc": 0.7090624999999999,
+    "time": 0.07578587532043457
+   },
+   {
+    "scenario": [
+     "fmnist",
+     4,
+     "gaussian",
+     "er",
+     0.2,
+     "random",
+     1
+    ],
+    "ok": true,
+    "acc": 0.8213125000000001,
+    "disagree": 0.09222543433424962,
+    "oracle_acc": 0.86,
+    "local_acc": 0.7022499999999999,
+    "time": 0.10183501243591309
+   },
+   {
+    "scenario": [
+     "fmnist",
+     4,
+     "gaussian",
+     "er",
+     0.2,
+     "random",
+     2
+    ],
+    "ok": true,
+    "acc": 0.7643125,
+    "disagree": 0.18756794732779677,
+    "oracle_acc": 0.869,
+    "local_acc": 0.7090624999999999,
+    "time": 0.09163117408752441
+   },
+   {
+    "scenario": [
+     "fmnist",
+     4,
+     "signflip",
+     "er",
+     0.2,
+     "random",
+     1
+    ],
+    "ok": true,
+    "acc": 0.8176874999999999,
+    "disagree": 0.09293151454086393,
+    "oracle_acc": 0.86,
+    "local_acc": 0.7022499999999999,
+    "time": 0.08132028579711914
+   },
+   {
+    "scenario": [
+     "fmnist",
+     4,
+     "signflip",
+     "er",
+     0.2,
+     "random",
+     2
+    ],
+    "ok": true,
+    "acc": 0.6959375,
+    "disagree": 0.28622555500137997,
+    "oracle_acc": 0.869,
+    "local_acc": 0.7090624999999999,
+    "time": 0.06626009941101074
+   },
+   {
+    "scenario": [
+     "fmnist",
+     4,
+     "labelflip",
+     "er",
+     0.2,
+     "random",
+     1
+    ],
+    "ok": true,
+    "acc": 0.7893125,
+    "disagree": 0.10539016000726843,
+    "oracle_acc": 0.86,
+    "local_acc": 0.7022499999999999,
+    "time": 0.08417892456054688
+   },
+   {
+    "scenario": [
+     "fmnist",
+     4,
+     "labelflip",
+     "er",
+     0.2,
+     "random",
+     2
+    ],
+    "ok": true,
+    "acc": 0.6514374999999999,
+    "disagree": 0.2649084188150713,
+    "oracle_acc": 0.869,
+    "local_acc": 0.7090624999999999,
+    "time": 0.07677125930786133
+   },
+   {
+    "scenario": [
+     "fmnist",
+     4,
+     "alie",
+     "er",
+     0.2,
+     "random",
+     1
+    ],
+    "ok": true,
+    "acc": 0.868125,
+    "disagree": 0.015651256735568768,
+    "oracle_acc": 0.86,
+    "local_acc": 0.7022499999999999,
+    "time": 0.09170198440551758
+   },
+   {
+    "scenario": [
+     "fmnist",
+     4,
+     "alie",
+     "er",
+     0.2,
+     "random",
+     2
+    ],
+    "ok": true,
+    "acc": 0.853125,
+    "disagree": 0.041991204482938034,
+    "oracle_acc": 0.869,
+    "local_acc": 0.7090624999999999,
+    "time": 0.08301901817321777
+   },
+   {
+    "scenario": [
+     "fmnist",
+     10,
+     "none",
+     "er",
+     0.2,
+     "random",
+     1
+    ],
+    "ok": true,
+    "acc": 0.8532500000000001,
+    "disagree": 0.017335447146665316,
+    "oracle_acc": 0.879,
+    "local_acc": 0.7844375,
+    "time": 0.08750009536743164
+   },
+   {
+    "scenario": [
+     "fmnist",
+     10,
+     "none",
+     "er",
+     0.2,
+     "random",
+     2
+    ],
+    "ok": true,
+    "acc": 0.838875,
+    "disagree": 0.05641831272071363,
+    "oracle_acc": 0.881,
+    "local_acc": 0.791875,
+    "time": 0.07807302474975586
+   },
+   {
+    "scenario": [
+     "fmnist",
+     10,
+     "gaussian",
+     "er",
+     0.2,
+     "random",
+     1
+    ],
+    "ok": true,
+    "acc": 0.8350625,
+    "disagree": 0.09699820477519705,
+    "oracle_acc": 0.879,
+    "local_acc": 0.7844375,
+    "time": 0.0990898609161377
+   },
+   {
+    "scenario": [
+     "fmnist",
+     10,
+     "gaussian",
+     "er",
+     0.2,
+     "random",
+     2
+    ],
+    "ok": true,
+    "acc": 0.78525,
+    "disagree": 0.19544279563347816,
+    "oracle_acc": 0.881,
+    "local_acc": 0.791875,
+    "time": 0.09239888191223145
+   },
+   {
+    "scenario": [
+     "fmnist",
+     10,
+     "signflip",
+     "er",
+     0.2,
+     "random",
+     1
+    ],
+    "ok": true,
+    "acc": 0.833,
+    "disagree": 0.09705981113718526,
+    "oracle_acc": 0.879,
+    "local_acc": 0.7844375,
+    "time": 0.08001995086669922
+   },
+   {
+    "scenario": [
+     "fmnist",
+     10,
+     "signflip",
+     "er",
+     0.2,
+     "random",
+     2
+    ],
+    "ok": true,
+    "acc": 0.68825,
+    "disagree": 0.31345234088611257,
+    "oracle_acc": 0.881,
+    "local_acc": 0.791875,
+    "time": 0.06868696212768555
+   },
+   {
+    "scenario": [
+     "fmnist",
+     10,
+     "labelflip",
+     "er",
+     0.2,
+     "random",
+     1
+    ],
+    "ok": true,
+    "acc": 0.8161875000000001,
+    "disagree": 0.10821882283525984,
+    "oracle_acc": 0.879,
+    "local_acc": 0.7844375,
+    "time": 0.08738899230957031
+   },
+   {
+    "scenario": [
+     "fmnist",
+     10,
+     "labelflip",
+     "er",
+     0.2,
+     "random",
+     2
+    ],
+    "ok": true,
+    "acc": 0.6656875,
+    "disagree": 0.277472632198259,
+    "oracle_acc": 0.881,
+    "local_acc": 0.791875,
+    "time": 0.07822799682617188
+   },
+   {
+    "scenario": [
+     "fmnist",
+     10,
+     "alie",
+     "er",
+     0.2,
+     "random",
+     1
+    ],
+    "ok": true,
+    "acc": 0.8816875,
+    "disagree": 0.012343495953370972,
+    "oracle_acc": 0.879,
+    "local_acc": 0.7844375,
+    "time": 0.09478020668029785
+   },
+   {
+    "scenario": [
+     "fmnist",
+     10,
+     "alie",
+     "er",
+     0.2,
+     "random",
+     2
+    ],
+    "ok": true,
+    "acc": 0.872625,
+    "disagree": 0.025164183617585024,
+    "oracle_acc": 0.881,
+    "local_acc": 0.791875,
+    "time": 0.08402395248413086
+   }
+  ]
+ },
+ "Krum": {
+  "summary": {
+   "mean_acc": 0.7703166666666665,
+   "worst_acc": 0.6060625,
+   "score": 0.6881895833333332,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.7753541666666667,
+    "gaussian": 0.7729270833333333,
+    "signflip": 0.7527395833333334,
+    "labelflip": 0.7567499999999999,
+    "alie": 0.7938125
+   }
+  },
+  "rows": [
+   {
+    "scenario": [
+     "fmnist",
+     1,
+     "none",
+     "er",
+     0.2,
+     "random",
+     1
+    ],
+    "ok": true,
+    "acc": 0.746875,
+    "disagree": 0.15434394272537902,
+    "oracle_acc": 0.851,
+    "local_acc": 0.5814375,
+    "time": 0.34272098541259766
+   },
+   {
+    "scenario": [
+     "fmnist",
+     1,
+     "none",
+     "er",
+     0.2,
+     "random",
+     2
+    ],
+    "ok": true,
+    "acc": 0.6979375,
+    "disagree": 0.25076978314373544,
+    "oracle_acc": 0.844,
+    "local_acc": 0.579375,
+    "time": 0.10808205604553223
+   },
+   {
+    "scenario": [
+     "fmnist",
+     1,
+     "gaussian",
+     "er",
+     0.2,
+     "random",
+     1
+    ],
+    "ok": true,
+    "acc": 0.7170000000000001,
+    "disagree": 0.08330608684207033,
+    "oracle_acc": 0.851,
+    "local_acc": 0.5814375,
+    "time": 0.3285090923309326
+   },
+   {
+    "scenario": [
+     "fmnist",
+     1,
+     "gaussian",
+     "er",
+     0.2,
+     "random",
+     2
+    ],
+    "ok": true,
+    "acc": 0.6759375000000001,
+    "disagree": 0.20934137724951365,
+    "oracle_acc": 0.844,
+    "local_acc": 0.579375,
+    "time": 0.11937808990478516
+   },
+   {
+    "scenario": [
+     "fmnist",
+     1,
+     "signflip",
+     "er",
+     0.2,
+     "random",
+     1
+    ],
+    "ok": true,
+    "acc": 0.6060625,
+    "disagree": 0.10116771551356839,
+    "oracle_acc": 0.851,
+    "local_acc": 0.5814375,
+    "time": 0.3335399627685547
+   },
+   {
+    "scenario": [
+     "fmnist",
+     1,
+     "signflip",
+     "er",
+     0.2,
+     "random",
+     2
+    ],
+    "ok": true,
+    "acc": 0.6629999999999999,
+    "disagree": 0.2284888762825072,
+    "oracle_acc": 0.844,
+    "local_acc": 0.579375,
+    "time": 0.10402417182922363
+   },
+   {
+    "scenario": [
+     "fmnist",
+     1,
+     "labelflip",
+     "er",
+     0.2,
+     "random",
+     1
+    ],
+    "ok": true,
+    "acc": 0.711125,
+    "disagree": 0.10754259146469175,
+    "oracle_acc": 0.851,
+    "local_acc": 0.5814375,
+    "time": 0.32234907150268555
+   },
+   {
+    "scenario": [
+     "fmnist",
+     1,
+     "labelflip",
+     "er",
+     0.2,
+     "random",
+     2
+    ],
+    "ok": true,
+    "acc": 0.6089375,
+    "disagree": 0.3196388669719178,
+    "oracle_acc": 0.844,
+    "local_acc": 0.579375,
+    "time": 0.10939383506774902
+   },
+   {
+    "scenario": [
+     "fmnist",
+     1,
+     "alie",
+     "er",
+     0.2,
+     "random",
+     1
+    ],
+    "ok": true,
+    "acc": 0.7095625000000001,
+    "disagree": 0.1672246887321308,
+    "oracle_acc": 0.851,
+    "local_acc": 0.5814375,
+    "time": 0.2483656406402588
+   },
+   {
+    "scenario": [
+     "fmnist",
+     1,
+     "alie",
+     "er",
+     0.2,
+     "random",
+     2
+    ],
+    "ok": true,
+    "acc": 0.6865,
+    "disagree": 0.27033703387222013,
+    "oracle_acc": 0.844,
+    "local_acc": 0.579375,
+    "time": 0.14380288124084473
+   },
+   {
+    "scenario": [
+     "fmnist",
+     4,
+     "none",
+     "er",
+     0.2,
+     "random",
+     1
+    ],
+    "ok": true,
+    "acc": 0.7710625,
+    "disagree": 0.13596172806699822,
+    "oracle_acc": 0.86,
+    "local_acc": 0.7022499999999999,
+    "time": 0.23469305038452148
+   },
+   {
+    "scenario": [
+     "fmnist",
+     4,
+     "none",
+     "er",
+     0.2,
+     "random",
+     2
+    ],
+    "ok": true,
+    "acc": 0.76675,
+    "disagree": 0.20351290682400286,
+    "oracle_acc": 0.869,
+    "local_acc": 0.7090624999999999,
+    "time": 0.11575508117675781
+   },
+   {
+    "scenario": [
+     "fmnist",
+     4,
+     "gaussian",
+     "er",
+     0.2,
+     "random",
+     1
+    ],
+    "ok": true,
+    "acc": 0.7895625,
+    "disagree": 0.14170525382561885,
+    "oracle_acc": 0.86,
+    "local_acc": 0.7022499999999999,
+    "time": 0.24962902069091797
+   },
+   {
+    "scenario": [
+     "fmnist",
+     4,
+     "gaussian",
+     "er",
+     0.2,
+     "random",
+     2
+    ],
+    "ok": true,
+    "acc": 0.81525,
+    "disagree": 0.17352625662246976,
+    "oracle_acc": 0.869,
+    "local_acc": 0.7090624999999999,
+    "time": 0.14190316200256348
+   },
+   {
+    "scenario": [
+     "fmnist",
+     4,
+     "signflip",
+     "er",
+     0.2,
+     "random",
+     1
+    ],
+    "ok": true,
+    "acc": 0.795875,
+    "disagree": 0.1042441810756695,
+    "oracle_acc": 0.86,
+    "local_acc": 0.7022499999999999,
+    "time": 0.22419285774230957
+   },
+   {
+    "scenario": [
+     "fmnist",
+     4,
+     "signflip",
+     "er",
+     0.2,
+     "random",
+     2
+    ],
+    "ok": true,
+    "acc": 0.8096875,
+    "disagree": 0.17626529707963504,
+    "oracle_acc": 0.869,
+    "local_acc": 0.7090624999999999,
+    "time": 0.1417069435119629
+   },
+   {
+    "scenario": [
+     "fmnist",
+     4,
+     "labelflip",
+     "er",
+     0.2,
+     "random",
+     1
+    ],
+    "ok": true,
+    "acc": 0.78375,
+    "disagree": 0.16094919763011742,
+    "oracle_acc": 0.86,
+    "local_acc": 0.7022499999999999,
+    "time": 0.24829792976379395
+   },
+   {
+    "scenario": [
+     "fmnist",
+     4,
+     "labelflip",
+     "er",
+     0.2,
+     "random",
+     2
+    ],
+    "ok": true,
+    "acc": 0.807875,
+    "disagree": 0.17831343251835555,
+    "oracle_acc": 0.869,
+    "local_acc": 0.7090624999999999,
+    "time": 0.3042588233947754
+   },
+   {
+    "scenario": [
+     "fmnist",
+     4,
+     "alie",
+     "er",
+     0.2,
+     "random",
+     1
+    ],
+    "ok": true,
+    "acc": 0.8409375,
+    "disagree": 0.1111814240030133,
+    "oracle_acc": 0.86,
+    "local_acc": 0.7022499999999999,
+    "time": 0.42061686515808105
+   },
+   {
+    "scenario": [
+     "fmnist",
+     4,
+     "alie",
+     "er",
+     0.2,
+     "random",
+     2
+    ],
+    "ok": true,
+    "acc": 0.8046875,
+    "disagree": 0.1710780500514389,
+    "oracle_acc": 0.869,
+    "local_acc": 0.7090624999999999,
+    "time": 0.2628762722015381
+   },
+   {
+    "scenario": [
+     "fmnist",
+     10,
+     "none",
+     "er",
+     0.2,
+     "random",
+     1
+    ],
+    "ok": true,
+    "acc": 0.8366874999999999,
+    "disagree": 0.0719131665204125,
+    "oracle_acc": 0.879,
+    "local_acc": 0.7844375,
+    "time": 0.37987613677978516
+   },
+   {
+    "scenario": [
+     "fmnist",
+     10,
+     "none",
+     "er",
+     0.2,
+     "random",
+     2
+    ],
+    "ok": true,
+    "acc": 0.8328125,
+    "disagree": 0.1063192464780926,
+    "oracle_acc": 0.881,
+    "local_acc": 0.791875,
+    "time": 0.20506596565246582
+   },
+   {
+    "scenario": [
+     "fmnist",
+     10,
+     "gaussian",
+     "er",
+     0.2,
+     "random",
+     1
+    ],
+    "ok": true,
+    "acc": 0.7942499999999999,
+    "disagree": 0.15979131237118968,
+    "oracle_acc": 0.879,
+    "local_acc": 0.7844375,
+    "time": 0.37978076934814453
+   },
+   {
+    "scenario": [
+     "fmnist",
+     10,
+     "gaussian",
+     "er",
+     0.2,
+     "random",
+     2
+    ],
+    "ok": true,
+    "acc": 0.8455625,
+    "disagree": 0.08790108398050114,
+    "oracle_acc": 0.881,
+    "local_acc": 0.791875,
+    "time": 0.19794607162475586
+   },
+   {
+    "scenario": [
+     "fmnist",
+     10,
+     "signflip",
+     "er",
+     0.2,
+     "random",
+     1
+    ],
+    "ok": true,
+    "acc": 0.7949999999999999,
+    "disagree": 0.14787839235331057,
+    "oracle_acc": 0.879,
+    "local_acc": 0.7844375,
+    "time": 0.31715989112854004
+   },
+   {
+    "scenario": [
+     "fmnist",
+     10,
+     "signflip",
+     "er",
+     0.2,
+     "random",
+     2
+    ],
+    "ok": true,
+    "acc": 0.8468125,
+    "disagree": 0.08993588880002008,
+    "oracle_acc": 0.881,
+    "local_acc": 0.791875,
+    "time": 0.1852281093597412
+   },
+   {
+    "scenario": [
+     "fmnist",
+     10,
+     "labelflip",
+     "er",
+     0.2,
+     "random",
+     1
+    ],
+    "ok": true,
+    "acc": 0.786625,
+    "disagree": 0.17550674487250134,
+    "oracle_acc": 0.879,
+    "local_acc": 0.7844375,
+    "time": 0.33490920066833496
+   },
+   {
+    "scenario": [
+     "fmnist",
+     10,
+     "labelflip",
+     "er",
+     0.2,
+     "random",
+     2
+    ],
+    "ok": true,
+    "acc": 0.8421875,
+    "disagree": 0.09699766246322702,
+    "oracle_acc": 0.881,
+    "local_acc": 0.791875,
+    "time": 0.11659097671508789
+   },
+   {
+    "scenario": [
+     "fmnist",
+     10,
+     "alie",
+     "er",
+     0.2,
+     "random",
+     1
+    ],
+    "ok": true,
+    "acc": 0.8509375,
+    "disagree": 0.08217803368152898,
+    "oracle_acc": 0.879,
+    "local_acc": 0.7844375,
+    "time": 0.37917637825012207
+   },
+   {
+    "scenario": [
+     "fmnist",
+     10,
+     "alie",
+     "er",
+     0.2,
+     "random",
+     2
+    ],
+    "ok": true,
+    "acc": 0.87025,
+    "disagree": 0.056657391968185665,
+    "oracle_acc": 0.881,
+    "local_acc": 0.791875,
+    "time": 0.10078287124633789
+   }
+  ]
+ },
+ "GeoMed": {
+  "summary": {
+   "mean_acc": 0.8216541666666667,
+   "worst_acc": 0.7065625,
+   "score": 0.7641083333333334,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.8006041666666667,
+    "gaussian": 0.8372708333333332,
+    "signflip": 0.8069999999999999,
+    "labelflip": 0.8055625000000001,
+    "alie": 0.8578333333333332
+   }
+  },
+  "rows": [
+   {
+    "scenario": [
+     "fmnist",
+     1,
+     "none",
+     "er",
+     0.2,
+     "random",
+     1
+    ],
+    "ok": true,
+    "acc": 0.7346250000000001,
+    "disagree": 0.04265012420321072,
+    "oracle_acc": 0.851,
+    "local_acc": 0.5814375,
+    "time": 0.6084098815917969
+   },
+   {
+    "scenario": [
+     "fmnist",
+     1,
+     "none",
+     "er",
+     0.2,
+     "random",
+     2
+    ],
+    "ok": true,
+    "acc": 0.740875,
+    "disagree": 0.11330628596709498,
+    "oracle_acc": 0.844,
+    "local_acc": 0.579375,
+    "time": 0.4616248607635498
+   },
+   {
+    "scenario": [
+     "fmnist",
+     1,
+     "gaussian",
+     "er",
+     0.2,
+     "random",
+     1
+    ],
+    "ok": true,
+    "acc": 0.8006875,
+    "disagree": 0.08000764578015242,
+    "oracle_acc": 0.851,
+    "local_acc": 0.5814375,
+    "time": 0.6423590183258057
+   },
+   {
+    "scenario": [
+     "fmnist",
+     1,
+     "gaussian",
+     "er",
+     0.2,
+     "random",
+     2
+    ],
+    "ok": true,
+    "acc": 0.826875,
+    "disagree": 0.07599988233261205,
+    "oracle_acc": 0.844,
+    "local_acc": 0.579375,
+    "time": 0.483767032623291
+   },
+   {
+    "scenario": [
+     "fmnist",
+     1,
+     "signflip",
+     "er",
+     0.2,
+     "random",
+     1
+    ],
+    "ok": true,
+    "acc": 0.7693125,
+    "disagree": 0.07856151890571207,
+    "oracle_acc": 0.851,
+    "local_acc": 0.5814375,
+    "time": 0.5977489948272705
+   },
+   {
+    "scenario": [
+     "fmnist",
+     1,
+     "signflip",
+     "er",
+     0.2,
+     "random",
+     2
+    ],
+    "ok": true,
+    "acc": 0.7065625,
+    "disagree": 0.11629597996257336,
+    "oracle_acc": 0.844,
+    "local_acc": 0.579375,
+    "time": 0.4646170139312744
+   },
+   {
+    "scenario": [
+     "fmnist",
+     1,
+     "labelflip",
+     "er",
+     0.2,
+     "random",
+     1
+    ],
+    "ok": true,
+    "acc": 0.7866875,
+    "disagree": 0.09411092987892866,
+    "oracle_acc": 0.851,
+    "local_acc": 0.5814375,
+    "time": 0.5978538990020752
+   },
+   {
+    "scenario": [
+     "fmnist",
+     1,
+     "labelflip",
+     "er",
+     0.2,
+     "random",
+     2
+    ],
+    "ok": true,
+    "acc": 0.715,
+    "disagree": 0.10375797941798896,
+    "oracle_acc": 0.844,
+    "local_acc": 0.579375,
+    "time": 0.4687459468841553
+   },
+   {
+    "scenario": [
+     "fmnist",
+     1,
+     "alie",
+     "er",
+     0.2,
+     "random",
+     1
+    ],
+    "ok": true,
+    "acc": 0.8446874999999999,
+    "disagree": 0.01986168207784887,
+    "oracle_acc": 0.851,
+    "local_acc": 0.5814375,
+    "time": 0.4827749729156494
+   },
+   {
+    "scenario": [
+     "fmnist",
+     1,
+     "alie",
+     "er",
+     0.2,
+     "random",
+     2
+    ],
+    "ok": true,
+    "acc": 0.8170625,
+    "disagree": 0.12858455678794586,
+    "oracle_acc": 0.844,
+    "local_acc": 0.579375,
+    "time": 0.44538068771362305
+   },
+   {
+    "scenario": [
+     "fmnist",
+     4,
+     "none",
+     "er",
+     0.2,
+     "random",
+     1
+    ],
+    "ok": true,
+    "acc": 0.8234999999999999,
+    "disagree": 0.033770693525674855,
+    "oracle_acc": 0.86,
+    "local_acc": 0.7022499999999999,
+    "time": 0.47425103187561035
+   },
+   {
+    "scenario": [
+     "fmnist",
+     4,
+     "none",
+     "er",
+     0.2,
+     "random",
+     2
+    ],
+    "ok": true,
+    "acc": 0.8066249999999999,
+    "disagree": 0.08630649398726323,
+    "oracle_acc": 0.869,
+    "local_acc": 0.7090624999999999,
+    "time": 0.4359409809112549
+   },
+   {
+    "scenario": [
+     "fmnist",
+     4,
+     "gaussian",
+     "er",
+     0.2,
+     "random",
+     1
+    ],
+    "ok": true,
+    "acc": 0.8210625,
+    "disagree": 0.08561019225228657,
+    "oracle_acc": 0.86,
+    "local_acc": 0.7022499999999999,
+    "time": 0.4966731071472168
+   },
+   {
+    "scenario": [
+     "fmnist",
+     4,
+     "gaussian",
+     "er",
+     0.2,
+     "random",
+     2
+    ],
+    "ok": true,
+    "acc": 0.8628125,
+    "disagree": 0.05624331295780372,
+    "oracle_acc": 0.869,
+    "local_acc": 0.7090624999999999,
+    "time": 0.45175981521606445
+   },
+   {
+    "scenario": [
+     "fmnist",
+     4,
+     "signflip",
+     "er",
+     0.2,
+     "random",
+     1
+    ],
+    "ok": true,
+    "acc": 0.8161875,
+    "disagree": 0.07756001759203414,
+    "oracle_acc": 0.86,
+    "local_acc": 0.7022499999999999,
+    "time": 0.4661531448364258
+   },
+   {
+    "scenario": [
+     "fmnist",
+     4,
+     "signflip",
+     "er",
+     0.2,
+     "random",
+     2
+    ],
+    "ok": true,
+    "acc": 0.83775,
+    "disagree": 0.07980464915100748,
+    "oracle_acc": 0.869,
+    "local_acc": 0.7090624999999999,
+    "time": 0.42413997650146484
+   },
+   {
+    "scenario": [
+     "fmnist",
+     4,
+     "labelflip",
+     "er",
+     0.2,
+     "random",
+     1
+    ],
+    "ok": true,
+    "acc": 0.8108125,
+    "disagree": 0.09501892612202789,
+    "oracle_acc": 0.86,
+    "local_acc": 0.7022499999999999,
+    "time": 0.5131280422210693
+   },
+   {
+    "scenario": [
+     "fmnist",
+     4,
+     "labelflip",
+     "er",
+     0.2,
+     "random",
+     2
+    ],
+    "ok": true,
+    "acc": 0.8179375,
+    "disagree": 0.08115321642295632,
+    "oracle_acc": 0.869,
+    "local_acc": 0.7090624999999999,
+    "time": 0.41660380363464355
+   },
+   {
+    "scenario": [
+     "fmnist",
+     4,
+     "alie",
+     "er",
+     0.2,
+     "random",
+     1
+    ],
+    "ok": true,
+    "acc": 0.8665,
+    "disagree": 0.015872964929226616,
+    "oracle_acc": 0.86,
+    "local_acc": 0.7022499999999999,
+    "time": 0.5154097080230713
+   },
+   {
+    "scenario": [
+     "fmnist",
+     4,
+     "alie",
+     "er",
+     0.2,
+     "random",
+     2
+    ],
+    "ok": true,
+    "acc": 0.8569374999999999,
+    "disagree": 0.07801733867526607,
+    "oracle_acc": 0.869,
+    "local_acc": 0.7090624999999999,
+    "time": 0.4183800220489502
+   },
+   {
+    "scenario": [
+     "fmnist",
+     10,
+     "none",
+     "er",
+     0.2,
+     "random",
+     1
+    ],
+    "ok": true,
+    "acc": 0.8505625,
+    "disagree": 0.024513238963402732,
+    "oracle_acc": 0.879,
+    "local_acc": 0.7844375,
+    "time": 0.507775068283081
+   },
+   {
+    "scenario": [
+     "fmnist",
+     10,
+     "none",
+     "er",
+     0.2,
+     "random",
+     2
+    ],
+    "ok": true,
+    "acc": 0.8474375,
+    "disagree": 0.049683669468431425,
+    "oracle_acc": 0.881,
+    "local_acc": 0.791875,
+    "time": 0.41478991508483887
+   },
+   {
+    "scenario": [
+     "fmnist",
+     10,
+     "gaussian",
+     "er",
+     0.2,
+     "random",
+     1
+    ],
+    "ok": true,
+    "acc": 0.8334999999999999,
+    "disagree": 0.09215829477386098,
+    "oracle_acc": 0.879,
+    "local_acc": 0.7844375,
+    "time": 0.5518519878387451
+   },
+   {
+    "scenario": [
+     "fmnist",
+     10,
+     "gaussian",
+     "er",
+     0.2,
+     "random",
+     2
+    ],
+    "ok": true,
+    "acc": 0.8786875,
+    "disagree": 0.04093011800537471,
+    "oracle_acc": 0.881,
+    "local_acc": 0.791875,
+    "time": 0.4387331008911133
+   },
+   {
+    "scenario": [
+     "fmnist",
+     10,
+     "signflip",
+     "er",
+     0.2,
+     "random",
+     1
+    ],
+    "ok": true,
+    "acc": 0.8359375,
+    "disagree": 0.08495490552961854,
+    "oracle_acc": 0.879,
+    "local_acc": 0.7844375,
+    "time": 0.41811394691467285
+   },
+   {
+    "scenario": [
+     "fmnist",
+     10,
+     "signflip",
+     "er",
+     0.2,
+     "random",
+     2
+    ],
+    "ok": true,
+    "acc": 0.87625,
+    "disagree": 0.048439446319581504,
+    "oracle_acc": 0.881,
+    "local_acc": 0.791875,
+    "time": 0.3816702365875244
+   },
+   {
+    "scenario": [
+     "fmnist",
+     10,
+     "labelflip",
+     "er",
+     0.2,
+     "random",
+     1
+    ],
+    "ok": true,
+    "acc": 0.8258125,
+    "disagree": 0.10048952949238774,
+    "oracle_acc": 0.879,
+    "local_acc": 0.7844375,
+    "time": 0.423231840133667
+   },
+   {
+    "scenario": [
+     "fmnist",
+     10,
+     "labelflip",
+     "er",
+     0.2,
+     "random",
+     2
+    ],
+    "ok": true,
+    "acc": 0.8771249999999999,
+    "disagree": 0.057532057404200705,
+    "oracle_acc": 0.881,
+    "local_acc": 0.791875,
+    "time": 0.386228084564209
+   },
+   {
+    "scenario": [
+     "fmnist",
+     10,
+     "alie",
+     "er",
+     0.2,
+     "random",
+     1
+    ],
+    "ok": true,
+    "acc": 0.880875,
+    "disagree": 0.014964371658610783,
+    "oracle_acc": 0.879,
+    "local_acc": 0.7844375,
+    "time": 0.428225040435791
+   },
+   {
+    "scenario": [
+     "fmnist",
+     10,
+     "alie",
+     "er",
+     0.2,
+     "random",
+     2
+    ],
+    "ok": true,
+    "acc": 0.8809375,
+    "disagree": 0.042150967821369165,
+    "oracle_acc": 0.881,
+    "local_acc": 0.791875,
+    "time": 0.39298510551452637
+   }
+  ]
+ },
+ "ClippedGossip": {
+  "summary": {
+   "mean_acc": 0.8426041666666667,
+   "worst_acc": 0.7671874999999999,
+   "score": 0.8048958333333334,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.8216979166666666,
+    "gaussian": 0.8550729166666665,
+    "signflip": 0.8384895833333333,
+    "labelflip": 0.8409479166666666,
+    "alie": 0.8568125000000001
+   }
+  },
+  "rows": [
+   {
+    "scenario": [
+     "fmnist",
+     1,
+     "none",
+     "er",
+     0.2,
+     "random",
+     1
+    ],
+    "ok": true,
+    "acc": 0.7871875,
+    "disagree": 0.051493440481840604,
+    "oracle_acc": 0.851,
+    "local_acc": 0.5814375,
+    "time": 0.03293418884277344
+   },
+   {
+    "scenario": [
+     "fmnist",
+     1,
+     "none",
+     "er",
+     0.2,
+     "random",
+     2
+    ],
+    "ok": true,
+    "acc": 0.7671874999999999,
+    "disagree": 0.0861856348001034,
+    "oracle_acc": 0.844,
+    "local_acc": 0.579375,
+    "time": 0.026870012283325195
+   },
+   {
+    "scenario": [
+     "fmnist",
+     1,
+     "gaussian",
+     "er",
+     0.2,
+     "random",
+     1
+    ],
+    "ok": true,
+    "acc": 0.8380624999999999,
+    "disagree": 0.06005663660531593,
+    "oracle_acc": 0.851,
+    "local_acc": 0.5814375,
+    "time": 0.0399632453918457
+   },
+   {
+    "scenario": [
+     "fmnist",
+     1,
+     "gaussian",
+     "er",
+     0.2,
+     "random",
+     2
+    ],
+    "ok": true,
+    "acc": 0.81975,
+    "disagree": 0.0912819087025382,
+    "oracle_acc": 0.844,
+    "local_acc": 0.579375,
+    "time": 0.03432297706604004
+   },
+   {
+    "scenario": [
+     "fmnist",
+     1,
+     "signflip",
+     "er",
+     0.2,
+     "random",
+     1
+    ],
+    "ok": true,
+    "acc": 0.8035,
+    "disagree": 0.07091944143935935,
+    "oracle_acc": 0.851,
+    "local_acc": 0.5814375,
+    "time": 0.03338193893432617
+   },
+   {
+    "scenario": [
+     "fmnist",
+     1,
+     "signflip",
+     "er",
+     0.2,
+     "random",
+     2
+    ],
+    "ok": true,
+    "acc": 0.775,
+    "disagree": 0.104080371258192,
+    "oracle_acc": 0.844,
+    "local_acc": 0.579375,
+    "time": 0.02632594108581543
+   },
+   {
+    "scenario": [
+     "fmnist",
+     1,
+     "labelflip",
+     "er",
+     0.2,
+     "random",
+     1
+    ],
+    "ok": true,
+    "acc": 0.7940625,
+    "disagree": 0.06331625105523747,
+    "oracle_acc": 0.851,
+    "local_acc": 0.5814375,
+    "time": 0.03399014472961426
+   },
+   {
+    "scenario": [
+     "fmnist",
+     1,
+     "labelflip",
+     "er",
+     0.2,
+     "random",
+     2
+    ],
+    "ok": true,
+    "acc": 0.79275,
+    "disagree": 0.08362300813708534,
+    "oracle_acc": 0.844,
+    "local_acc": 0.579375,
+    "time": 0.029616117477416992
+   },
+   {
+    "scenario": [
+     "fmnist",
+     1,
+     "alie",
+     "er",
+     0.2,
+     "random",
+     1
+    ],
+    "ok": true,
+    "acc": 0.8394999999999999,
+    "disagree": 0.047666245397593274,
+    "oracle_acc": 0.851,
+    "local_acc": 0.5814375,
+    "time": 0.04672408103942871
+   },
+   {
+    "scenario": [
+     "fmnist",
+     1,
+     "alie",
+     "er",
+     0.2,
+     "random",
+     2
+    ],
+    "ok": true,
+    "acc": 0.8220624999999999,
+    "disagree": 0.07476276299279254,
+    "oracle_acc": 0.844,
+    "local_acc": 0.579375,
+    "time": 0.08539581298828125
+   },
+   {
+    "scenario": [
+     "fmnist",
+     4,
+     "none",
+     "er",
+     0.2,
+     "random",
+     1
+    ],
+    "ok": true,
+    "acc": 0.8415625,
+    "disagree": 0.03894186981082956,
+    "oracle_acc": 0.86,
+    "local_acc": 0.7022499999999999,
+    "time": 0.027780771255493164
+   },
+   {
+    "scenario": [
+     "fmnist",
+     4,
+     "none",
+     "er",
+     0.2,
+     "random",
+     2
+    ],
+    "ok": true,
+    "acc": 0.8200624999999999,
+    "disagree": 0.07430934849339571,
+    "oracle_acc": 0.869,
+    "local_acc": 0.7090624999999999,
+    "time": 0.034157752990722656
+   },
+   {
+    "scenario": [
+     "fmnist",
+     4,
+     "gaussian",
+     "er",
+     0.2,
+     "random",
+     1
+    ],
+    "ok": true,
+    "acc": 0.8645625,
+    "disagree": 0.04656200811220975,
+    "oracle_acc": 0.86,
+    "local_acc": 0.7022499999999999,
+    "time": 0.03528904914855957
+   },
+   {
+    "scenario": [
+     "fmnist",
+     4,
+     "gaussian",
+     "er",
+     0.2,
+     "random",
+     2
+    ],
+    "ok": true,
+    "acc": 0.8548125,
+    "disagree": 0.07104432731916235,
+    "oracle_acc": 0.869,
+    "local_acc": 0.7090624999999999,
+    "time": 0.0586397647857666
+   },
+   {
+    "scenario": [
+     "fmnist",
+     4,
+     "signflip",
+     "er",
+     0.2,
+     "random",
+     1
+    ],
+    "ok": true,
+    "acc": 0.8534375000000001,
+    "disagree": 0.04534864053428759,
+    "oracle_acc": 0.86,
+    "local_acc": 0.7022499999999999,
+    "time": 0.03363204002380371
+   },
+   {
+    "scenario": [
+     "fmnist",
+     4,
+     "signflip",
+     "er",
+     0.2,
+     "random",
+     2
+    ],
+    "ok": true,
+    "acc": 0.848625,
+    "disagree": 0.07250706874656739,
+    "oracle_acc": 0.869,
+    "local_acc": 0.7090624999999999,
+    "time": 0.04636979103088379
+   },
+   {
+    "scenario": [
+     "fmnist",
+     4,
+     "labelflip",
+     "er",
+     0.2,
+     "random",
+     1
+    ],
+    "ok": true,
+    "acc": 0.8556875,
+    "disagree": 0.04982093863377145,
+    "oracle_acc": 0.86,
+    "local_acc": 0.7022499999999999,
+    "time": 0.08195781707763672
+   },
+   {
+    "scenario": [
+     "fmnist",
+     4,
+     "labelflip",
+     "er",
+     0.2,
+     "random",
+     2
+    ],
+    "ok": true,
+    "acc": 0.8541874999999999,
+    "disagree": 0.0682948701955964,
+    "oracle_acc": 0.869,
+    "local_acc": 0.7090624999999999,
+    "time": 0.04684805870056152
+   },
+   {
+    "scenario": [
+     "fmnist",
+     4,
+     "alie",
+     "er",
+     0.2,
+     "random",
+     1
+    ],
+    "ok": true,
+    "acc": 0.8652500000000001,
+    "disagree": 0.03350962887159234,
+    "oracle_acc": 0.86,
+    "local_acc": 0.7022499999999999,
+    "time": 0.09622478485107422
+   },
+   {
+    "scenario": [
+     "fmnist",
+     4,
+     "alie",
+     "er",
+     0.2,
+     "random",
+     2
+    ],
+    "ok": true,
+    "acc": 0.8586874999999999,
+    "disagree": 0.05259238650077863,
+    "oracle_acc": 0.869,
+    "local_acc": 0.7090624999999999,
+    "time": 0.045262813568115234
+   },
+   {
+    "scenario": [
+     "fmnist",
+     10,
+     "none",
+     "er",
+     0.2,
+     "random",
+     1
+    ],
+    "ok": true,
+    "acc": 0.858875,
+    "disagree": 0.02818285091002674,
+    "oracle_acc": 0.879,
+    "local_acc": 0.7844375,
+    "time": 0.0694580078125
+   },
+   {
+    "scenario": [
+     "fmnist",
+     10,
+     "none",
+     "er",
+     0.2,
+     "random",
+     2
+    ],
+    "ok": true,
+    "acc": 0.8553124999999999,
+    "disagree": 0.045293930825337045,
+    "oracle_acc": 0.881,
+    "local_acc": 0.791875,
+    "time": 0.03431987762451172
+   },
+   {
+    "scenario": [
+     "fmnist",
+     10,
+     "gaussian",
+     "er",
+     0.2,
+     "random",
+     1
+    ],
+    "ok": true,
+    "acc": 0.876625,
+    "disagree": 0.0365427461119546,
+    "oracle_acc": 0.879,
+    "local_acc": 0.7844375,
+    "time": 0.06277918815612793
+   },
+   {
+    "scenario": [
+     "fmnist",
+     10,
+     "gaussian",
+     "er",
+     0.2,
+     "random",
+     2
+    ],
+    "ok": true,
+    "acc": 0.876625,
+    "disagree": 0.050516022268698675,
+    "oracle_acc": 0.881,
+    "local_acc": 0.791875,
+    "time": 0.03525805473327637
+   },
+   {
+    "scenario": [
+     "fmnist",
+     10,
+     "signflip",
+     "er",
+     0.2,
+     "random",
+     1
+    ],
+    "ok": true,
+    "acc": 0.8761875,
+    "disagree": 0.03181053189130311,
+    "oracle_acc": 0.879,
+    "local_acc": 0.7844375,
+    "time": 0.0297849178314209
+   },
+   {
+    "scenario": [
+     "fmnist",
+     10,
+     "signflip",
+     "er",
+     0.2,
+     "random",
+     2
+    ],
+    "ok": true,
+    "acc": 0.8741875,
+    "disagree": 0.04725863648982599,
+    "oracle_acc": 0.881,
+    "local_acc": 0.791875,
+    "time": 0.03553891181945801
+   },
+   {
+    "scenario": [
+     "fmnist",
+     10,
+     "labelflip",
+     "er",
+     0.2,
+     "random",
+     1
+    ],
+    "ok": true,
+    "acc": 0.874625,
+    "disagree": 0.041036016947470146,
+    "oracle_acc": 0.879,
+    "local_acc": 0.7844375,
+    "time": 0.03308701515197754
+   },
+   {
+    "scenario": [
+     "fmnist",
+     10,
+     "labelflip",
+     "er",
+     0.2,
+     "random",
+     2
+    ],
+    "ok": true,
+    "acc": 0.874375,
+    "disagree": 0.047987778243557225,
+    "oracle_acc": 0.881,
+    "local_acc": 0.791875,
+    "time": 0.05337810516357422
+   },
+   {
+    "scenario": [
+     "fmnist",
+     10,
+     "alie",
+     "er",
+     0.2,
+     "random",
+     1
+    ],
+    "ok": true,
+    "acc": 0.8775625,
+    "disagree": 0.025560321216908627,
+    "oracle_acc": 0.879,
+    "local_acc": 0.7844375,
+    "time": 0.08408904075622559
+   },
+   {
+    "scenario": [
+     "fmnist",
+     10,
+     "alie",
+     "er",
+     0.2,
+     "random",
+     2
+    ],
+    "ok": true,
+    "acc": 0.8778125,
+    "disagree": 0.03517334268734152,
+    "oracle_acc": 0.881,
+    "local_acc": 0.791875,
+    "time": 0.038732051849365234
+   }
+  ]
+ },
+ "BALANCE": {
+  "summary": {
+   "mean_acc": 0.8311083333333334,
+   "worst_acc": 0.6301874999999999,
+   "score": 0.7306479166666666,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.7459791666666667,
+    "gaussian": 0.8641770833333332,
+    "signflip": 0.8641770833333332,
+    "labelflip": 0.8182187500000001,
+    "alie": 0.8629895833333334
+   }
+  },
+  "rows": [
+   {
+    "scenario": [
+     "fmnist",
+     1,
+     "none",
+     "er",
+     0.2,
+     "random",
+     1
+    ],
+    "ok": true,
+    "acc": 0.6301874999999999,
+    "disagree": 0.04602063429272672,
+    "oracle_acc": 0.851,
+    "local_acc": 0.5814375,
+    "time": 0.050330162048339844
+   },
+   {
+    "scenario": [
+     "fmnist",
+     1,
+     "none",
+     "er",
+     0.2,
+     "random",
+     2
+    ],
+    "ok": true,
+    "acc": 0.6908125,
+    "disagree": 0.08071467158330785,
+    "oracle_acc": 0.844,
+    "local_acc": 0.579375,
+    "time": 0.0299379825592041
+   },
+   {
+    "scenario": [
+     "fmnist",
+     1,
+     "gaussian",
+     "er",
+     0.2,
+     "random",
+     1
+    ],
+    "ok": true,
+    "acc": 0.8461875,
+    "disagree": 0.018469321682589405,
+    "oracle_acc": 0.851,
+    "local_acc": 0.5814375,
+    "time": 0.03368210792541504
+   },
+   {
+    "scenario": [
+     "fmnist",
+     1,
+     "gaussian",
+     "er",
+     0.2,
+     "random",
+     2
+    ],
+    "ok": true,
+    "acc": 0.845625,
+    "disagree": 0.02667142628909482,
+    "oracle_acc": 0.844,
+    "local_acc": 0.579375,
+    "time": 0.043663978576660156
+   },
+   {
+    "scenario": [
+     "fmnist",
+     1,
+     "signflip",
+     "er",
+     0.2,
+     "random",
+     1
+    ],
+    "ok": true,
+    "acc": 0.8461875,
+    "disagree": 0.018469321682589405,
+    "oracle_acc": 0.851,
+    "local_acc": 0.5814375,
+    "time": 0.043341875076293945
+   },
+   {
+    "scenario": [
+     "fmnist",
+     1,
+     "signflip",
+     "er",
+     0.2,
+     "random",
+     2
+    ],
+    "ok": true,
+    "acc": 0.845625,
+    "disagree": 0.02667142628909482,
+    "oracle_acc": 0.844,
+    "local_acc": 0.579375,
+    "time": 0.030074119567871094
+   },
+   {
+    "scenario": [
+     "fmnist",
+     1,
+     "labelflip",
+     "er",
+     0.2,
+     "random",
+     1
+    ],
+    "ok": true,
+    "acc": 0.7930625,
+    "disagree": 0.09707803139114796,
+    "oracle_acc": 0.851,
+    "local_acc": 0.5814375,
+    "time": 0.03624224662780762
+   },
+   {
+    "scenario": [
+     "fmnist",
+     1,
+     "labelflip",
+     "er",
+     0.2,
+     "random",
+     2
+    ],
+    "ok": true,
+    "acc": 0.8479375,
+    "disagree": 0.025146455141119104,
+    "oracle_acc": 0.844,
+    "local_acc": 0.579375,
+    "time": 0.03422689437866211
+   },
+   {
+    "scenario": [
+     "fmnist",
+     1,
+     "alie",
+     "er",
+     0.2,
+     "random",
+     1
+    ],
+    "ok": true,
+    "acc": 0.8450624999999999,
+    "disagree": 0.02325457950936037,
+    "oracle_acc": 0.851,
+    "local_acc": 0.5814375,
+    "time": 0.04127001762390137
+   },
+   {
+    "scenario": [
+     "fmnist",
+     1,
+     "alie",
+     "er",
+     0.2,
+     "random",
+     2
+    ],
+    "ok": true,
+    "acc": 0.84,
+    "disagree": 0.038559452991263864,
+    "oracle_acc": 0.844,
+    "local_acc": 0.579375,
+    "time": 0.04234170913696289
+   },
+   {
+    "scenario": [
+     "fmnist",
+     4,
+     "none",
+     "er",
+     0.2,
+     "random",
+     1
+    ],
+    "ok": true,
+    "acc": 0.754375,
+    "disagree": 0.0340122067026402,
+    "oracle_acc": 0.86,
+    "local_acc": 0.7022499999999999,
+    "time": 0.026665925979614258
+   },
+   {
+    "scenario": [
+     "fmnist",
+     4,
+     "none",
+     "er",
+     0.2,
+     "random",
+     2
+    ],
+    "ok": true,
+    "acc": 0.758875,
+    "disagree": 0.0766658227672968,
+    "oracle_acc": 0.869,
+    "local_acc": 0.7090624999999999,
+    "time": 0.0218660831451416
+   },
+   {
+    "scenario": [
+     "fmnist",
+     4,
+     "gaussian",
+     "er",
+     0.2,
+     "random",
+     1
+    ],
+    "ok": true,
+    "acc": 0.8665624999999999,
+    "disagree": 0.012977753158934425,
+    "oracle_acc": 0.86,
+    "local_acc": 0.7022499999999999,
+    "time": 0.032688140869140625
+   },
+   {
+    "scenario": [
+     "fmnist",
+     4,
+     "gaussian",
+     "er",
+     0.2,
+     "random",
+     2
+    ],
+    "ok": true,
+    "acc": 0.867875,
+    "disagree": 0.021397728320968055,
+    "oracle_acc": 0.869,
+    "local_acc": 0.7090624999999999,
+    "time": 0.03246498107910156
+   },
+   {
+    "scenario": [
+     "fmnist",
+     4,
+     "signflip",
+     "er",
+     0.2,
+     "random",
+     1
+    ],
+    "ok": true,
+    "acc": 0.8665624999999999,
+    "disagree": 0.012977753158934425,
+    "oracle_acc": 0.86,
+    "local_acc": 0.7022499999999999,
+    "time": 0.028370141983032227
+   },
+   {
+    "scenario": [
+     "fmnist",
+     4,
+     "signflip",
+     "er",
+     0.2,
+     "random",
+     2
+    ],
+    "ok": true,
+    "acc": 0.867875,
+    "disagree": 0.021397728320968055,
+    "oracle_acc": 0.869,
+    "local_acc": 0.7090624999999999,
+    "time": 0.023020029067993164
+   },
+   {
+    "scenario": [
+     "fmnist",
+     4,
+     "labelflip",
+     "er",
+     0.2,
+     "random",
+     1
+    ],
+    "ok": true,
+    "acc": 0.8086875,
+    "disagree": 0.09448069789871272,
+    "oracle_acc": 0.86,
+    "local_acc": 0.7022499999999999,
+    "time": 0.02873086929321289
+   },
+   {
+    "scenario": [
+     "fmnist",
+     4,
+     "labelflip",
+     "er",
+     0.2,
+     "random",
+     2
+    ],
+    "ok": true,
+    "acc": 0.8656874999999999,
+    "disagree": 0.020420508296607714,
+    "oracle_acc": 0.869,
+    "local_acc": 0.7090624999999999,
+    "time": 0.02580881118774414
+   },
+   {
+    "scenario": [
+     "fmnist",
+     4,
+     "alie",
+     "er",
+     0.2,
+     "random",
+     1
+    ],
+    "ok": true,
+    "acc": 0.86775,
+    "disagree": 0.01591648382736182,
+    "oracle_acc": 0.86,
+    "local_acc": 0.7022499999999999,
+    "time": 0.04138326644897461
+   },
+   {
+    "scenario": [
+     "fmnist",
+     4,
+     "alie",
+     "er",
+     0.2,
+     "random",
+     2
+    ],
+    "ok": true,
+    "acc": 0.866125,
+    "disagree": 0.025328618847633416,
+    "oracle_acc": 0.869,
+    "local_acc": 0.7090624999999999,
+    "time": 0.05527925491333008
+   },
+   {
+    "scenario": [
+     "fmnist",
+     10,
+     "none",
+     "er",
+     0.2,
+     "random",
+     1
+    ],
+    "ok": true,
+    "acc": 0.8285,
+    "disagree": 0.023482562440862224,
+    "oracle_acc": 0.879,
+    "local_acc": 0.7844375,
+    "time": 0.024536848068237305
+   },
+   {
+    "scenario": [
+     "fmnist",
+     10,
+     "none",
+     "er",
+     0.2,
+     "random",
+     2
+    ],
+    "ok": true,
+    "acc": 0.813125,
+    "disagree": 0.04831280960904962,
+    "oracle_acc": 0.881,
+    "local_acc": 0.791875,
+    "time": 0.026584148406982422
+   },
+   {
+    "scenario": [
+     "fmnist",
+     10,
+     "gaussian",
+     "er",
+     0.2,
+     "random",
+     1
+    ],
+    "ok": true,
+    "acc": 0.8788750000000001,
+    "disagree": 0.010056358082217484,
+    "oracle_acc": 0.879,
+    "local_acc": 0.7844375,
+    "time": 0.03242182731628418
+   },
+   {
+    "scenario": [
+     "fmnist",
+     10,
+     "gaussian",
+     "er",
+     0.2,
+     "random",
+     2
+    ],
+    "ok": true,
+    "acc": 0.8799375,
+    "disagree": 0.01665946371098792,
+    "oracle_acc": 0.881,
+    "local_acc": 0.791875,
+    "time": 0.04867696762084961
+   },
+   {
+    "scenario": [
+     "fmnist",
+     10,
+     "signflip",
+     "er",
+     0.2,
+     "random",
+     1
+    ],
+    "ok": true,
+    "acc": 0.8788750000000001,
+    "disagree": 0.010056358082217484,
+    "oracle_acc": 0.879,
+    "local_acc": 0.7844375,
+    "time": 0.04153800010681152
+   },
+   {
+    "scenario": [
+     "fmnist",
+     10,
+     "signflip",
+     "er",
+     0.2,
+     "random",
+     2
+    ],
+    "ok": true,
+    "acc": 0.8799375,
+    "disagree": 0.01665946371098792,
+    "oracle_acc": 0.881,
+    "local_acc": 0.791875,
+    "time": 0.024100065231323242
+   },
+   {
+    "scenario": [
+     "fmnist",
+     10,
+     "labelflip",
+     "er",
+     0.2,
+     "random",
+     1
+    ],
+    "ok": true,
+    "acc": 0.8235625,
+    "disagree": 0.09517157180547219,
+    "oracle_acc": 0.879,
+    "local_acc": 0.7844375,
+    "time": 0.04051613807678223
+   },
+   {
+    "scenario": [
+     "fmnist",
+     10,
+     "labelflip",
+     "er",
+     0.2,
+     "random",
+     2
+    ],
+    "ok": true,
+    "acc": 0.770375,
+    "disagree": 0.14408864780910308,
+    "oracle_acc": 0.881,
+    "local_acc": 0.791875,
+    "time": 0.020100116729736328
+   },
+   {
+    "scenario": [
+     "fmnist",
+     10,
+     "alie",
+     "er",
+     0.2,
+     "random",
+     1
+    ],
+    "ok": true,
+    "acc": 0.8788125,
+    "disagree": 0.011886296752948451,
+    "oracle_acc": 0.879,
+    "local_acc": 0.7844375,
+    "time": 0.033251047134399414
+   },
+   {
+    "scenario": [
+     "fmnist",
+     10,
+     "alie",
+     "er",
+     0.2,
+     "random",
+     2
+    ],
+    "ok": true,
+    "acc": 0.8801875,
+    "disagree": 0.018538532623617,
+    "oracle_acc": 0.881,
+    "local_acc": 0.791875,
+    "time": 0.03334617614746094
+   }
+  ]
+ },
+ "Huber-IRLS": {
+  "summary": {
+   "mean_acc": 0.7900416666666669,
+   "worst_acc": 0.5389999999999999,
+   "score": 0.6645208333333334,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.79696875,
+    "gaussian": 0.8400833333333333,
+    "signflip": 0.7357083333333333,
+    "labelflip": 0.7133333333333333,
+    "alie": 0.8641145833333334
+   }
+  },
+  "rows": [
+   {
+    "scenario": [
+     "fmnist",
+     1,
+     "none",
+     "er",
+     0.2,
+     "random",
+     1
+    ],
+    "ok": true,
+    "acc": 0.73875,
+    "disagree": 0.038606643949582506,
+    "oracle_acc": 0.851,
+    "local_acc": 0.5814375,
+    "time": 0.22385597229003906
+   },
+   {
+    "scenario": [
+     "fmnist",
+     1,
+     "none",
+     "er",
+     0.2,
+     "random",
+     2
+    ],
+    "ok": true,
+    "acc": 0.7371875000000001,
+    "disagree": 0.10731330274887432,
+    "oracle_acc": 0.844,
+    "local_acc": 0.579375,
+    "time": 0.23261070251464844
+   },
+   {
+    "scenario": [
+     "fmnist",
+     1,
+     "gaussian",
+     "er",
+     0.2,
+     "random",
+     1
+    ],
+    "ok": true,
+    "acc": 0.8035,
+    "disagree": 0.07677163887062287,
+    "oracle_acc": 0.851,
+    "local_acc": 0.5814375,
+    "time": 0.2579529285430908
+   },
+   {
+    "scenario": [
+     "fmnist",
+     1,
+     "gaussian",
+     "er",
+     0.2,
+     "random",
+     2
+    ],
+    "ok": true,
+    "acc": 0.829,
+    "disagree": 0.07761649362154555,
+    "oracle_acc": 0.844,
+    "local_acc": 0.579375,
+    "time": 0.2555572986602783
+   },
+   {
+    "scenario": [
+     "fmnist",
+     1,
+     "signflip",
+     "er",
+     0.2,
+     "random",
+     1
+    ],
+    "ok": true,
+    "acc": 0.7738749999999999,
+    "disagree": 0.07142911863641642,
+    "oracle_acc": 0.851,
+    "local_acc": 0.5814375,
+    "time": 0.22181987762451172
+   },
+   {
+    "scenario": [
+     "fmnist",
+     1,
+     "signflip",
+     "er",
+     0.2,
+     "random",
+     2
+    ],
+    "ok": true,
+    "acc": 0.6101875,
+    "disagree": 0.20775416858074028,
+    "oracle_acc": 0.844,
+    "local_acc": 0.579375,
+    "time": 0.23615097999572754
+   },
+   {
+    "scenario": [
+     "fmnist",
+     1,
+     "labelflip",
+     "er",
+     0.2,
+     "random",
+     1
+    ],
+    "ok": true,
+    "acc": 0.7865624999999999,
+    "disagree": 0.08470403267581247,
+    "oracle_acc": 0.851,
+    "local_acc": 0.5814375,
+    "time": 0.23032712936401367
+   },
+   {
+    "scenario": [
+     "fmnist",
+     1,
+     "labelflip",
+     "er",
+     0.2,
+     "random",
+     2
+    ],
+    "ok": true,
+    "acc": 0.5389999999999999,
+    "disagree": 0.17959612188456991,
+    "oracle_acc": 0.844,
+    "local_acc": 0.579375,
+    "time": 0.2516310214996338
+   },
+   {
+    "scenario": [
+     "fmnist",
+     1,
+     "alie",
+     "er",
+     0.2,
+     "random",
+     1
+    ],
+    "ok": true,
+    "acc": 0.8470625,
+    "disagree": 0.005822277633947543,
+    "oracle_acc": 0.851,
+    "local_acc": 0.5814375,
+    "time": 0.22997713088989258
+   },
+   {
+    "scenario": [
+     "fmnist",
+     1,
+     "alie",
+     "er",
+     0.2,
+     "random",
+     2
+    ],
+    "ok": true,
+    "acc": 0.837625,
+    "disagree": 0.03567560002639995,
+    "oracle_acc": 0.844,
+    "local_acc": 0.579375,
+    "time": 0.21129608154296875
+   },
+   {
+    "scenario": [
+     "fmnist",
+     4,
+     "none",
+     "er",
+     0.2,
+     "random",
+     1
+    ],
+    "ok": true,
+    "acc": 0.8246875,
+    "disagree": 0.02972126378290307,
+    "oracle_acc": 0.86,
+    "local_acc": 0.7022499999999999,
+    "time": 0.20964789390563965
+   },
+   {
+    "scenario": [
+     "fmnist",
+     4,
+     "none",
+     "er",
+     0.2,
+     "random",
+     2
+    ],
+    "ok": true,
+    "acc": 0.7956875,
+    "disagree": 0.09565266163370197,
+    "oracle_acc": 0.869,
+    "local_acc": 0.7090624999999999,
+    "time": 0.20578885078430176
+   },
+   {
+    "scenario": [
+     "fmnist",
+     4,
+     "gaussian",
+     "er",
+     0.2,
+     "random",
+     1
+    ],
+    "ok": true,
+    "acc": 0.82475,
+    "disagree": 0.08085748756020092,
+    "oracle_acc": 0.86,
+    "local_acc": 0.7022499999999999,
+    "time": 0.24039292335510254
+   },
+   {
+    "scenario": [
+     "fmnist",
+     4,
+     "gaussian",
+     "er",
+     0.2,
+     "random",
+     2
+    ],
+    "ok": true,
+    "acc": 0.8667499999999999,
+    "disagree": 0.060564674031498705,
+    "oracle_acc": 0.869,
+    "local_acc": 0.7090624999999999,
+    "time": 0.2209630012512207
+   },
+   {
+    "scenario": [
+     "fmnist",
+     4,
+     "signflip",
+     "er",
+     0.2,
+     "random",
+     1
+    ],
+    "ok": true,
+    "acc": 0.81075,
+    "disagree": 0.07659937260494652,
+    "oracle_acc": 0.86,
+    "local_acc": 0.7022499999999999,
+    "time": 0.21262097358703613
+   },
+   {
+    "scenario": [
+     "fmnist",
+     4,
+     "signflip",
+     "er",
+     0.2,
+     "random",
+     2
+    ],
+    "ok": true,
+    "acc": 0.6792499999999999,
+    "disagree": 0.2538383243430103,
+    "oracle_acc": 0.869,
+    "local_acc": 0.7090624999999999,
+    "time": 0.19318795204162598
+   },
+   {
+    "scenario": [
+     "fmnist",
+     4,
+     "labelflip",
+     "er",
+     0.2,
+     "random",
+     1
+    ],
+    "ok": true,
+    "acc": 0.80475,
+    "disagree": 0.0878413043115743,
+    "oracle_acc": 0.86,
+    "local_acc": 0.7022499999999999,
+    "time": 0.19620466232299805
+   },
+   {
+    "scenario": [
+     "fmnist",
+     4,
+     "labelflip",
+     "er",
+     0.2,
+     "random",
+     2
+    ],
+    "ok": true,
+    "acc": 0.652375,
+    "disagree": 0.1976420087706796,
+    "oracle_acc": 0.869,
+    "local_acc": 0.7090624999999999,
+    "time": 0.2101128101348877
+   },
+   {
+    "scenario": [
+     "fmnist",
+     4,
+     "alie",
+     "er",
+     0.2,
+     "random",
+     1
+    ],
+    "ok": true,
+    "acc": 0.8691875,
+    "disagree": 0.004257258834676279,
+    "oracle_acc": 0.86,
+    "local_acc": 0.7022499999999999,
+    "time": 0.20636701583862305
+   },
+   {
+    "scenario": [
+     "fmnist",
+     4,
+     "alie",
+     "er",
+     0.2,
+     "random",
+     2
+    ],
+    "ok": true,
+    "acc": 0.8663125,
+    "disagree": 0.023209773858970835,
+    "oracle_acc": 0.869,
+    "local_acc": 0.7090624999999999,
+    "time": 0.23433303833007812
+   },
+   {
+    "scenario": [
+     "fmnist",
+     10,
+     "none",
+     "er",
+     0.2,
+     "random",
+     1
+    ],
+    "ok": true,
+    "acc": 0.85075,
+    "disagree": 0.018524236936596473,
+    "oracle_acc": 0.879,
+    "local_acc": 0.7844375,
+    "time": 0.19362926483154297
+   },
+   {
+    "scenario": [
+     "fmnist",
+     10,
+     "none",
+     "er",
+     0.2,
+     "random",
+     2
+    ],
+    "ok": true,
+    "acc": 0.83475,
+    "disagree": 0.057088611949478583,
+    "oracle_acc": 0.881,
+    "local_acc": 0.791875,
+    "time": 0.20978093147277832
+   },
+   {
+    "scenario": [
+     "fmnist",
+     10,
+     "gaussian",
+     "er",
+     0.2,
+     "random",
+     1
+    ],
+    "ok": true,
+    "acc": 0.8375,
+    "disagree": 0.08484945501518759,
+    "oracle_acc": 0.879,
+    "local_acc": 0.7844375,
+    "time": 0.22440004348754883
+   },
+   {
+    "scenario": [
+     "fmnist",
+     10,
+     "gaussian",
+     "er",
+     0.2,
+     "random",
+     2
+    ],
+    "ok": true,
+    "acc": 0.879,
+    "disagree": 0.04345662814944793,
+    "oracle_acc": 0.881,
+    "local_acc": 0.791875,
+    "time": 0.24180197715759277
+   },
+   {
+    "scenario": [
+     "fmnist",
+     10,
+     "signflip",
+     "er",
+     0.2,
+     "random",
+     1
+    ],
+    "ok": true,
+    "acc": 0.8333124999999999,
+    "disagree": 0.08282768090974421,
+    "oracle_acc": 0.879,
+    "local_acc": 0.7844375,
+    "time": 0.2588329315185547
+   },
+   {
+    "scenario": [
+     "fmnist",
+     10,
+     "signflip",
+     "er",
+     0.2,
+     "random",
+     2
+    ],
+    "ok": true,
+    "acc": 0.706875,
+    "disagree": 0.28034191860104546,
+    "oracle_acc": 0.881,
+    "local_acc": 0.791875,
+    "time": 0.2976710796356201
+   },
+   {
+    "scenario": [
+     "fmnist",
+     10,
+     "labelflip",
+     "er",
+     0.2,
+     "random",
+     1
+    ],
+    "ok": true,
+    "acc": 0.8255,
+    "disagree": 0.09550745255458354,
+    "oracle_acc": 0.879,
+    "local_acc": 0.7844375,
+    "time": 0.383944034576416
+   },
+   {
+    "scenario": [
+     "fmnist",
+     10,
+     "labelflip",
+     "er",
+     0.2,
+     "random",
+     2
+    ],
+    "ok": true,
+    "acc": 0.6718124999999999,
+    "disagree": 0.20649109608660599,
+    "oracle_acc": 0.881,
+    "local_acc": 0.791875,
+    "time": 0.19919681549072266
+   },
+   {
+    "scenario": [
+     "fmnist",
+     10,
+     "alie",
+     "er",
+     0.2,
+     "random",
+     1
+    ],
+    "ok": true,
+    "acc": 0.883375,
+    "disagree": 0.004136605334882973,
+    "oracle_acc": 0.879,
+    "local_acc": 0.7844375,
+    "time": 0.3937380313873291
+   },
+   {
+    "scenario": [
+     "fmnist",
+     10,
+     "alie",
+     "er",
+     0.2,
+     "random",
+     2
+    ],
+    "ok": true,
+    "acc": 0.8811249999999999,
+    "disagree": 0.018259830103216138,
+    "oracle_acc": 0.881,
+    "local_acc": 0.791875,
+    "time": 0.2062990665435791
+   }
+  ]
+ }
+}

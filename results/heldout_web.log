@@ -1,0 +1,17 @@
+Mean           mean=0.480 min=0.048 none=0.740 drift=0.764 fail=0
+CW-Median      mean=0.742 min=0.120 none=0.799 drift=0.748 fail=0
+BRIDGE-T       mean=0.785 min=0.183 none=0.841 drift=0.772 fail=0
+Krum           mean=0.707 min=0.244 none=0.728 drift=0.613 fail=0
+GeoMed         mean=0.850 min=0.210 none=0.885 drift=0.746 fail=0
+ClippedGossip  mean=0.891 min=0.283 none=0.914 drift=0.793 fail=0
+BALANCE        mean=0.891 min=0.067 none=0.833 drift=0.821 fail=0
+Huber-IRLS     mean=0.847 min=0.084 none=0.862 drift=0.793 fail=0
+ARCO-G         mean=0.901 min=0.176 none=0.946 drift=0.697 fail=0
+ARCO-B         mean=0.891 min=0.129 none=0.899 drift=0.853 fail=0
+ARCO-H         mean=0.888 min=0.140 none=0.899 drift=0.791 fail=0
+LLM-A          mean=0.918 min=0.244 none=0.933 drift=0.725 fail=0
+LLM-B          mean=0.860 min=0.067 none=0.848 drift=0.677 fail=0
+LLM-C          mean=0.840 min=0.257 none=0.872 drift=0.751 fail=0
+LLM-H          mean=0.897 min=0.351 none=0.942 drift=0.757 fail=0
+Rand24first    mean=0.808 min=0.206 none=0.839 drift=0.673 fail=0
+Rand200        mean=0.851 min=0.156 none=0.902 drift=0.787 fail=0

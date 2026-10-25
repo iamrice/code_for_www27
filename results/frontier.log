@@ -1,0 +1,60 @@
+ARCO huber self q0.25 d0.5 k0.0    val=0.7775 drift40=0.909 drift10=0.944 none40=0.938
+ARCO huber self q0.25 d0.5 k0.1    val=0.7911 drift40=0.926 drift10=0.951 none40=0.936
+ARCO huber self q0.25 d1.0 k0.0    val=0.7541 drift40=0.923 drift10=0.948 none40=0.931
+ARCO huber self q0.25 d1.0 k0.1    val=0.7729 drift40=0.929 drift10=0.953 none40=0.927
+ARCO huber self q0.25 d2.0 k0.0    val=0.3964 drift40=0.968 drift10=0.983 none40=0.847
+ARCO huber self q0.25 d2.0 k0.1    val=0.4534 drift40=0.973 drift10=0.985 none40=0.849
+ARCO huber self q0.5 d0.5 k0.0     val=0.7632 drift40=0.914 drift10=0.945 none40=0.925
+ARCO huber self q0.5 d0.5 k0.1     val=0.7714 drift40=0.928 drift10=0.954 none40=0.929
+ARCO huber self q0.5 d1.0 k0.0     val=0.6606 drift40=0.953 drift10=0.968 none40=0.895
+ARCO huber self q0.5 d1.0 k0.1     val=0.7062 drift40=0.950 drift10=0.971 none40=0.910
+ARCO huber self q0.5 d2.0 k0.0     val=0.2961 drift40=0.969 drift10=0.985 none40=0.793
+ARCO huber self q0.5 d2.0 k0.1     val=0.3237 drift40=0.975 drift10=0.987 none40=0.811
+ARCO huber median q0.25 d0.5 k0.0  val=0.7545 drift40=0.913 drift10=0.938 none40=0.930
+ARCO huber median q0.25 d0.5 k0.1  val=0.7692 drift40=0.922 drift10=0.943 none40=0.935
+ARCO huber median q0.25 d1.0 k0.0  val=0.7348 drift40=0.917 drift10=0.935 none40=0.925
+ARCO huber median q0.25 d1.0 k0.1  val=0.7435 drift40=0.925 drift10=0.939 none40=0.928
+ARCO huber median q0.25 d2.0 k0.0  val=0.4785 drift40=0.964 drift10=0.970 none40=0.875
+ARCO huber median q0.25 d2.0 k0.1  val=0.5459 drift40=0.964 drift10=0.971 none40=0.879
+ARCO huber median q0.5 d0.5 k0.0   val=0.7429 drift40=0.919 drift10=0.936 none40=0.919
+ARCO huber median q0.5 d0.5 k0.1   val=0.7638 drift40=0.921 drift10=0.941 none40=0.930
+ARCO huber median q0.5 d1.0 k0.0   val=0.6743 drift40=0.942 drift10=0.950 none40=0.898
+ARCO huber median q0.5 d1.0 k0.1   val=0.7121 drift40=0.938 drift10=0.952 none40=0.912
+ARCO huber median q0.5 d2.0 k0.0   val=0.3202 drift40=0.965 drift10=0.974 none40=0.794
+ARCO huber median q0.5 d2.0 k0.1   val=0.3540 drift40=0.966 drift10=0.974 none40=0.817
+ARCO log self q0.25 d0.5 k0.0      val=0.8215 drift40=0.758 drift10=0.855 none40=0.972
+ARCO log self q0.25 d0.5 k0.1      val=0.8080 drift40=0.830 drift10=0.883 none40=0.968
+ARCO log self q0.25 d1.0 k0.0      val=0.8124 drift40=0.844 drift10=0.881 none40=0.957
+ARCO log self q0.25 d1.0 k0.1      val=0.8125 drift40=0.832 drift10=0.892 none40=0.963
+ARCO log self q0.25 d2.0 k0.0      val=0.7091 drift40=0.964 drift10=0.980 none40=0.926
+ARCO log self q0.25 d2.0 k0.1      val=0.7537 drift40=0.964 drift10=0.982 none40=0.947
+ARCO log self q0.5 d0.5 k0.0       val=0.8220 drift40=0.776 drift10=0.854 none40=0.974
+ARCO log self q0.5 d0.5 k0.1       val=0.8222 drift40=0.843 drift10=0.880 none40=0.984
+ARCO log self q0.5 d1.0 k0.0       val=0.7626 drift40=0.933 drift10=0.943 none40=0.945
+ARCO log self q0.5 d1.0 k0.1       val=0.7712 drift40=0.923 drift10=0.944 none40=0.960
+ARCO log self q0.5 d2.0 k0.0       val=0.4690 drift40=0.966 drift10=0.983 none40=0.824
+ARCO log self q0.5 d2.0 k0.1       val=0.6051 drift40=0.972 drift10=0.986 none40=0.844
+ARCO log median q0.25 d0.5 k0.0    val=0.7945 drift40=0.884 drift10=0.919 none40=0.948
+ARCO log median q0.25 d0.5 k0.1    val=0.7943 drift40=0.889 drift10=0.924 none40=0.954
+ARCO log median q0.25 d1.0 k0.0    val=0.7949 drift40=0.884 drift10=0.902 none40=0.948
+ARCO log median q0.25 d1.0 k0.1    val=0.7962 drift40=0.872 drift10=0.907 none40=0.957
+ARCO log median q0.25 d2.0 k0.0    val=0.7282 drift40=0.952 drift10=0.958 none40=0.943
+ARCO log median q0.25 d2.0 k0.1    val=0.7326 drift40=0.934 drift10=0.960 none40=0.955
+ARCO log median q0.5 d0.5 k0.0     val=0.7924 drift40=0.879 drift10=0.908 none40=0.947
+ARCO log median q0.5 d0.5 k0.1     val=0.7983 drift40=0.886 drift10=0.916 none40=0.957
+ARCO log median q0.5 d1.0 k0.0     val=0.7589 drift40=0.918 drift10=0.928 none40=0.942
+ARCO log median q0.5 d1.0 k0.1     val=0.7650 drift40=0.918 drift10=0.930 none40=0.956
+ARCO log median q0.5 d2.0 k0.0     val=0.6673 drift40=0.963 drift10=0.966 none40=0.892
+ARCO log median q0.5 d2.0 k0.1     val=0.7025 drift40=0.956 drift10=0.967 none40=0.934
+Mean                               val=0.1907 drift40=0.888 drift10=0.987 none40=0.820
+CW-Median                          val=0.7472 drift40=0.924 drift10=0.928 none40=0.941
+BRIDGE-T                           val=0.7013 drift40=0.902 drift10=0.928 none40=0.931
+Krum                               val=0.6882 drift40=0.756 drift10=0.795 none40=0.901
+GeoMed                             val=0.7641 drift40=0.908 drift10=0.918 none40=0.926
+ClippedGossip                      val=0.8049 drift40=0.928 drift10=0.948 none40=0.942
+BALANCE                            val=0.7306 drift40=0.969 drift10=0.987 none40=0.820
+Huber-IRLS                         val=0.6645 drift40=0.929 drift10=0.941 none40=0.914
+LLM-A                              val=0.8113 drift40=0.829 drift10=0.880 none40=0.955
+LLM-B                              val=0.7989 drift40=0.926 drift10=0.942 none40=0.939
+LLM-C                              val=0.7983 drift40=0.926 drift10=0.932 none40=0.950
+LLM-H                              val=0.8043 drift40=0.891 drift10=0.894 none40=0.957

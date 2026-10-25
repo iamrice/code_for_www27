@@ -1,0 +1,138 @@
+=== Local_none 07:31:45
+FINAL {"acc_honest": 0.32925623655319214, "acc_min": 0.2159000039100647, "acc_noisy": 0.2211500108242035, "comm_floats_per_link": 0, "n_params": 545098, "time": 120.4444432258606}
+=== LLM-A_ipm 07:33:58
+FINAL {"acc_honest": 0.3391125202178955, "acc_min": 0.23520000278949738, "acc_noisy": 0.25075000524520874, "comm_floats_per_link": 2000000, "n_params": 545098, "time": 203.90192699432373}
+=== ClippedGossip_ipm 07:37:27
+FINAL {"acc_honest": 0.43450623750686646, "acc_min": 0.35179999470710754, "acc_noisy": 0.3585750162601471, "comm_floats_per_link": 2000000, "n_params": 545098, "time": 183.7182331085205}
+=== BALANCE_ipm 07:40:36
+FINAL {"acc_honest": 0.4357062578201294, "acc_min": 0.3492000102996826, "acc_noisy": 0.35625001788139343, "comm_floats_per_link": 2000000, "n_params": 545098, "time": 189.15200996398926}
+=== GeoMed_ipm 07:43:50
+FINAL {"acc_honest": 0.43098747730255127, "acc_min": 0.34290000796318054, "acc_noisy": 0.35087502002716064, "comm_floats_per_link": 2000000, "n_params": 545098, "time": 196.92819619178772}
+=== LLM-H_ipm 07:47:14
+FINAL {"acc_honest": 0.40108126401901245, "acc_min": 0.19089999794960022, "acc_noisy": 0.2993749976158142, "comm_floats_per_link": 2000000, "n_params": 545098, "time": 189.4273009300232}
+=== Rand200_ipm 07:50:29
+FINAL {"acc_honest": 0.43280625343322754, "acc_min": 0.35010001063346863, "acc_noisy": 0.35575002431869507, "comm_floats_per_link": 2000000, "n_params": 545098, "time": 187.13452696800232}
+=== BRIDGE-T_ipm 07:53:41
+FINAL {"acc_honest": 0.4312562644481659, "acc_min": 0.3422999978065491, "acc_noisy": 0.34815001487731934, "comm_floats_per_link": 2000000, "n_params": 545098, "time": 183.75386714935303}
+=== CW-Median_ipm 07:56:50
+FINAL {"acc_honest": 0.4341000020503998, "acc_min": 0.33489999175071716, "acc_noisy": 0.3390750288963318, "comm_floats_per_link": 2000000, "n_params": 545098, "time": 183.78450202941895}
+=== Mean_ipm 08:00:02
+FINAL {"acc_honest": 0.4370437562465668, "acc_min": 0.35109999775886536, "acc_noisy": 0.3559499979019165, "comm_floats_per_link": 2000000, "n_params": 545098, "time": 180.31673073768616}
+=== LLM-A_dissensus 08:03:10
+FINAL {"acc_honest": 0.35167500376701355, "acc_min": 0.15049999952316284, "acc_noisy": 0.27172499895095825, "comm_floats_per_link": 2000000, "n_params": 545098, "time": 191.05772376060486}
+=== ClippedGossip_dissensus 08:06:26
+FINAL {"acc_honest": 0.41122502088546753, "acc_min": 0.22779999673366547, "acc_noisy": 0.31485000252723694, "comm_floats_per_link": 2000000, "n_params": 545098, "time": 180.86719632148743}
+=== BALANCE_dissensus 08:09:32
+FINAL {"acc_honest": 0.41609376668930054, "acc_min": 0.33550000190734863, "acc_noisy": 0.3429499864578247, "comm_floats_per_link": 2000000, "n_params": 545098, "time": 190.59914803504944}
+=== GeoMed_dissensus 08:12:48
+FINAL {"acc_honest": 0.39323124289512634, "acc_min": 0.2093999981880188, "acc_noisy": 0.30559998750686646, "comm_floats_per_link": 2000000, "n_params": 545098, "time": 207.7843759059906}
+=== LLM-H_dissensus 08:16:22
+FINAL {"acc_honest": 0.4369312524795532, "acc_min": 0.3508000075817108, "acc_noisy": 0.359250009059906, "comm_floats_per_link": 2000000, "n_params": 545098, "time": 187.18298196792603}
+=== Rand200_dissensus 08:19:34
+FINAL {"acc_honest": 0.3004937469959259, "acc_min": 0.14219999313354492, "acc_noisy": 0.22077500820159912, "comm_floats_per_link": 2000000, "n_params": 545098, "time": 184.61482405662537}
+=== BRIDGE-T_dissensus 08:22:46
+FINAL {"acc_honest": 0.4142249822616577, "acc_min": 0.18880000710487366, "acc_noisy": 0.31299999356269836, "comm_floats_per_link": 2000000, "n_params": 545098, "time": 182.3969669342041}
+=== CW-Median_dissensus 08:25:58
+FINAL {"acc_honest": 0.40674999356269836, "acc_min": 0.19789999723434448, "acc_noisy": 0.30627501010894775, "comm_floats_per_link": 2000000, "n_params": 545098, "time": 181.12498784065247}
+=== Mean_dissensus 08:29:06
+FINAL {"acc_honest": 0.3116687536239624, "acc_min": 0.18729999661445618, "acc_noisy": 0.2292499989271164, "comm_floats_per_link": 2000000, "n_params": 545098, "time": 179.79628992080688}
+=== LLM-A_targeted 08:32:13
+FINAL {"acc_honest": 0.41568124294281006, "acc_min": 0.3249000012874603, "acc_noisy": 0.3317999839782715, "comm_floats_per_link": 2000000, "n_params": 545098, "time": 185.3393850326538}
+=== ClippedGossip_targeted 08:35:25
+FINAL {"acc_honest": 0.39361876249313354, "acc_min": 0.30709999799728394, "acc_noisy": 0.3152250051498413, "comm_floats_per_link": 2000000, "n_params": 545098, "time": 181.87468910217285}
+=== BALANCE_targeted 08:38:32
+FINAL {"acc_honest": 0.4308375120162964, "acc_min": 0.3427000045776367, "acc_noisy": 0.3453750014305115, "comm_floats_per_link": 2000000, "n_params": 545098, "time": 176.3273708820343}
+=== GeoMed_targeted 08:41:33
+FINAL {"acc_honest": 0.37475624680519104, "acc_min": 0.27059999108314514, "acc_noisy": 0.3017750084400177, "comm_floats_per_link": 2000000, "n_params": 545098, "time": 192.0336422920227}
+=== LLM-H_targeted 08:44:50
+FINAL {"acc_honest": 0.43534374237060547, "acc_min": 0.34940001368522644, "acc_noisy": 0.35750001668930054, "comm_floats_per_link": 2000000, "n_params": 545098, "time": 180.09015083312988}
+=== Rand200_targeted 08:47:56
+FINAL {"acc_honest": 0.40460625290870667, "acc_min": 0.16339999437332153, "acc_noisy": 0.3034999966621399, "comm_floats_per_link": 2000000, "n_params": 545098, "time": 178.6843888759613}
+=== BRIDGE-T_targeted 08:50:59
+FINAL {"acc_honest": 0.34571248292922974, "acc_min": 0.25760000944137573, "acc_noisy": 0.28437501192092896, "comm_floats_per_link": 2000000, "n_params": 545098, "time": 181.02972221374512}
+=== CW-Median_targeted 08:54:05
+FINAL {"acc_honest": 0.3648187518119812, "acc_min": 0.26109999418258667, "acc_noisy": 0.2916249930858612, "comm_floats_per_link": 2000000, "n_params": 545098, "time": 183.24922490119934}
+=== Mean_targeted 08:57:13
+FINAL {"acc_honest": 0.250893771648407, "acc_min": 0.16380000114440918, "acc_noisy": 0.195250004529953, "comm_floats_per_link": 2000000, "n_params": 545098, "time": 181.91057062149048}
+=== LLM-A_adaptive 09:00:19
+FINAL {"acc_honest": 0.3621875047683716, "acc_min": 0.2662999927997589, "acc_noisy": 0.27597498893737793, "comm_floats_per_link": 2000000, "n_params": 545098, "time": 220.0780532360077}
+=== ClippedGossip_adaptive 09:04:03
+FINAL {"acc_honest": 0.4069562554359436, "acc_min": 0.2870999872684479, "acc_noisy": 0.30789998173713684, "comm_floats_per_link": 2000000, "n_params": 545098, "time": 191.9792721271515}
+=== BALANCE_adaptive 09:07:20
+FINAL {"acc_honest": 0.3752312660217285, "acc_min": 0.2831999957561493, "acc_noisy": 0.29144999384880066, "comm_floats_per_link": 2000000, "n_params": 545098, "time": 191.92024779319763}
+=== GeoMed_adaptive 09:10:37
+FINAL {"acc_honest": 0.40286874771118164, "acc_min": 0.2989000082015991, "acc_noisy": 0.30570000410079956, "comm_floats_per_link": 2000000, "n_params": 545098, "time": 404.40182876586914}
+=== LLM-H_adaptive 09:17:26
+FINAL {"acc_honest": 0.4023125171661377, "acc_min": 0.1995999962091446, "acc_noisy": 0.3394250273704529, "comm_floats_per_link": 2000000, "n_params": 545098, "time": 248.94378399848938}
+=== Rand200_adaptive 09:21:39
+FINAL {"acc_honest": 0.3524937629699707, "acc_min": 0.2386000007390976, "acc_noisy": 0.26430001854896545, "comm_floats_per_link": 2000000, "n_params": 545098, "time": 195.1309289932251}
+=== BRIDGE-T_adaptive 09:24:59
+FINAL {"acc_honest": 0.4408687651157379, "acc_min": 0.34689998626708984, "acc_noisy": 0.35922500491142273, "comm_floats_per_link": 2000000, "n_params": 545098, "time": 224.16891980171204}
+=== CW-Median_adaptive 09:28:48
+FINAL {"acc_honest": 0.4390125274658203, "acc_min": 0.34769999980926514, "acc_noisy": 0.35387498140335083, "comm_floats_per_link": 2000000, "n_params": 545098, "time": 232.91757488250732}
+=== Mean_adaptive 09:32:46
+FINAL {"acc_honest": 0.3675000071525574, "acc_min": 0.1281999945640564, "acc_noisy": 0.23132500052452087, "comm_floats_per_link": 2000000, "n_params": 545098, "time": 183.77873396873474}
+=== LLM-A_alie 09:35:54
+FINAL {"acc_honest": 0.4565250277519226, "acc_min": 0.3662000000476837, "acc_noisy": 0.37242501974105835, "comm_floats_per_link": 2000000, "n_params": 545098, "time": 181.69683194160461}
+=== ClippedGossip_alie 09:39:00
+FINAL {"acc_honest": 0.4506312608718872, "acc_min": 0.36070001125335693, "acc_noisy": 0.36787497997283936, "comm_floats_per_link": 2000000, "n_params": 545098, "time": 180.62539291381836}
+=== BALANCE_alie 09:42:04
+FINAL {"acc_honest": 0.4505624771118164, "acc_min": 0.3643999993801117, "acc_noisy": 0.3721250295639038, "comm_floats_per_link": 2000000, "n_params": 545098, "time": 180.2618110179901}
+=== GeoMed_alie 09:45:09
+FINAL {"acc_honest": 0.448381245136261, "acc_min": 0.35409998893737793, "acc_noisy": 0.3628750145435333, "comm_floats_per_link": 2000000, "n_params": 545098, "time": 190.91037106513977}
+=== LLM-H_alie 09:48:24
+FINAL {"acc_honest": 0.4397749900817871, "acc_min": 0.3508000075817108, "acc_noisy": 0.35782498121261597, "comm_floats_per_link": 2000000, "n_params": 545098, "time": 182.40819096565247}
+=== Rand200_alie 09:51:32
+FINAL {"acc_honest": 0.44653749465942383, "acc_min": 0.35690000653266907, "acc_noisy": 0.3641499876976013, "comm_floats_per_link": 2000000, "n_params": 545098, "time": 182.65145301818848}
+=== BRIDGE-T_alie 09:54:39
+FINAL {"acc_honest": 0.43943750858306885, "acc_min": 0.3434000015258789, "acc_noisy": 0.3516499996185303, "comm_floats_per_link": 2000000, "n_params": 545098, "time": 183.46992874145508}
+=== CW-Median_alie 09:57:46
+FINAL {"acc_honest": 0.43624377250671387, "acc_min": 0.3361999988555908, "acc_noisy": 0.34267503023147583, "comm_floats_per_link": 2000000, "n_params": 545098, "time": 180.30777525901794}
+=== Mean_alie 10:00:51
+FINAL {"acc_honest": 0.454018771648407, "acc_min": 0.37040001153945923, "acc_noisy": 0.373725026845932, "comm_floats_per_link": 2000000, "n_params": 545098, "time": 178.93673992156982}
+=== LLM-A_signflip 10:03:54
+FINAL {"acc_honest": 0.3391125202178955, "acc_min": 0.23520000278949738, "acc_noisy": 0.25075000524520874, "comm_floats_per_link": 2000000, "n_params": 545098, "time": 179.82143115997314}
+=== ClippedGossip_signflip 10:06:59
+FINAL {"acc_honest": 0.36419999599456787, "acc_min": 0.2653000056743622, "acc_noisy": 0.2859250009059906, "comm_floats_per_link": 2000000, "n_params": 545098, "time": 177.7833662033081}
+=== BALANCE_signflip 10:10:02
+FINAL {"acc_honest": 0.4326687455177307, "acc_min": 0.3440000116825104, "acc_noisy": 0.3552250266075134, "comm_floats_per_link": 2000000, "n_params": 545098, "time": 181.7691457271576}
+=== GeoMed_signflip 10:13:08
+FINAL {"acc_honest": 0.325893759727478, "acc_min": 0.22509999573230743, "acc_noisy": 0.24924999475479126, "comm_floats_per_link": 2000000, "n_params": 545098, "time": 190.35082507133484}
+=== LLM-H_signflip 10:16:23
+FINAL {"acc_honest": 0.43342500925064087, "acc_min": 0.35359999537467957, "acc_noisy": 0.35929998755455017, "comm_floats_per_link": 2000000, "n_params": 545098, "time": 184.76745510101318}
+=== Rand200_signflip 10:19:33
+FINAL {"acc_honest": 0.43280625343322754, "acc_min": 0.35010001063346863, "acc_noisy": 0.35575002431869507, "comm_floats_per_link": 2000000, "n_params": 545098, "time": 181.40399718284607}
+=== BRIDGE-T_signflip 10:22:39
+FINAL {"acc_honest": 0.4312562644481659, "acc_min": 0.3422999978065491, "acc_noisy": 0.34815001487731934, "comm_floats_per_link": 2000000, "n_params": 545098, "time": 182.42543292045593}
+=== CW-Median_signflip 10:25:45
+FINAL {"acc_honest": 0.4341000020503998, "acc_min": 0.33489999175071716, "acc_noisy": 0.3390750288963318, "comm_floats_per_link": 2000000, "n_params": 545098, "time": 184.50745296478271}
+=== Mean_signflip 10:28:55
+FINAL {"acc_honest": 0.1955062448978424, "acc_min": 0.11540000140666962, "acc_noisy": 0.1302500069141388, "comm_floats_per_link": 2000000, "n_params": 545098, "time": 192.55489206314087}
+=== LLM-A_none 10:32:13
+FINAL {"acc_honest": 0.4264500141143799, "acc_min": 0.314300000667572, "acc_noisy": 0.33922502398490906, "comm_floats_per_link": 2000000, "n_params": 545098, "time": 186.68292570114136}
+=== ClippedGossip_none 10:35:25
+FINAL {"acc_honest": 0.42285627126693726, "acc_min": 0.3303000032901764, "acc_noisy": 0.33810001611709595, "comm_floats_per_link": 2000000, "n_params": 545098, "time": 253.52287817001343}
+=== BALANCE_none 10:39:46
+FINAL {"acc_honest": 0.40483126044273376, "acc_min": 0.32179999351501465, "acc_noisy": 0.3256499767303467, "comm_floats_per_link": 2000000, "n_params": 545098, "time": 322.4158148765564}
+=== GeoMed_none 10:45:17
+FINAL {"acc_honest": 0.4224749803543091, "acc_min": 0.3386000096797943, "acc_noisy": 0.3411500155925751, "comm_floats_per_link": 2000000, "n_params": 545098, "time": 279.80817675590515}
+=== LLM-H_none 10:50:07
+FINAL {"acc_honest": 0.4330124855041504, "acc_min": 0.30869999527931213, "acc_noisy": 0.3423500061035156, "comm_floats_per_link": 2000000, "n_params": 545098, "time": 291.01576709747314}
+=== Rand200_none 10:55:05
+FINAL {"acc_honest": 0.40885627269744873, "acc_min": 0.2985999882221222, "acc_noisy": 0.33069998025894165, "comm_floats_per_link": 2000000, "n_params": 545098, "time": 354.66339683532715}
+=== BRIDGE-T_none 11:01:11
+FINAL {"acc_honest": 0.43806248903274536, "acc_min": 0.35580000281333923, "acc_noisy": 0.36204999685287476, "comm_floats_per_link": 2000000, "n_params": 545098, "time": 328.71358704566956}
+=== CW-Median_none 11:06:50
+FINAL {"acc_honest": 0.4402812719345093, "acc_min": 0.3515999913215637, "acc_noisy": 0.3668000102043152, "comm_floats_per_link": 2000000, "n_params": 545098, "time": 233.97095608711243}
+=== Mean_none 11:10:52
+FINAL {"acc_honest": 0.3992624878883362, "acc_min": 0.31029999256134033, "acc_noisy": 0.3214750289916992, "comm_floats_per_link": 2000000, "n_params": 545098, "time": 235.94534182548523}
+=== DFedAvg_none 11:14:55
+FINAL {"acc_honest": 0.40786874294281006, "acc_min": 0.33799999952316284, "acc_noisy": 0.4217749834060669, "comm_floats_per_link": 10901960, "n_params": 545098, "time": 84.74958515167236}
+=== DFedAvg_signflip 11:16:24
+FINAL {"acc_honest": 0.3324125111103058, "acc_min": 0.22020000219345093, "acc_noisy": 0.35474997758865356, "comm_floats_per_link": 10901960, "n_params": 545098, "time": 89.6475260257721}
+=== DFedAvg_alie 11:17:59
+FINAL {"acc_honest": 0.10000000149011612, "acc_min": 0.10000000149011612, "acc_noisy": 0.10000000149011612, "comm_floats_per_link": 10901960, "n_params": 545098, "time": 87.17236995697021}
+=== DFedAvg_ipm 11:19:31
+FINAL {"acc_honest": 0.18795625865459442, "acc_min": 0.12770000100135803, "acc_noisy": 0.1780250072479248, "comm_floats_per_link": 10901960, "n_params": 545098, "time": 126.89385771751404}
+=== DFedAvg_dissensus 11:21:44
+FINAL {"acc_honest": 0.15747500956058502, "acc_min": 0.09730000048875809, "acc_noisy": 0.11050000041723251, "comm_floats_per_link": 10901960, "n_params": 545098, "time": 101.12344408035278}

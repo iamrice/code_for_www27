@@ -1,0 +1,49 @@
+=== ARCO-B_ipm 11:23:54
+FINAL {"acc_honest": 0.34007498621940613, "acc_min": 0.23800000548362732, "acc_noisy": 0.2490749955177307, "comm_floats_per_link": 2000000, "n_params": 545098, "time": 192.6731460094452}
+=== ARCO-G_ipm 11:27:13
+FINAL {"acc_honest": 0.38913750648498535, "acc_min": 0.28060001134872437, "acc_noisy": 0.30215001106262207, "comm_floats_per_link": 2000000, "n_params": 545098, "time": 193.2244668006897}
+=== ARCO-H_ipm 11:30:32
+FINAL {"acc_honest": 0.3378562331199646, "acc_min": 0.23430000245571136, "acc_noisy": 0.24570000171661377, "comm_floats_per_link": 2000000, "n_params": 545098, "time": 193.79434084892273}
+=== ARCO-B_dissensus 11:33:51
+FINAL {"acc_honest": 0.3744499683380127, "acc_min": 0.17219999432563782, "acc_noisy": 0.2915000021457672, "comm_floats_per_link": 2000000, "n_params": 545098, "time": 190.21090292930603}
+=== ARCO-G_dissensus 11:37:08
+FINAL {"acc_honest": 0.4214937388896942, "acc_min": 0.34459999203681946, "acc_noisy": 0.34800001978874207, "comm_floats_per_link": 2000000, "n_params": 545098, "time": 185.61455392837524}
+=== ARCO-H_dissensus 11:40:19
+FINAL {"acc_honest": 0.4183187484741211, "acc_min": 0.17829999327659607, "acc_noisy": 0.30629998445510864, "comm_floats_per_link": 2000000, "n_params": 545098, "time": 195.68633317947388}
+=== ARCO-B_targeted 11:43:41
+FINAL {"acc_honest": 0.34872502088546753, "acc_min": 0.2069000005722046, "acc_noisy": 0.270425021648407, "comm_floats_per_link": 2000000, "n_params": 545098, "time": 199.96963000297546}
+=== ARCO-G_targeted 11:47:05
+FINAL {"acc_honest": 0.4169187545776367, "acc_min": 0.32510000467300415, "acc_noisy": 0.3300750255584717, "comm_floats_per_link": 2000000, "n_params": 545098, "time": 187.2445170879364}
+=== ARCO-H_targeted 11:50:17
+FINAL {"acc_honest": 0.3590624928474426, "acc_min": 0.24199999868869781, "acc_noisy": 0.2851250171661377, "comm_floats_per_link": 2000000, "n_params": 545098, "time": 186.86201810836792}
+=== ARCO-B_adaptive 11:53:29
+FINAL {"acc_honest": 0.3295437693595886, "acc_min": 0.23229999840259552, "acc_noisy": 0.23845000565052032, "comm_floats_per_link": 2000000, "n_params": 545098, "time": 226.63015484809875}
+=== ARCO-G_adaptive 11:57:21
+FINAL {"acc_honest": 0.3753499984741211, "acc_min": 0.25189998745918274, "acc_noisy": 0.28312498331069946, "comm_floats_per_link": 2000000, "n_params": 545098, "time": 217.0149359703064}
+=== ARCO-H_adaptive 12:01:03
+FINAL {"acc_honest": 0.34366875886917114, "acc_min": 0.24639999866485596, "acc_noisy": 0.2540000081062317, "comm_floats_per_link": 2000000, "n_params": 545098, "time": 219.2728226184845}
+=== ARCO-B_drift 12:04:48
+FINAL {"acc_honest": 0.4146375060081482, "acc_min": 0.322299987077713, "acc_noisy": 0.33147498965263367, "comm_floats_per_link": 2000000, "n_params": 545098, "time": 184.76671314239502}
+=== ARCO-G_drift 12:07:58
+FINAL {"acc_honest": 0.33675625920295715, "acc_min": 0.17820000648498535, "acc_noisy": 0.27135002613067627, "comm_floats_per_link": 2000000, "n_params": 545098, "time": 183.2621569633484}
+=== ARCO-H_drift 12:11:05
+FINAL {"acc_honest": 0.4009374976158142, "acc_min": 0.3109999895095825, "acc_noisy": 0.3241499960422516, "comm_floats_per_link": 2000000, "n_params": 545098, "time": 184.51861310005188}
+=== ARCO-B_alie 12:14:16
+FINAL {"acc_honest": 0.3851812481880188, "acc_min": 0.2856000065803528, "acc_noisy": 0.2985750138759613, "comm_floats_per_link": 2000000, "n_params": 545098, "time": 183.99263286590576}
+=== ARCO-G_alie 12:17:25
+FINAL {"acc_honest": 0.38237500190734863, "acc_min": 0.29089999198913574, "acc_noisy": 0.2932249903678894, "comm_floats_per_link": 2000000, "n_params": 545098, "time": 187.47306108474731}
+=== ARCO-H_alie 12:20:37
+FINAL {"acc_honest": 0.38369375467300415, "acc_min": 0.2840000092983246, "acc_noisy": 0.2943750023841858, "comm_floats_per_link": 2000000, "n_params": 545098, "time": 188.22109484672546}
+=== ARCO-B_signflip 12:23:50
+FINAL {"acc_honest": 0.32818126678466797, "acc_min": 0.22439999878406525, "acc_noisy": 0.24062499403953552, "comm_floats_per_link": 2000000, "n_params": 545098, "time": 203.90569496154785}
+=== ARCO-G_signflip 12:27:21
+FINAL {"acc_honest": 0.39054375886917114, "acc_min": 0.2784000039100647, "acc_noisy": 0.29820001125335693, "comm_floats_per_link": 2000000, "n_params": 545098, "time": 201.3792200088501}
+=== ARCO-H_signflip 12:30:52
+FINAL {"acc_honest": 0.29903125762939453, "acc_min": 0.1851000040769577, "acc_noisy": 0.21015000343322754, "comm_floats_per_link": 2000000, "n_params": 545098, "time": 221.16804099082947}
+=== ARCO-B_none 12:34:38
+FINAL {"acc_honest": 0.4097437560558319, "acc_min": 0.3312999904155731, "acc_noisy": 0.33422499895095825, "comm_floats_per_link": 2000000, "n_params": 545098, "time": 197.6189088821411}
+=== ARCO-G_none 12:38:01
+FINAL {"acc_honest": 0.43082499504089355, "acc_min": 0.34139999747276306, "acc_noisy": 0.3470250070095062, "comm_floats_per_link": 2000000, "n_params": 545098, "time": 209.42489409446716}
+=== ARCO-H_none 12:41:37
+FINAL {"acc_honest": 0.4183937609195709, "acc_min": 0.329800009727478, "acc_noisy": 0.33992502093315125, "comm_floats_per_link": 2000000, "n_params": 545098, "time": 257.6198139190674}
+=== ClippedGossip_drift 12:46:09

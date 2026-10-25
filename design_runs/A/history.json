@@ -1,0 +1,818 @@
+[
+ {
+  "name": "A1.1_HellingerGeoMedian",
+  "round": 1,
+  "desc": "Project every message back onto the probability simplex (non-finite -> 0, clip, renormalise; all-zero rows -> uniform), embed in Hellinger space (square-root probabilities, where all honest messages lie on a bounded sphere), and compute the geometric median of self + neighbours with Weiszfeld iterations. The node then takes a self-centred step toward that median, capped at the median neighbour distance, and maps back by squaring.",
+  "src": "def aggregate(x_self, X_nb, t, T, state):\n    def san(X):\n        X = np.nan_to_num(np.asarray(X, dtype=float), nan=0.0, posinf=0.0, neginf=0.0)\n        X = np.clip(X, 0.0, None)\n        s = X.sum(-1, keepdims=True)\n        C = X.shape[-1]\n        return np.where(s > 1e-12, X / np.maximum(s, 1e-12), 1.0 / C)\n\n    xs = san(x_self)\n    Y = san(X_nb)\n    P = np.sqrt(np.concatenate([xs[None], Y], 0))\n    n = P.shape[0]\n    F = P.reshape(n, -1)\n    z = np.median(F, 0)\n    for _ in range(30):\n        d = np.linalg.norm(F - z, axis=1)\n        w = 1.0 / np.maximum(d, 1e-8)\n        z_new = (w[:, None] * F).sum(0) / w.sum()\n        if np.linalg.norm(z_new - z) < 1e-7:\n            z = z_new\n            break\n        z = z_new\n    ps = F[0]\n    D = z - ps\n    nd = np.linalg.norm(D)\n    dn = np.linalg.norm(F[1:] - ps, axis=1)\n    tau = float(np.median(dn)) + 1e-12\n    step = D * min(1.0, tau / max(nd, 1e-12))\n    out = (ps + step).reshape(xs.shape) ** 2\n    out = out + 1e-12\n    return out / out.sum(-1, keepdims=True)\n",
+  "file": "<repo>/design_runs/A/A1.1_HellingerGeoMedian.py",
+  "design": {
+   "mean_acc": 0.8472124999999999,
+   "worst_acc": 0.7807499999999999,
+   "score": 0.8139812499999999,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.8427708333333332,
+    "gaussian": 0.8535208333333332,
+    "signflip": 0.8503958333333334,
+    "labelflip": 0.836125,
+    "alie": 0.8532500000000001
+   }
+  },
+  "val": {
+   "mean_acc": 0.8300583333333333,
+   "worst_acc": 0.7094374999999999,
+   "score": 0.7697479166666666,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.7935000000000002,
+    "gaussian": 0.8360104166666668,
+    "signflip": 0.8588125,
+    "labelflip": 0.8039270833333334,
+    "alie": 0.8580416666666667
+   }
+  },
+  "error": null
+ },
+ {
+  "name": "A1.2_AgreementTrust",
+  "round": 1,
+  "desc": "Each neighbour gets a trust score equal to the fraction of samples where its argmax matches a reference built half from the node's own state and half from the coordinate-wise median. The reference leans on the node's own state, so a colluding local majority cannot capture it, and the median half helps nodes with noisy labels. Trust is kept in memory so it drops fast and recovers slowly, and weights are set relative to the best-agreeing neighbour, with a floor above chance level so near-random or permuted messages get zero weight.",
+  "src": "def aggregate(x_self, X_nb, t, T, state):\n    def san(X):\n        X = np.nan_to_num(np.asarray(X, dtype=float), nan=0.0, posinf=0.0, neginf=0.0)\n        X = np.clip(X, 0.0, None)\n        s = X.sum(-1, keepdims=True)\n        C = X.shape[-1]\n        return np.where(s > 1e-12, X / np.maximum(s, 1e-12), 1.0 / C)\n\n    xs = san(x_self)\n    Y = san(X_nb)\n    k = len(Y)\n    C = xs.shape[-1]\n    Z = np.concatenate([xs[None], Y], 0)\n    med = np.median(Z, 0)\n    ref = (0.5 * xs + 0.5 * med).argmax(-1)\n    agree = (Y.argmax(-1) == ref[None]).mean(1)\n    prev = state.get('trust')\n    if prev is None or len(prev) != k:\n        trust = agree\n    else:\n        trust = np.minimum(agree, 0.5 * prev + 0.5 * agree)\n    state['trust'] = trust\n    amax = float(trust.max())\n    lo = max(2.0 / C, 0.5 * amax)\n    hi = max(lo + 0.05, 0.85 * amax)\n    w = np.clip((trust - lo) / (hi - lo), 0.0, 1.0)\n    out = (xs + (w[:, None, None] * Y).sum(0)) / (1.0 + w.sum())\n    return out\n",
+  "file": "<repo>/design_runs/A/A1.2_AgreementTrust.py",
+  "design": {
+   "mean_acc": 0.8494708333333333,
+   "worst_acc": 0.782375,
+   "score": 0.8159229166666666,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.8208958333333333,
+    "gaussian": 0.8563124999999999,
+    "signflip": 0.8563333333333333,
+    "labelflip": 0.8564999999999999,
+    "alie": 0.8573125
+   }
+  },
+  "val": {
+   "mean_acc": 0.8346000000000001,
+   "worst_acc": 0.6076250000000001,
+   "score": 0.7211125,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.7230520833333335,
+    "gaussian": 0.8623333333333334,
+    "signflip": 0.8626666666666667,
+    "labelflip": 0.862625,
+    "alie": 0.8623229166666665
+   }
+  },
+  "error": null
+ },
+ {
+  "name": "A1.3_PerSampleTrimmedHellinger",
+  "round": 1,
+  "desc": "Robust selection is done separately for each public sample, not per message. For each sample, after projecting onto the simplex and embedding in Hellinger space, the rule keeps the closest half of {self, neighbours} to a reference that is half own state and half coordinate-wise median, then averages them. An attacker therefore has to win sample by sample, and its influence on any one row is bounded.",
+  "src": "def aggregate(x_self, X_nb, t, T, state):\n    def san(X):\n        X = np.nan_to_num(np.asarray(X, dtype=float), nan=0.0, posinf=0.0, neginf=0.0)\n        X = np.clip(X, 0.0, None)\n        s = X.sum(-1, keepdims=True)\n        C = X.shape[-1]\n        return np.where(s > 1e-12, X / np.maximum(s, 1e-12), 1.0 / C)\n\n    xs = san(x_self)\n    Y = san(X_nb)\n    A = np.sqrt(np.concatenate([xs[None], Y], 0))       # (n, m, C)\n    n = A.shape[0]\n    med = np.median(A, 0)\n    ref = 0.5 * med + 0.5 * A[0]\n    d = np.linalg.norm(A - ref[None], axis=2)           # (n, m)\n    keep = max(1, (n + 1) // 2)\n    idx = np.argsort(d, axis=0, kind='stable')[:keep]   # (keep, m)\n    sel = np.take_along_axis(A, idx[:, :, None], axis=0)\n    z = sel.mean(0)\n    out = z ** 2 + 1e-12\n    return out / out.sum(-1, keepdims=True)\n",
+  "file": "<repo>/design_runs/A/A1.3_PerSampleTrimmedHellinger.py",
+  "design": {
+   "mean_acc": 0.8253208333333333,
+   "worst_acc": 0.704,
+   "score": 0.7646604166666666,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.8256041666666668,
+    "gaussian": 0.8371458333333334,
+    "signflip": 0.7948749999999999,
+    "labelflip": 0.8345625,
+    "alie": 0.8344166666666667
+   }
+  },
+  "val": {
+   "mean_acc": 0.8178979166666666,
+   "worst_acc": 0.6131875,
+   "score": 0.7155427083333332,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.8099062499999999,
+    "gaussian": 0.8304791666666667,
+    "signflip": 0.7838958333333333,
+    "labelflip": 0.8203854166666668,
+    "alie": 0.8448229166666666
+   }
+  },
+  "error": null
+ },
+ {
+  "name": "A1.4_ReputationClippedGossip",
+  "round": 1,
+  "desc": "This is self-centred clipped gossip run on simplex-projected messages, plus a per-neighbour reputation kept in memory. The reputation is an exponential moving average of how much each neighbour's message had to be clipped, so neighbours that are far away again and again lose influence. The clipping radius adapts to a lower quantile of neighbour distances, and normalising by total reputation keeps any one Byzantine neighbour's displacement within that radius.",
+  "src": "def aggregate(x_self, X_nb, t, T, state):\n    def san(X):\n        X = np.nan_to_num(np.asarray(X, dtype=float), nan=0.0, posinf=0.0, neginf=0.0)\n        X = np.clip(X, 0.0, None)\n        s = X.sum(-1, keepdims=True)\n        C = X.shape[-1]\n        return np.where(s > 1e-12, X / np.maximum(s, 1e-12), 1.0 / C)\n\n    xs = san(x_self)\n    Y = san(X_nb)\n    k = len(Y)\n    D = Y - xs[None]\n    nrm = np.linalg.norm(D.reshape(k, -1), axis=1)\n    tau = float(np.quantile(nrm, 0.25)) + 1e-12\n    scale = np.minimum(1.0, tau / np.maximum(nrm, 1e-12))\n    r = state.get('rep')\n    if r is None or len(r) != k:\n        r = scale.copy()\n    else:\n        r = 0.6 * r + 0.4 * scale\n    state['rep'] = r\n    w = r * scale\n    out = xs + (w[:, None, None] * D).sum(0) / (1.0 + r.sum())\n    out = np.clip(out, 0.0, None) + 1e-12\n    return out / out.sum(-1, keepdims=True)\n",
+  "file": "<repo>/design_runs/A/A1.4_ReputationClippedGossip.py",
+  "design": {
+   "mean_acc": 0.8564166666666667,
+   "worst_acc": 0.816375,
+   "score": 0.8363958333333333,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.8483958333333333,
+    "gaussian": 0.8586458333333332,
+    "signflip": 0.8580416666666667,
+    "labelflip": 0.8597916666666666,
+    "alie": 0.8572083333333333
+   }
+  },
+  "val": {
+   "mean_acc": 0.8518229166666665,
+   "worst_acc": 0.770875,
+   "score": 0.8113489583333333,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.82465625,
+    "gaussian": 0.85903125,
+    "signflip": 0.8582708333333334,
+    "labelflip": 0.8588437500000001,
+    "alie": 0.8583124999999999
+   }
+  },
+  "error": null
+ },
+ {
+  "name": "A2.1_HellingerContractiveRepClip",
+  "round": 2,
+  "desc": "Refines the best rule so far (A1.4). It does reputation-weighted self-centred clipping in Hellinger (sqrt-probability) space, where distances are bounded and more meaningful for probability rows. It adds a contraction prior: honest gossip should shrink disagreement over time, so the clipping radius may never grow by more than 10% from one iteration to the next. This limits adaptive attackers and low-degree nodes (k = 1) where the quantile is the attacker itself. Reputation falls quickly and recovers slowly.",
+  "src": "def aggregate(x_self, X_nb, t, T, state):\n    def san(X):\n        X = np.nan_to_num(np.asarray(X, dtype=float), nan=0.0, posinf=0.0, neginf=0.0)\n        X = np.clip(X, 0.0, None)\n        s = X.sum(-1, keepdims=True)\n        C = X.shape[-1]\n        return np.where(s > 1e-12, X / np.maximum(s, 1e-12), 1.0 / C)\n\n    xs = san(x_self)\n    Y = san(X_nb)\n    k = len(Y)\n    S = np.sqrt(xs)\n    R = np.sqrt(Y)\n    D = R - S[None]\n    nrm = np.linalg.norm(D.reshape(k, -1), axis=1)\n    q = 0.25 if k >= 4 else 0.5\n    tau = float(np.quantile(nrm, q)) + 1e-12\n    prev_tau = state.get('tau')\n    if prev_tau is not None:\n        tau = min(tau, 1.1 * prev_tau)\n    state['tau'] = tau\n    scale = np.minimum(1.0, tau / np.maximum(nrm, 1e-12))\n    r = state.get('rep')\n    if r is None or len(r) != k:\n        r = scale.copy()\n    else:\n        # fast to lose trust, slow to regain it\n        r = np.where(scale < r, 0.4 * r + 0.6 * scale, 0.7 * r + 0.3 * scale)\n    state['rep'] = r\n    w = r * scale\n    out = S + (w[:, None, None] * D).sum(0) / (1.0 + r.sum())\n    out = np.clip(out, 0.0, None) ** 2 + 1e-12\n    return out / out.sum(-1, keepdims=True)\n",
+  "file": "<repo>/design_runs/A/A2.1_HellingerContractiveRepClip.py",
+  "design": {
+   "mean_acc": 0.8483375,
+   "worst_acc": 0.805625,
+   "score": 0.82698125,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.8414791666666667,
+    "gaussian": 0.852125,
+    "signflip": 0.8494375000000001,
+    "labelflip": 0.8517916666666666,
+    "alie": 0.8468541666666667
+   }
+  },
+  "val": {
+   "mean_acc": 0.8477416666666666,
+   "worst_acc": 0.756,
+   "score": 0.8018708333333333,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.8187083333333333,
+    "gaussian": 0.8553749999999999,
+    "signflip": 0.8540312499999999,
+    "labelflip": 0.85446875,
+    "alie": 0.856125
+   }
+  },
+  "error": null
+ },
+ {
+  "name": "A2.2_IterativeCenteredClipRep",
+  "round": 2,
+  "desc": "Instead of clipping around its own state, which is noisy when the node's own labels are noisy, the node estimates a robust centre by iterative centred clipping (Karimireddy et al. 2021). The centre starts at the midpoint between the node's own state and the coordinate-wise median, and each candidate is weighted by a reputation carried across iterations. The node then takes one bounded step from its own state toward that centre, so a poor honest node is pulled toward consensus while any Byzantine influence stays limited.",
+  "src": "def aggregate(x_self, X_nb, t, T, state):\n    def san(X):\n        X = np.nan_to_num(np.asarray(X, dtype=float), nan=0.0, posinf=0.0, neginf=0.0)\n        X = np.clip(X, 0.0, None)\n        s = X.sum(-1, keepdims=True)\n        C = X.shape[-1]\n        return np.where(s > 1e-12, X / np.maximum(s, 1e-12), 1.0 / C)\n\n    xs = san(x_self)\n    Y = san(X_nb)\n    k = len(Y)\n    Z = np.sqrt(np.concatenate([xs[None], Y], 0))     # (n, m, C)\n    n = k + 1\n    F = Z.reshape(n, -1)\n    r = state.get('rep')\n    if r is None or len(r) != k:\n        r = np.ones(k)\n    prior = np.concatenate([[1.0], r])\n    c = 0.5 * F[0] + 0.5 * np.median(F, 0)\n    scale = np.ones(n)\n    for _ in range(3):\n        Dc = F - c[None]\n        dn = np.linalg.norm(Dc, axis=1)\n        tau = float(np.median(dn[1:])) + 1e-12\n        scale = np.minimum(1.0, tau / np.maximum(dn, 1e-12))\n        w = prior * scale\n        c = c + (w[:, None] * Dc).sum(0) / prior.sum()\n    r = 0.6 * r + 0.4 * scale[1:] if 'rep' in state else scale[1:].copy()\n    state['rep'] = r\n    # bounded step from self toward the robust centre\n    step = c - F[0]\n    sn = np.linalg.norm(step)\n    dself = np.linalg.norm(F[1:] - F[0][None], axis=1)\n    lim = float(np.quantile(dself, 0.5)) + 1e-12\n    alpha = (0.5 + 0.5 * (t + 1) / T)\n    out = F[0] + alpha * step * min(1.0, lim / max(sn, 1e-12))\n    out = np.clip(out.reshape(xs.shape), 0.0, None) ** 2 + 1e-12\n    return out / out.sum(-1, keepdims=True)\n",
+  "file": "<repo>/design_runs/A/A2.2_IterativeCenteredClipRep.py",
+  "design": {
+   "mean_acc": 0.8388916666666666,
+   "worst_acc": 0.7441249999999999,
+   "score": 0.7915083333333333,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.8459375000000001,
+    "gaussian": 0.8493333333333334,
+    "signflip": 0.8524166666666666,
+    "labelflip": 0.7952083333333334,
+    "alie": 0.8515625
+   }
+  },
+  "val": {
+   "mean_acc": 0.8259250000000001,
+   "worst_acc": 0.7141875,
+   "score": 0.7700562500000001,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.8027187499999999,
+    "gaussian": 0.8325520833333334,
+    "signflip": 0.8605937499999999,
+    "labelflip": 0.7782291666666667,
+    "alie": 0.85553125
+   }
+  },
+  "error": null
+ },
+ {
+  "name": "A2.3_SoftKrumReputationGossip",
+  "round": 2,
+  "desc": "New idea: a soft Krum-style density score. Each candidate (self and neighbours) is scored by its mean Hellinger distance to its nearest half of the other candidates. Candidates in the dense honest cluster score low. Outliers (gaussian, signflip, labelflip) and loners score high and get exponentially smaller weight. The weights are smoothed over iterations, and the result is applied as a clipped gossip step from the node's own state.",
+  "src": "def aggregate(x_self, X_nb, t, T, state):\n    def san(X):\n        X = np.nan_to_num(np.asarray(X, dtype=float), nan=0.0, posinf=0.0, neginf=0.0)\n        X = np.clip(X, 0.0, None)\n        s = X.sum(-1, keepdims=True)\n        C = X.shape[-1]\n        return np.where(s > 1e-12, X / np.maximum(s, 1e-12), 1.0 / C)\n\n    xs = san(x_self)\n    Y = san(X_nb)\n    k = len(Y)\n    n = k + 1\n    F = np.sqrt(np.concatenate([xs[None], Y], 0)).reshape(n, -1)\n    G = F @ F.T\n    sq = np.diag(G)\n    Dm = np.sqrt(np.maximum(sq[:, None] + sq[None, :] - 2.0 * G, 0.0))\n    h = max(1, (n - 1) // 2)\n    Ds = np.sort(Dm + np.diag(np.full(n, np.inf)), axis=1)[:, :h]\n    score = Ds.mean(1)\n    base = float(np.median(score)) + 1e-12\n    dens = np.exp(-4.0 * np.maximum(score - score.min(), 0.0) / base)\n    cur = dens[1:]\n    r = state.get('rep')\n    if r is None or len(r) != k:\n        r = cur.copy()\n    else:\n        r = np.minimum(cur + 0.1, 0.5 * r + 0.5 * cur)\n    r = np.clip(r, 0.0, 1.0)\n    state['rep'] = r\n    D = F[1:] - F[0][None]\n    nrm = Dm[0, 1:]\n    tau = float(np.quantile(nrm, 0.5)) + 1e-12\n    sc = np.minimum(1.0, tau / np.maximum(nrm, 1e-12))\n    w = r * sc\n    out = F[0] + (w[:, None] * D).sum(0) / (1.0 + r.sum())\n    out = np.clip(out.reshape(xs.shape), 0.0, None) ** 2 + 1e-12\n    return out / out.sum(-1, keepdims=True)\n",
+  "file": "<repo>/design_runs/A/A2.3_SoftKrumReputationGossip.py",
+  "design": {
+   "mean_acc": 0.82775,
+   "worst_acc": 0.7468125,
+   "score": 0.7872812499999999,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.82025,
+    "gaussian": 0.8352499999999999,
+    "signflip": 0.8394791666666667,
+    "labelflip": 0.8019166666666667,
+    "alie": 0.8418541666666667
+   }
+  },
+  "val": {
+   "mean_acc": 0.7953104166666667,
+   "worst_acc": 0.6397499999999999,
+   "score": 0.7175302083333333,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.7516041666666666,
+    "gaussian": 0.7791354166666666,
+    "signflip": 0.8322083333333333,
+    "labelflip": 0.7629270833333334,
+    "alie": 0.8506770833333333
+   }
+  },
+  "error": null
+ },
+ {
+  "name": "A2.4_RowwiseClipNeighbourReputation",
+  "round": 2,
+  "desc": "New idea: two-level robustness. Clipping happens per sample (per row), with a radius taken from the across-neighbour median distance for that row, blended with the global median radius. A neighbour that disagrees only on some samples, such as an honest node with noisy labels, still contributes fully on the rest. A neighbour-level reputation, the EMA of its average row acceptance, scales the whole message, so attacks that perturb every row lose influence over time.",
+  "src": "def aggregate(x_self, X_nb, t, T, state):\n    def san(X):\n        X = np.nan_to_num(np.asarray(X, dtype=float), nan=0.0, posinf=0.0, neginf=0.0)\n        X = np.clip(X, 0.0, None)\n        s = X.sum(-1, keepdims=True)\n        C = X.shape[-1]\n        return np.where(s > 1e-12, X / np.maximum(s, 1e-12), 1.0 / C)\n\n    xs = san(x_self)\n    Y = san(X_nb)\n    k = len(Y)\n    S = np.sqrt(xs)\n    R = np.sqrt(Y)\n    D = R - S[None]                                   # (k, m, C)\n    dr = np.linalg.norm(D, axis=2)                    # (k, m)\n    q = 0.4 if k >= 3 else 0.5\n    tau_row = np.quantile(dr, q, axis=0)              # (m,)\n    tau_glob = float(np.median(dr))\n    tau = 0.5 * tau_row + 0.5 * tau_glob + 1e-12\n    sr = np.minimum(1.0, tau[None, :] / np.maximum(dr, 1e-12))   # (k, m)\n    acc = sr.mean(1)\n    r = state.get('rep')\n    if r is None or len(r) != k:\n        r = acc.copy()\n    else:\n        r = np.where(acc < r, 0.4 * r + 0.6 * acc, 0.7 * r + 0.3 * acc)\n    state['rep'] = r\n    rw = np.clip((r - 0.3) / 0.5, 0.0, 1.0)            # hard-gate low-reputation neighbours\n    w = rw[:, None] * sr                               # (k, m)\n    out = S + (w[:, :, None] * D).sum(0) / (1.0 + rw.sum())\n    out = np.clip(out, 0.0, None) ** 2 + 1e-12\n    return out / out.sum(-1, keepdims=True)\n",
+  "file": "<repo>/design_runs/A/A2.4_RowwiseClipNeighbourReputation.py",
+  "design": {
+   "mean_acc": 0.847325,
+   "worst_acc": 0.7901874999999999,
+   "score": 0.81875625,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.8495624999999999,
+    "gaussian": 0.8527708333333334,
+    "signflip": 0.8499166666666667,
+    "labelflip": 0.8391041666666667,
+    "alie": 0.8452708333333333
+   }
+  },
+  "val": {
+   "mean_acc": 0.8431374999999999,
+   "worst_acc": 0.736625,
+   "score": 0.7898812499999999,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.8256041666666668,
+    "gaussian": 0.8570208333333332,
+    "signflip": 0.8615729166666667,
+    "labelflip": 0.8161875,
+    "alie": 0.8553020833333331
+   }
+  },
+  "error": null
+ },
+ {
+  "name": "A3.1_A3_1_SelfAwareCenterRepClip",
+  "round": 3,
+  "desc": "Keeps the best rule so far (A1.4: probability-space self-centred clipping with neighbour reputation) and adds one thing: the node checks itself for being an outlier. If its own state is far from the coordinate-wise median compared with how far its neighbours are, the clipping centre moves part of the way (at most half) toward that median. Noisy-label honest nodes stop anchoring on their own poor knowledge, and the move stays bounded if the median is corrupted.",
+  "src": "def aggregate(x_self, X_nb, t, T, state):\n    def san(X):\n        X = np.nan_to_num(np.asarray(X, dtype=float), nan=0.0, posinf=0.0, neginf=0.0)\n        X = np.clip(X, 0.0, None)\n        s = X.sum(-1, keepdims=True)\n        C = X.shape[-1]\n        return np.where(s > 1e-12, X / np.maximum(s, 1e-12), 1.0 / C)\n\n    xs = san(x_self)\n    Y = san(X_nb)\n    k = len(Y)\n    c = xs\n    if k >= 3:\n        Z = np.concatenate([xs[None], Y], 0)\n        med = np.median(Z, 0)\n        ds = float(np.linalg.norm(xs - med))\n        dn = np.linalg.norm((Y - med[None]).reshape(k, -1), axis=1)\n        ref = float(np.median(dn)) + 1e-12\n        alpha = float(np.clip(0.5 * (ds / ref - 1.0), 0.0, 0.5))\n        prev = state.get('alpha')\n        if prev is not None:\n            alpha = 0.5 * prev + 0.5 * alpha\n        state['alpha'] = alpha\n        c = xs + alpha * (med - xs)\n    D = Y - c[None]\n    nrm = np.linalg.norm(D.reshape(k, -1), axis=1)\n    tau = float(np.quantile(nrm, 0.25)) + 1e-12\n    scale = np.minimum(1.0, tau / np.maximum(nrm, 1e-12))\n    r = state.get('rep')\n    if r is None or len(r) != k:\n        r = scale.copy()\n    else:\n        r = 0.6 * r + 0.4 * scale\n    state['rep'] = r\n    w = r * scale\n    out = c + (w[:, None, None] * D).sum(0) / (1.0 + r.sum())\n    out = np.clip(out, 0.0, None) + 1e-12\n    return out / out.sum(-1, keepdims=True)\n",
+  "file": "<repo>/design_runs/A/A3.1_A3_1_SelfAwareCenterRepClip.py",
+  "design": {
+   "mean_acc": 0.8562375000000001,
+   "worst_acc": 0.815375,
+   "score": 0.8358062500000001,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.8474791666666667,
+    "gaussian": 0.8587708333333333,
+    "signflip": 0.8581875000000001,
+    "labelflip": 0.8597708333333333,
+    "alie": 0.8569791666666666
+   }
+  },
+  "val": {
+   "mean_acc": 0.8477812500000002,
+   "worst_acc": 0.7718750000000001,
+   "score": 0.8098281250000001,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.8233229166666668,
+    "gaussian": 0.8592708333333333,
+    "signflip": 0.8571249999999999,
+    "labelflip": 0.8412395833333332,
+    "alie": 0.8579479166666667
+   }
+  },
+  "error": null
+ },
+ {
+  "name": "A3.2_A3_2_DualEvidenceRepClip",
+  "round": 3,
+  "desc": "Reputation is built from two kinds of evidence that cover each other's blind spots. Geometric evidence is the clipping scale, which catches large-norm or random messages such as gaussian noise. Semantic evidence is how often a neighbour's argmax agrees with a robust reference (self mixed with the median), which catches permuted or negated knowledge that can sit at a moderate distance, such as labelflip and signflip. Trust is lost quickly and regained slowly, and the aggregation step is the A1.4 clipped-gossip step.",
+  "src": "def aggregate(x_self, X_nb, t, T, state):\n    def san(X):\n        X = np.nan_to_num(np.asarray(X, dtype=float), nan=0.0, posinf=0.0, neginf=0.0)\n        X = np.clip(X, 0.0, None)\n        s = X.sum(-1, keepdims=True)\n        C = X.shape[-1]\n        return np.where(s > 1e-12, X / np.maximum(s, 1e-12), 1.0 / C)\n\n    xs = san(x_self)\n    Y = san(X_nb)\n    k = len(Y)\n    D = Y - xs[None]\n    nrm = np.linalg.norm(D.reshape(k, -1), axis=1)\n    tau = float(np.quantile(nrm, 0.25)) + 1e-12\n    scale = np.minimum(1.0, tau / np.maximum(nrm, 1e-12))\n    Z = np.concatenate([xs[None], Y], 0)\n    med = np.median(Z, 0)\n    ref = (0.5 * xs + 0.5 * med).argmax(-1)\n    agree = (Y.argmax(-1) == ref[None]).mean(1)\n    amax = float(agree.max())\n    lo = 0.3\n    hi = max(lo + 0.05, 0.8 * amax)\n    ag = np.clip((agree - lo) / (hi - lo), 0.0, 1.0)\n    ev = np.sqrt(scale) * ag\n    r = state.get('rep')\n    if r is None or len(r) != k:\n        r = ev.copy()\n    else:\n        r = np.where(ev < r, 0.4 * r + 0.6 * ev, 0.7 * r + 0.3 * ev)\n    state['rep'] = r\n    w = r * scale\n    out = xs + (w[:, None, None] * D).sum(0) / (1.0 + r.sum())\n    out = np.clip(out, 0.0, None) + 1e-12\n    return out / out.sum(-1, keepdims=True)\n",
+  "file": "<repo>/design_runs/A/A3.2_A3_2_DualEvidenceRepClip.py",
+  "design": {
+   "mean_acc": 0.8532541666666668,
+   "worst_acc": 0.8081875000000001,
+   "score": 0.8307208333333334,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.8461458333333334,
+    "gaussian": 0.8550208333333332,
+    "signflip": 0.8547916666666667,
+    "labelflip": 0.8550208333333332,
+    "alie": 0.8552916666666667
+   }
+  },
+  "val": {
+   "mean_acc": 0.8506333333333332,
+   "worst_acc": 0.7535625,
+   "score": 0.8020979166666666,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.8147187499999999,
+    "gaussian": 0.859625,
+    "signflip": 0.860375,
+    "labelflip": 0.8594999999999998,
+    "alie": 0.8589479166666667
+   }
+  },
+  "error": null
+ },
+ {
+  "name": "A3.3_A3_3_TrustScaledRadiusClip",
+  "round": 3,
+  "desc": "Each neighbour gets its own clipping radius, which grows with its reputation: tau_j = tau * (1 + 2 r_j^2). Neighbours that have stayed close for several iterations can mix almost freely, which raises consensus speed and benign accuracy where A1.4 lost a little to over-clipping. Neighbours that are persistently far keep the tight radius plus a low reputation weight, so their influence on each step stays bounded.",
+  "src": "def aggregate(x_self, X_nb, t, T, state):\n    def san(X):\n        X = np.nan_to_num(np.asarray(X, dtype=float), nan=0.0, posinf=0.0, neginf=0.0)\n        X = np.clip(X, 0.0, None)\n        s = X.sum(-1, keepdims=True)\n        C = X.shape[-1]\n        return np.where(s > 1e-12, X / np.maximum(s, 1e-12), 1.0 / C)\n\n    xs = san(x_self)\n    Y = san(X_nb)\n    k = len(Y)\n    D = Y - xs[None]\n    nrm = np.linalg.norm(D.reshape(k, -1), axis=1)\n    tau = float(np.quantile(nrm, 0.25)) + 1e-12\n    base = np.minimum(1.0, tau / np.maximum(nrm, 1e-12))\n    r = state.get('rep')\n    if r is None or len(r) != k:\n        r = base.copy()\n    else:\n        r = np.where(base < r, 0.4 * r + 0.6 * base, 0.7 * r + 0.3 * base)\n    state['rep'] = r\n    tau_j = tau * (1.0 + 2.0 * r ** 2)\n    scale = np.minimum(1.0, tau_j / np.maximum(nrm, 1e-12))\n    w = r * scale\n    out = xs + (w[:, None, None] * D).sum(0) / (1.0 + r.sum())\n    out = np.clip(out, 0.0, None) + 1e-12\n    return out / out.sum(-1, keepdims=True)\n",
+  "file": "<repo>/design_runs/A/A3.3_A3_3_TrustScaledRadiusClip.py",
+  "design": {
+   "mean_acc": 0.8574416666666667,
+   "worst_acc": 0.8175,
+   "score": 0.8374708333333334,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.8497083333333334,
+    "gaussian": 0.8590833333333334,
+    "signflip": 0.8584375,
+    "labelflip": 0.8614999999999999,
+    "alie": 0.8584791666666666
+   }
+  },
+  "val": {
+   "mean_acc": 0.8515645833333332,
+   "worst_acc": 0.7658125,
+   "score": 0.8086885416666666,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.8216145833333334,
+    "gaussian": 0.8617083333333332,
+    "signflip": 0.8618645833333333,
+    "labelflip": 0.8523854166666668,
+    "alie": 0.8602500000000001
+   }
+  },
+  "error": null
+ },
+ {
+  "name": "A3.4_A3_4_DawidSkeneReliabilityGossip",
+  "round": 3,
+  "desc": "New idea: estimate how reliable each source is (self and every neighbour) with a lightweight Dawid-Skene / EM loop over the argmax labels on the public set. A weighted majority vote and per-source accuracies are re-estimated in turn, and each source's weight is its log-odds, log(a(C-1)/(1-a)). Under this weighting, attackers (permuted, negated or random labels) fall to weight 0, and noisy-label honest nodes get smaller but non-zero weight. The weights feed a reputation memory and gated clipped gossip. A node that turns out unreliable itself lowers its own self-weight so it can follow its neighbours more.",
+  "src": "def aggregate(x_self, X_nb, t, T, state):\n    def san(X):\n        X = np.nan_to_num(np.asarray(X, dtype=float), nan=0.0, posinf=0.0, neginf=0.0)\n        X = np.clip(X, 0.0, None)\n        s = X.sum(-1, keepdims=True)\n        C = X.shape[-1]\n        return np.where(s > 1e-12, X / np.maximum(s, 1e-12), 1.0 / C)\n\n    xs = san(x_self)\n    Y = san(X_nb)\n    k = len(Y)\n    m, C = xs.shape\n    Z = np.concatenate([xs[None], Y], 0)\n    n = k + 1\n    A = Z.argmax(-1)\n    OH = np.eye(C)[A]                       # (n, m, C)\n    w = np.ones(n)\n    for _ in range(4):\n        votes = np.tensordot(w, OH, axes=(0, 0))   # (m, C)\n        maj = votes.argmax(-1)\n        acc = (A == maj[None]).mean(1)\n        a = np.clip(acc, 1.0 / C + 1e-3, 1.0 - 1e-3)\n        w_new = np.maximum(0.0, np.log(a * (C - 1) / (1.0 - a)))\n        if w_new.sum() <= 1e-12:\n            break\n        w = w_new\n    wmax = max(float(w.max()), 1e-12)\n    ev = w[1:] / wmax\n    selfrel = float(w[0] / wmax)\n    r = state.get('rep')\n    if r is None or len(r) != k:\n        r = ev.copy()\n    else:\n        r = np.where(ev < r, 0.4 * r + 0.6 * ev, 0.7 * r + 0.3 * ev)\n    state['rep'] = r\n    D = Y - xs[None]\n    nrm = np.linalg.norm(D.reshape(k, -1), axis=1)\n    trusted = r > 0.5\n    if trusted.any():\n        tau = float(np.median(nrm[trusted]))\n    else:\n        tau = float(np.quantile(nrm, 0.25))\n    tau += 1e-12\n    scale = np.minimum(1.0, tau / np.maximum(nrm, 1e-12))\n    g = np.clip((r - 0.25) / 0.5, 0.0, 1.0)\n    sw = max(0.3, min(1.0, selfrel))\n    cw = g * scale\n    out = xs + (cw[:, None, None] * D).sum(0) / (sw + g.sum())\n    out = np.clip(out, 0.0, None) + 1e-12\n    return out / out.sum(-1, keepdims=True)\n",
+  "file": "<repo>/design_runs/A/A3.4_A3_4_DawidSkeneReliabilityGossip.py",
+  "design": {
+   "mean_acc": 0.8405208333333332,
+   "worst_acc": 0.73075,
+   "score": 0.7856354166666666,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.8365208333333333,
+    "gaussian": 0.8268333333333332,
+    "signflip": 0.8577708333333334,
+    "labelflip": 0.8238958333333333,
+    "alie": 0.8575833333333334
+   }
+  },
+  "val": {
+   "mean_acc": 0.8207895833333334,
+   "worst_acc": 0.6738124999999999,
+   "score": 0.7473010416666667,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.7861354166666666,
+    "gaussian": 0.8051979166666666,
+    "signflip": 0.8520520833333333,
+    "labelflip": 0.8008333333333333,
+    "alie": 0.8597291666666665
+   }
+  },
+  "error": null
+ },
+ {
+  "name": "A4.1_A4_1_AnnealedSelfTrustRadiusClip",
+  "round": 4,
+  "desc": "Refines the best rule (trust-scaled radius clipping with asymmetric reputation). The self-weight in the denominator is annealed from 1.0 to 0.5 over the iterations. Clipping and reputation already limit Byzantine influence, so later rounds can lean more on trusted neighbours, which should help consensus and noisy-label nodes, especially in the \"none\" scenario where we are furthest from the oracle.",
+  "src": "def aggregate(x_self, X_nb, t, T, state):\n    def san(X):\n        X = np.nan_to_num(np.asarray(X, dtype=float), nan=0.0, posinf=0.0, neginf=0.0)\n        X = np.clip(X, 0.0, None)\n        s = X.sum(-1, keepdims=True)\n        C = X.shape[-1]\n        return np.where(s > 1e-12, X / np.maximum(s, 1e-12), 1.0 / C)\n\n    xs = san(x_self)\n    Y = san(X_nb)\n    k = len(Y)\n    D = Y - xs[None]\n    nrm = np.linalg.norm(D.reshape(k, -1), axis=1)\n    tau = float(np.quantile(nrm, 0.25)) + 1e-12\n    base = np.minimum(1.0, tau / np.maximum(nrm, 1e-12))\n    r = state.get('rep')\n    if r is None or len(r) != k:\n        r = base.copy()\n    else:\n        r = np.where(base < r, 0.4 * r + 0.6 * base, 0.7 * r + 0.3 * base)\n    state['rep'] = r\n    tau_j = tau * (1.0 + 2.0 * r ** 2)\n    scale = np.minimum(1.0, tau_j / np.maximum(nrm, 1e-12))\n    w = r * scale\n    lam = 1.0 - 0.5 * float(t) / max(T - 1, 1)\n    out = xs + (w[:, None, None] * D).sum(0) / (lam + r.sum())\n    out = np.clip(out, 0.0, None) + 1e-12\n    return out / out.sum(-1, keepdims=True)\n",
+  "file": "<repo>/design_runs/A/A4.1_A4_1_AnnealedSelfTrustRadiusClip.py",
+  "design": {
+   "mean_acc": 0.8575875000000001,
+   "worst_acc": 0.817375,
+   "score": 0.83748125,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.8496666666666667,
+    "gaussian": 0.8596041666666666,
+    "signflip": 0.8585833333333334,
+    "labelflip": 0.8614791666666667,
+    "alie": 0.8586041666666667
+   }
+  },
+  "val": {
+   "mean_acc": 0.8516104166666666,
+   "worst_acc": 0.766375,
+   "score": 0.8089927083333333,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.8216458333333333,
+    "gaussian": 0.8617916666666666,
+    "signflip": 0.861875,
+    "labelflip": 0.8523229166666667,
+    "alie": 0.8604166666666666
+   }
+  },
+  "error": null
+ },
+ {
+  "name": "A4.2_A4_2_RowwiseTrustClip",
+  "round": 4,
+  "desc": "Keeps a global per-neighbour reputation, which captures who is reliable over time, but clips at the level of single samples (rows). Each row gets its own radius: a quantile across neighbours of that row's deviation. Rows where this node is wrong and everyone disagrees with it are then not over-clipped, while a small coordinated shift on rows where everyone agrees (ALIE-style) is still bounded.",
+  "src": "def aggregate(x_self, X_nb, t, T, state):\n    def san(X):\n        X = np.nan_to_num(np.asarray(X, dtype=float), nan=0.0, posinf=0.0, neginf=0.0)\n        X = np.clip(X, 0.0, None)\n        s = X.sum(-1, keepdims=True)\n        C = X.shape[-1]\n        return np.where(s > 1e-12, X / np.maximum(s, 1e-12), 1.0 / C)\n\n    xs = san(x_self)\n    Y = san(X_nb)\n    k = len(Y)\n    D = Y - xs[None]\n    nrm = np.linalg.norm(D.reshape(k, -1), axis=1)\n    tau = float(np.quantile(nrm, 0.25)) + 1e-12\n    base = np.minimum(1.0, tau / np.maximum(nrm, 1e-12))\n    r = state.get('rep')\n    if r is None or len(r) != k:\n        r = base.copy()\n    else:\n        r = np.where(base < r, 0.4 * r + 0.6 * base, 0.7 * r + 0.3 * base)\n    state['rep'] = r\n    rn = np.linalg.norm(D, axis=2)                      # (k, m)\n    tau_row = np.quantile(rn, 0.25, axis=0) + 1e-12     # (m,)\n    tau_jr = tau_row[None, :] * (1.0 + 2.0 * r[:, None] ** 2)\n    sc = np.minimum(1.0, tau_jr / np.maximum(rn, 1e-12))\n    gsc = np.minimum(1.0, tau * (1.0 + 2.0 * r ** 2) / np.maximum(nrm, 1e-12))\n    w = (r * np.sqrt(gsc))[:, None] * sc                # (k, m)\n    out = xs + (w[:, :, None] * D).sum(0) / (1.0 + r.sum())\n    out = np.clip(out, 0.0, None) + 1e-12\n    return out / out.sum(-1, keepdims=True)\n",
+  "file": "<repo>/design_runs/A/A4.2_A4_2_RowwiseTrustClip.py",
+  "design": {
+   "mean_acc": 0.8551833333333333,
+   "worst_acc": 0.8140624999999999,
+   "score": 0.8346229166666665,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.8480416666666667,
+    "gaussian": 0.8578749999999999,
+    "signflip": 0.8559166666666668,
+    "labelflip": 0.8598125,
+    "alie": 0.8542708333333332
+   }
+  },
+  "val": {
+   "mean_acc": 0.8510020833333332,
+   "worst_acc": 0.7646875,
+   "score": 0.8078447916666666,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.82446875,
+    "gaussian": 0.8600104166666666,
+    "signflip": 0.8600312499999999,
+    "labelflip": 0.85065625,
+    "alie": 0.8598437499999999
+   }
+  },
+  "error": null
+ },
+ {
+  "name": "A4.3_A4_3_PeerCorroboratedRepClip",
+  "round": 4,
+  "desc": "New idea: a neighbour's evidence comes from how close it is to this node and also from how well its peers corroborate it. The score is the median distance to all other received messages, self included. A noisy-label honest node then does not wrongly distrust good neighbours just because they disagree with it. Byzantines, as long as they are a minority locally, still look far from the honest majority. Reputation and trust-scaled clipping on the actual displacement are as before.",
+  "src": "def aggregate(x_self, X_nb, t, T, state):\n    def san(X):\n        X = np.nan_to_num(np.asarray(X, dtype=float), nan=0.0, posinf=0.0, neginf=0.0)\n        X = np.clip(X, 0.0, None)\n        s = X.sum(-1, keepdims=True)\n        C = X.shape[-1]\n        return np.where(s > 1e-12, X / np.maximum(s, 1e-12), 1.0 / C)\n\n    xs = san(x_self)\n    Y = san(X_nb)\n    k = len(Y)\n    D = Y - xs[None]\n    nrm = np.linalg.norm(D.reshape(k, -1), axis=1)\n    if k >= 2:\n        F = np.concatenate([xs[None], Y], 0).reshape(k + 1, -1)\n        sq = (F * F).sum(1)\n        G = F @ F.T\n        Dm = np.sqrt(np.maximum(sq[:, None] + sq[None, :] - 2.0 * G, 0.0))\n        dpeer = np.empty(k)\n        for j in range(k):\n            row = np.delete(Dm[j + 1], j + 1)\n            dpeer[j] = np.median(row)\n        s = 0.5 * nrm + 0.5 * dpeer\n    else:\n        s = nrm.copy()\n    ts = float(np.quantile(s, 0.25)) + 1e-12\n    base = np.minimum(1.0, ts / np.maximum(s, 1e-12))\n    r = state.get('rep')\n    if r is None or len(r) != k:\n        r = base.copy()\n    else:\n        r = np.where(base < r, 0.4 * r + 0.6 * base, 0.7 * r + 0.3 * base)\n    state['rep'] = r\n    tau = float(np.quantile(nrm, 0.25)) + 1e-12\n    tau_j = tau * (1.0 + 2.0 * r ** 2)\n    scale = np.minimum(1.0, tau_j / np.maximum(nrm, 1e-12))\n    w = r * scale\n    out = xs + (w[:, None, None] * D).sum(0) / (1.0 + r.sum())\n    out = np.clip(out, 0.0, None) + 1e-12\n    return out / out.sum(-1, keepdims=True)\n",
+  "file": "<repo>/design_runs/A/A4.3_A4_3_PeerCorroboratedRepClip.py",
+  "design": {
+   "mean_acc": 0.8470541666666666,
+   "worst_acc": 0.7487499999999999,
+   "score": 0.7979020833333332,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.8475416666666665,
+    "gaussian": 0.858625,
+    "signflip": 0.8578333333333333,
+    "labelflip": 0.812375,
+    "alie": 0.8588958333333333
+   }
+  },
+  "val": {
+   "mean_acc": 0.8393333333333335,
+   "worst_acc": 0.7381875,
+   "score": 0.7887604166666667,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.8170000000000001,
+    "gaussian": 0.8535104166666665,
+    "signflip": 0.8627916666666667,
+    "labelflip": 0.8014270833333333,
+    "alie": 0.8619375000000001
+   }
+  },
+  "error": null
+ },
+ {
+  "name": "A4.4_A4_4_RelativeHedgeTrustClip",
+  "round": 4,
+  "desc": "New idea: reputation as a relative multiplicative-weights (Hedge) learner. Each round, a neighbour suffers a loss equal to how far its log-distance exceeds the median log-distance. Its trust is exp(-eta * (average loss - best average loss)), so the most consistent neighbour always keeps trust 1. Neighbours that are persistently outlying decay exponentially, while honest heterogeneity costs only a bounded amount. The trust then drives the trust-scaled clipping radius.",
+  "src": "def aggregate(x_self, X_nb, t, T, state):\n    def san(X):\n        X = np.nan_to_num(np.asarray(X, dtype=float), nan=0.0, posinf=0.0, neginf=0.0)\n        X = np.clip(X, 0.0, None)\n        s = X.sum(-1, keepdims=True)\n        C = X.shape[-1]\n        return np.where(s > 1e-12, X / np.maximum(s, 1e-12), 1.0 / C)\n\n    xs = san(x_self)\n    Y = san(X_nb)\n    k = len(Y)\n    D = Y - xs[None]\n    nrm = np.linalg.norm(D.reshape(k, -1), axis=1)\n    med = float(np.median(nrm)) + 1e-12\n    loss = np.clip(np.log(np.maximum(nrm, 1e-12) / med), 0.0, 3.0)\n    L = state.get('L')\n    n = state.get('n', 0)\n    if L is None or len(L) != k:\n        L = np.zeros(k)\n        n = 0\n    L = L + loss\n    n = n + 1\n    state['L'] = L\n    state['n'] = n\n    Lb = L / n\n    r = np.exp(-2.5 * (Lb - Lb.min()))\n    tau = float(np.quantile(nrm, 0.25)) + 1e-12\n    tau_j = tau * (1.0 + 2.0 * r ** 2)\n    scale = np.minimum(1.0, tau_j / np.maximum(nrm, 1e-12))\n    w = r * scale\n    out = xs + (w[:, None, None] * D).sum(0) / (1.0 + r.sum())\n    out = np.clip(out, 0.0, None) + 1e-12\n    return out / out.sum(-1, keepdims=True)\n",
+  "file": "<repo>/design_runs/A/A4.4_A4_4_RelativeHedgeTrustClip.py",
+  "design": {
+   "mean_acc": 0.8560125,
+   "worst_acc": 0.82175,
+   "score": 0.83888125,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.8517083333333333,
+    "gaussian": 0.8562083333333333,
+    "signflip": 0.8558125,
+    "labelflip": 0.8588125,
+    "alie": 0.8575208333333334
+   }
+  },
+  "val": {
+   "mean_acc": 0.8443083333333333,
+   "worst_acc": 0.7465625,
+   "score": 0.7954354166666666,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.8214374999999999,
+    "gaussian": 0.8546874999999999,
+    "signflip": 0.8637604166666666,
+    "labelflip": 0.8214687499999999,
+    "alie": 0.8601875
+   }
+  },
+  "error": null
+ },
+ {
+  "name": "A5.1_A5_1_HedgeAnnealedClip",
+  "round": 5,
+  "desc": "Combines the two strongest mechanisms: the scale-free multiplicative-weights (Hedge) reputation on log distance ratios from A4.4, plus the annealed self-weight from A4.1 so that late iterations mix faster once reputations have settled (this targets the weaker \"none\" scenario). The clipping radius uses a slightly wider base quantile (0.3) to speed up honest mixing.",
+  "src": "def aggregate(x_self, X_nb, t, T, state):\n    def san(X):\n        X = np.nan_to_num(np.asarray(X, dtype=float), nan=0.0, posinf=0.0, neginf=0.0)\n        X = np.clip(X, 0.0, None)\n        s = X.sum(-1, keepdims=True)\n        C = X.shape[-1]\n        return np.where(s > 1e-12, X / np.maximum(s, 1e-12), 1.0 / C)\n\n    xs = san(x_self)\n    Y = san(X_nb)\n    k = len(Y)\n    D = Y - xs[None]\n    nrm = np.linalg.norm(D.reshape(k, -1), axis=1)\n    med = float(np.median(nrm)) + 1e-12\n    loss = np.clip(np.log(np.maximum(nrm, 1e-12) / med), 0.0, 3.0)\n    L = state.get('L')\n    n = state.get('n', 0)\n    if L is None or len(L) != k:\n        L = np.zeros(k)\n        n = 0\n    L = L + loss\n    n = n + 1\n    state['L'] = L\n    state['n'] = n\n    Lb = L / n\n    r = np.exp(-2.5 * (Lb - Lb.min()))\n    tau = float(np.quantile(nrm, 0.3)) + 1e-12\n    tau_j = tau * (1.0 + 2.0 * r ** 2)\n    scale = np.minimum(1.0, tau_j / np.maximum(nrm, 1e-12))\n    w = r * scale\n    lam = 1.0 - 0.5 * float(t) / max(T - 1, 1)\n    out = xs + (w[:, None, None] * D).sum(0) / (lam + r.sum())\n    out = np.clip(out, 0.0, None) + 1e-12\n    return out / out.sum(-1, keepdims=True)\n",
+  "file": "<repo>/design_runs/A/A5.1_A5_1_HedgeAnnealedClip.py",
+  "design": {
+   "mean_acc": 0.8557541666666667,
+   "worst_acc": 0.821125,
+   "score": 0.8384395833333333,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.8516041666666666,
+    "gaussian": 0.85575,
+    "signflip": 0.8554999999999998,
+    "labelflip": 0.8583333333333333,
+    "alie": 0.8575833333333334
+   }
+  },
+  "val": {
+   "mean_acc": 0.8442604166666666,
+   "worst_acc": 0.74625,
+   "score": 0.7952552083333333,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.8210729166666666,
+    "gaussian": 0.8539166666666667,
+    "signflip": 0.8642500000000001,
+    "labelflip": 0.8217291666666666,
+    "alie": 0.8603333333333333
+   }
+  },
+  "error": null
+ },
+ {
+  "name": "A5.2_A5_2_DecisionAgreementHedge",
+  "round": 5,
+  "desc": "New idea: besides geometric distance, each neighbour is scored on a *decision-level* signal, the fraction of public samples whose argmax disagrees with a robust reference (coordinate-wise median of self and neighbours). The two relative losses (log-ratio to the median neighbour) are averaged inside the Hedge reputation. Attacks that change predictions but stay close in L2, or that are far in L2 but harmless, are then weighted by how much they would actually change the labels.",
+  "src": "def aggregate(x_self, X_nb, t, T, state):\n    def san(X):\n        X = np.nan_to_num(np.asarray(X, dtype=float), nan=0.0, posinf=0.0, neginf=0.0)\n        X = np.clip(X, 0.0, None)\n        s = X.sum(-1, keepdims=True)\n        C = X.shape[-1]\n        return np.where(s > 1e-12, X / np.maximum(s, 1e-12), 1.0 / C)\n\n    xs = san(x_self)\n    Y = san(X_nb)\n    k = len(Y)\n    D = Y - xs[None]\n    nrm = np.linalg.norm(D.reshape(k, -1), axis=1)\n    medn = float(np.median(nrm)) + 1e-12\n    loss_n = np.clip(np.log(np.maximum(nrm, 1e-12) / medn), 0.0, 3.0)\n    ref = np.median(np.concatenate([xs[None], Y], 0), 0)\n    am = np.argmax(ref, -1)\n    dis = (np.argmax(Y, -1) != am[None]).mean(1)\n    eps = 0.02\n    loss_d = np.clip(np.log((dis + eps) / (float(np.median(dis)) + eps)), 0.0, 3.0)\n    loss = 0.5 * (loss_n + loss_d)\n    L = state.get('L')\n    n = state.get('n', 0)\n    if L is None or len(L) != k:\n        L = np.zeros(k)\n        n = 0\n    L = L + loss\n    n = n + 1\n    state['L'] = L\n    state['n'] = n\n    Lb = L / n\n    r = np.exp(-2.5 * (Lb - Lb.min()))\n    tau = float(np.quantile(nrm, 0.25)) + 1e-12\n    tau_j = tau * (1.0 + 2.0 * r ** 2)\n    scale = np.minimum(1.0, tau_j / np.maximum(nrm, 1e-12))\n    w = r * scale\n    out = xs + (w[:, None, None] * D).sum(0) / (1.0 + r.sum())\n    out = np.clip(out, 0.0, None) + 1e-12\n    return out / out.sum(-1, keepdims=True)\n",
+  "file": "<repo>/design_runs/A/A5.2_A5_2_DecisionAgreementHedge.py",
+  "design": {
+   "mean_acc": 0.8466666666666668,
+   "worst_acc": 0.73475,
+   "score": 0.7907083333333333,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.8414166666666668,
+    "gaussian": 0.8563124999999999,
+    "signflip": 0.8561666666666667,
+    "labelflip": 0.8232291666666667,
+    "alie": 0.8562083333333333
+   }
+  },
+  "val": {
+   "mean_acc": 0.8381854166666667,
+   "worst_acc": 0.7325,
+   "score": 0.7853427083333333,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.7998125000000001,
+    "gaussian": 0.8452916666666668,
+    "signflip": 0.864125,
+    "labelflip": 0.8214791666666668,
+    "alie": 0.8602187499999999
+   }
+  },
+  "error": null
+ },
+ {
+  "name": "A5.3_A5_3_ReputationWeightedGeoMedian",
+  "round": 5,
+  "desc": "New aggregator: instead of a clipped mean, each node computes a reputation-weighted geometric median (Weiszfeld, warm-started at its own state) of {self, neighbours}. Self has weight 1 and neighbours have Hedge reputations. The geometric median has breakdown point 1/2 in weight, so reputation decay and median robustness reinforce each other. The step toward it is then partly damped to keep gossip stable.",
+  "src": "def aggregate(x_self, X_nb, t, T, state):\n    def san(X):\n        X = np.nan_to_num(np.asarray(X, dtype=float), nan=0.0, posinf=0.0, neginf=0.0)\n        X = np.clip(X, 0.0, None)\n        s = X.sum(-1, keepdims=True)\n        C = X.shape[-1]\n        return np.where(s > 1e-12, X / np.maximum(s, 1e-12), 1.0 / C)\n\n    xs = san(x_self)\n    Y = san(X_nb)\n    k = len(Y)\n    D = Y - xs[None]\n    nrm = np.linalg.norm(D.reshape(k, -1), axis=1)\n    med = float(np.median(nrm)) + 1e-12\n    loss = np.clip(np.log(np.maximum(nrm, 1e-12) / med), 0.0, 3.0)\n    L = state.get('L')\n    n = state.get('n', 0)\n    if L is None or len(L) != k:\n        L = np.zeros(k)\n        n = 0\n    L = L + loss\n    n = n + 1\n    state['L'] = L\n    state['n'] = n\n    Lb = L / n\n    r = np.exp(-2.5 * (Lb - Lb.min()))\n    P = np.concatenate([xs[None], Y], 0).reshape(k + 1, -1)\n    wt = np.concatenate([[1.0], r])\n    z = xs.reshape(-1).copy()\n    floor = 1e-3 * med + 1e-9\n    for _ in range(8):\n        d = np.linalg.norm(P - z[None], axis=1)\n        a = wt / np.maximum(d, floor)\n        z = (a[:, None] * P).sum(0) / a.sum()\n    z = z.reshape(xs.shape)\n    step = 0.6 + 0.3 * float(t) / max(T - 1, 1)\n    out = xs + step * (z - xs)\n    out = np.clip(out, 0.0, None) + 1e-12\n    return out / out.sum(-1, keepdims=True)\n",
+  "file": "<repo>/design_runs/A/A5.3_A5_3_ReputationWeightedGeoMedian.py",
+  "design": {
+   "mean_acc": 0.8294875,
+   "worst_acc": 0.7636875000000001,
+   "score": 0.7965875,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.8386666666666667,
+    "gaussian": 0.8290416666666666,
+    "signflip": 0.81725,
+    "labelflip": 0.8282916666666665,
+    "alie": 0.8341875
+   }
+  },
+  "val": {
+   "mean_acc": 0.8427395833333333,
+   "worst_acc": 0.7596875000000001,
+   "score": 0.8012135416666667,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.8238020833333333,
+    "gaussian": 0.8471041666666667,
+    "signflip": 0.8456770833333334,
+    "labelflip": 0.8418645833333334,
+    "alie": 0.8552500000000002
+   }
+  },
+  "error": null
+ },
+ {
+  "name": "A5.4_A5_4_ConfidenceRowWeightedHedgeClip",
+  "round": 5,
+  "desc": "Keeps the Hedge-reputation radius clipping at message level, which gives the safety guarantees. Inside each sample row, the clipped contributions (self included) are weighted by normalised prediction confidence (1 - entropy/log C), bounded to [0.5, 2] relative to the row average. Noisy-label honest nodes, whose predictions tend to be flatter, then count less per sample, and the bound on the relative weight limits how much a Byzantine node can gain by faking confidence.",
+  "src": "def aggregate(x_self, X_nb, t, T, state):\n    def san(X):\n        X = np.nan_to_num(np.asarray(X, dtype=float), nan=0.0, posinf=0.0, neginf=0.0)\n        X = np.clip(X, 0.0, None)\n        s = X.sum(-1, keepdims=True)\n        C = X.shape[-1]\n        return np.where(s > 1e-12, X / np.maximum(s, 1e-12), 1.0 / C)\n\n    xs = san(x_self)\n    Y = san(X_nb)\n    k, m, C = Y.shape\n    D = Y - xs[None]\n    nrm = np.linalg.norm(D.reshape(k, -1), axis=1)\n    med = float(np.median(nrm)) + 1e-12\n    loss = np.clip(np.log(np.maximum(nrm, 1e-12) / med), 0.0, 3.0)\n    L = state.get('L')\n    n = state.get('n', 0)\n    if L is None or len(L) != k:\n        L = np.zeros(k)\n        n = 0\n    L = L + loss\n    n = n + 1\n    state['L'] = L\n    state['n'] = n\n    Lb = L / n\n    r = np.exp(-2.5 * (Lb - Lb.min()))\n    tau = float(np.quantile(nrm, 0.25)) + 1e-12\n    tau_j = tau * (1.0 + 2.0 * r ** 2)\n    scale = np.minimum(1.0, tau_j / np.maximum(nrm, 1e-12))\n    Yc = xs[None] + scale[:, None, None] * D\n    Z = np.concatenate([xs[None], Y], 0)\n    H = -(Z * np.log(np.maximum(Z, 1e-12))).sum(-1)\n    conf = 1.0 - H / math.log(C) + 0.1\n    rho = conf / np.maximum(conf.mean(0, keepdims=True), 1e-12)\n    rho = np.clip(rho, 0.5, 2.0)\n    ws = rho[0]\n    wn = r[:, None] * rho[1:]\n    num = ws[:, None] * xs + (wn[:, :, None] * Yc).sum(0)\n    den = ws + wn.sum(0)\n    out = num / den[:, None]\n    out = np.clip(out, 0.0, None) + 1e-12\n    return out / out.sum(-1, keepdims=True)\n",
+  "file": "<repo>/design_runs/A/A5.4_A5_4_ConfidenceRowWeightedHedgeClip.py",
+  "design": {
+   "mean_acc": 0.8474875000000001,
+   "worst_acc": 0.7388125,
+   "score": 0.79315,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.8459375000000001,
+    "gaussian": 0.8556458333333333,
+    "signflip": 0.8560208333333333,
+    "labelflip": 0.8227083333333334,
+    "alie": 0.8571249999999999
+   }
+  },
+  "val": {
+   "mean_acc": 0.8419958333333334,
+   "worst_acc": 0.7424999999999999,
+   "score": 0.7922479166666667,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.8150624999999999,
+    "gaussian": 0.8556145833333333,
+    "signflip": 0.8613854166666667,
+    "labelflip": 0.8171875000000001,
+    "alie": 0.8607291666666668
+   }
+  },
+  "error": null
+ },
+ {
+  "name": "A6.1_A6_1_TrustedRadiusHedgeClip",
+  "round": 6,
+  "desc": "Refines the best hedge-trust clipping rule: the clipping radius is no longer the global 25% quantile of all distances (which stays very conservative in benign runs) but is estimated from the neighbours the hedge currently trusts, blended with the global quantile and capped by the global median. Self-weight is annealed so honest nodes mix more in late iterations once trust has separated.",
+  "src": "def aggregate(x_self, X_nb, t, T, state):\n    def san(X):\n        X = np.nan_to_num(np.asarray(X, dtype=float), nan=0.0, posinf=0.0, neginf=0.0)\n        X = np.clip(X, 0.0, None)\n        s = X.sum(-1, keepdims=True)\n        C = X.shape[-1]\n        return np.where(s > 1e-12, X / np.maximum(s, 1e-12), 1.0 / C)\n\n    xs = san(x_self)\n    Y = san(X_nb)\n    k = len(Y)\n    D = Y - xs[None]\n    nrm = np.linalg.norm(D.reshape(k, -1), axis=1)\n    med = float(np.median(nrm)) + 1e-12\n    loss = np.clip(np.log(np.maximum(nrm, 1e-12) / med), 0.0, 3.0)\n    L = state.get('L')\n    n = state.get('n', 0)\n    if L is None or len(L) != k:\n        L = np.zeros(k)\n        n = 0\n    L = L + loss\n    n = n + 1\n    state['L'] = L\n    state['n'] = n\n    Lb = L / n\n    r = np.exp(-2.5 * (Lb - Lb.min()))\n    q25 = float(np.quantile(nrm, 0.25))\n    trusted = r >= 0.5\n    if trusted.sum() >= 1:\n        tq = float(np.median(nrm[trusted]))\n    else:\n        tq = q25\n    tau = min(0.5 * q25 + 0.5 * tq, med) + 1e-12\n    tau_j = tau * (1.0 + 2.0 * r ** 2)\n    scale = np.minimum(1.0, tau_j / np.maximum(nrm, 1e-12))\n    w = r * scale\n    lam = 1.0 - 0.5 * float(t) / max(T - 1, 1)\n    out = xs + (w[:, None, None] * D).sum(0) / (lam + r.sum())\n    out = np.clip(out, 0.0, None) + 1e-12\n    return out / out.sum(-1, keepdims=True)\n",
+  "file": "<repo>/design_runs/A/A6.1_A6_1_TrustedRadiusHedgeClip.py",
+  "design": {
+   "mean_acc": 0.854275,
+   "worst_acc": 0.8166249999999999,
+   "score": 0.83545,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.8514166666666666,
+    "gaussian": 0.8557916666666666,
+    "signflip": 0.8555833333333333,
+    "labelflip": 0.85075,
+    "alie": 0.8578333333333332
+   }
+  },
+  "val": {
+   "mean_acc": 0.84413125,
+   "worst_acc": 0.7443749999999999,
+   "score": 0.794253125,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.8208958333333333,
+    "gaussian": 0.8537812499999999,
+    "signflip": 0.8640729166666666,
+    "labelflip": 0.8215833333333333,
+    "alie": 0.8603229166666667
+   }
+  },
+  "error": null
+ },
+ {
+  "name": "A6.2_A6_2_IteratedTrustCenteredClip",
+  "round": 6,
+  "desc": "Combines hedge reputation with Karimireddy-style iterated centred clipping: the first fixed-point step reproduces the hedge-clip rule (centred at self), then two more steps re-centre the clipping ball at the current estimate, so the result moves toward the trust-weighted robust centre of the honest cluster instead of staying anchored to a possibly noisy self state. Self contributes unclipped with annealed weight, which bounds how far any step can be dragged.",
+  "src": "def aggregate(x_self, X_nb, t, T, state):\n    def san(X):\n        X = np.nan_to_num(np.asarray(X, dtype=float), nan=0.0, posinf=0.0, neginf=0.0)\n        X = np.clip(X, 0.0, None)\n        s = X.sum(-1, keepdims=True)\n        C = X.shape[-1]\n        return np.where(s > 1e-12, X / np.maximum(s, 1e-12), 1.0 / C)\n\n    xs = san(x_self)\n    Y = san(X_nb)\n    k = len(Y)\n    D = Y - xs[None]\n    nrm = np.linalg.norm(D.reshape(k, -1), axis=1)\n    med = float(np.median(nrm)) + 1e-12\n    loss = np.clip(np.log(np.maximum(nrm, 1e-12) / med), 0.0, 3.0)\n    L = state.get('L')\n    n = state.get('n', 0)\n    if L is None or len(L) != k:\n        L = np.zeros(k)\n        n = 0\n    L = L + loss\n    n = n + 1\n    state['L'] = L\n    state['n'] = n\n    Lb = L / n\n    r = np.exp(-2.5 * (Lb - Lb.min()))\n    lam = 1.0 - 0.5 * float(t) / max(T - 1, 1)\n    tau = float(np.quantile(nrm, 0.25)) + 1e-12\n    tau_j = tau * (1.0 + 2.0 * r ** 2)\n    v = xs.copy()\n    for it in range(3):\n        Dv = Y - v[None]\n        nv = np.linalg.norm(Dv.reshape(k, -1), axis=1)\n        s = np.minimum(1.0, tau_j / np.maximum(nv, 1e-12))\n        step = lam * (xs - v) + ((r * s)[:, None, None] * Dv).sum(0)\n        v = v + step / (lam + r.sum())\n    out = np.clip(v, 0.0, None) + 1e-12\n    return out / out.sum(-1, keepdims=True)\n",
+  "file": "<repo>/design_runs/A/A6.2_A6_2_IteratedTrustCenteredClip.py",
+  "design": {
+   "mean_acc": 0.8564166666666666,
+   "worst_acc": 0.8213125,
+   "score": 0.8388645833333332,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.8518125,
+    "gaussian": 0.8567083333333333,
+    "signflip": 0.8561666666666667,
+    "labelflip": 0.8590208333333332,
+    "alie": 0.858375
+   }
+  },
+  "val": {
+   "mean_acc": 0.8446604166666667,
+   "worst_acc": 0.7465625,
+   "score": 0.7956114583333334,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.8218541666666668,
+    "gaussian": 0.8540625,
+    "signflip": 0.8646354166666667,
+    "labelflip": 0.8220625,
+    "alie": 0.8606874999999999
+   }
+  },
+  "error": null
+ },
+ {
+  "name": "A6.3_A6_3_PeerConsensusHedgeClip",
+  "round": 6,
+  "desc": "New idea: the hedge loss of a neighbour is computed not only from its distance to self (which penalises honest neighbours when self is a noisy-label node) but also from its median distance to all other received messages (a Krum-like peer-consensus score using the full pairwise Gram matrix). The two log-ratio losses are averaged, accumulated over time, and drive the same trust-scaled self-centred clipping.",
+  "src": "def aggregate(x_self, X_nb, t, T, state):\n    def san(X):\n        X = np.nan_to_num(np.asarray(X, dtype=float), nan=0.0, posinf=0.0, neginf=0.0)\n        X = np.clip(X, 0.0, None)\n        s = X.sum(-1, keepdims=True)\n        C = X.shape[-1]\n        return np.where(s > 1e-12, X / np.maximum(s, 1e-12), 1.0 / C)\n\n    xs = san(x_self)\n    Y = san(X_nb)\n    k = len(Y)\n    D = Y - xs[None]\n    nrm = np.linalg.norm(D.reshape(k, -1), axis=1)\n    med = float(np.median(nrm)) + 1e-12\n    loss_self = np.clip(np.log(np.maximum(nrm, 1e-12) / med), 0.0, 3.0)\n    Z = np.concatenate([xs[None], Y]).reshape(k + 1, -1)\n    G = Z @ Z.T\n    dg = np.diag(G)\n    P = np.sqrt(np.maximum(dg[:, None] + dg[None, :] - 2.0 * G, 0.0))\n    if k >= 2:\n        sc = np.zeros(k)\n        for j in range(k):\n            row = np.delete(P[j + 1], j + 1)\n            sc[j] = np.median(row)\n        msc = float(np.median(sc)) + 1e-12\n        loss_peer = np.clip(np.log(np.maximum(sc, 1e-12) / msc), 0.0, 3.0)\n        loss = 0.5 * loss_self + 0.5 * loss_peer\n    else:\n        loss = loss_self\n    L = state.get('L')\n    n = state.get('n', 0)\n    if L is None or len(L) != k:\n        L = np.zeros(k)\n        n = 0\n    L = L + loss\n    n = n + 1\n    state['L'] = L\n    state['n'] = n\n    Lb = L / n\n    r = np.exp(-2.5 * (Lb - Lb.min()))\n    tau = float(np.quantile(nrm, 0.25)) + 1e-12\n    tau_j = tau * (1.0 + 2.0 * r ** 2)\n    scale = np.minimum(1.0, tau_j / np.maximum(nrm, 1e-12))\n    w = r * scale\n    lam = 1.0 - 0.5 * float(t) / max(T - 1, 1)\n    out = xs + (w[:, None, None] * D).sum(0) / (lam + r.sum())\n    out = np.clip(out, 0.0, None) + 1e-12\n    return out / out.sum(-1, keepdims=True)\n",
+  "file": "<repo>/design_runs/A/A6.3_A6_3_PeerConsensusHedgeClip.py",
+  "design": {
+   "mean_acc": 0.8476458333333332,
+   "worst_acc": 0.7593125,
+   "score": 0.8034791666666665,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.8491875000000001,
+    "gaussian": 0.8564374999999999,
+    "signflip": 0.8556458333333333,
+    "labelflip": 0.8191041666666665,
+    "alie": 0.8578541666666667
+   }
+  },
+  "val": {
+   "mean_acc": 0.8400083333333335,
+   "worst_acc": 0.745625,
+   "score": 0.7928166666666667,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.8198645833333335,
+    "gaussian": 0.8498437500000001,
+    "signflip": 0.8645208333333333,
+    "labelflip": 0.8051354166666668,
+    "alie": 0.8606770833333334
+   }
+  },
+  "error": null
+ },
+ {
+  "name": "A6.4_A6_4_SampleLevelHedgeClip",
+  "round": 6,
+  "desc": "New idea: node-level hedge trust is kept, but clipping is done per public sample (row) instead of on the whole matrix: each row deviation is clipped to a radius set by the median row deviation across neighbours for that sample, widened for trusted neighbours. This lets honest neighbours fully correct the samples where self is wrong while capping any neighbour's influence on each individual sample, which is the unit the final argmax accuracy is measured on.",
+  "src": "def aggregate(x_self, X_nb, t, T, state):\n    def san(X):\n        X = np.nan_to_num(np.asarray(X, dtype=float), nan=0.0, posinf=0.0, neginf=0.0)\n        X = np.clip(X, 0.0, None)\n        s = X.sum(-1, keepdims=True)\n        C = X.shape[-1]\n        return np.where(s > 1e-12, X / np.maximum(s, 1e-12), 1.0 / C)\n\n    xs = san(x_self)\n    Y = san(X_nb)\n    k = len(Y)\n    D = Y - xs[None]\n    nrm = np.linalg.norm(D.reshape(k, -1), axis=1)\n    med = float(np.median(nrm)) + 1e-12\n    loss = np.clip(np.log(np.maximum(nrm, 1e-12) / med), 0.0, 3.0)\n    L = state.get('L')\n    n = state.get('n', 0)\n    if L is None or len(L) != k:\n        L = np.zeros(k)\n        n = 0\n    L = L + loss\n    n = n + 1\n    state['L'] = L\n    state['n'] = n\n    Lb = L / n\n    r = np.exp(-2.5 * (Lb - Lb.min()))\n    Rn = np.linalg.norm(D, axis=2)\n    tau_row = np.median(Rn, axis=0) + 1e-6\n    gmed = float(np.median(tau_row)) + 1e-6\n    tau_row = np.minimum(tau_row, 3.0 * gmed)\n    tau_jr = (0.5 + 1.0 * r ** 2)[:, None] * tau_row[None, :]\n    srow = np.minimum(1.0, tau_jr / np.maximum(Rn, 1e-12))\n    tau = float(np.quantile(nrm, 0.25)) + 1e-12\n    tau_j = tau * (1.0 + 2.0 * r ** 2)\n    sg = np.minimum(1.0, tau_j / np.maximum(nrm, 1e-12))\n    sg = np.sqrt(sg)\n    W = (r * sg)[:, None] * srow\n    lam = 1.0 - 0.5 * float(t) / max(T - 1, 1)\n    out = xs + (W[:, :, None] * D).sum(0) / (lam + r.sum())\n    out = np.clip(out, 0.0, None) + 1e-12\n    return out / out.sum(-1, keepdims=True)\n",
+  "file": "<repo>/design_runs/A/A6.4_A6_4_SampleLevelHedgeClip.py",
+  "design": {
+   "mean_acc": 0.8532083333333332,
+   "worst_acc": 0.8174999999999999,
+   "score": 0.8353541666666666,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.8491249999999999,
+    "gaussian": 0.8549166666666667,
+    "signflip": 0.8512083333333332,
+    "labelflip": 0.8577499999999999,
+    "alie": 0.8530416666666666
+   }
+  },
+  "val": {
+   "mean_acc": 0.8468041666666667,
+   "worst_acc": 0.7541875,
+   "score": 0.8004958333333334,
+   "n_fail": 0,
+   "per_attack": {
+    "none": 0.8259062500000001,
+    "gaussian": 0.8529791666666666,
+    "signflip": 0.862625,
+    "labelflip": 0.83625,
+    "alie": 0.8562604166666667
+   }
+  },
+  "error": null
+ }
+]
